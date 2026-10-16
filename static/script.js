@@ -1,0 +1,250 @@
+// JAVASCRIPT = the BEHAVIOR. It reacts to clicks and talks to the backend.
+
+let sb;              // Supabase client: handles logging in
+let token = null;    // my login "ID card", sent to our server to prove who I am
+let loggedIn = false;
+let profile = null;  // my name + languages
+let messages = [];   // chat messages with the current partner
+let deck = {};       // { "hola": "#ffd54f", ... }  word -> color
+let partnerName = "";
+
+const LANGUAGES = ["English", "Spanish", "French", "German", "Japanese", "Chinese", "Russian"];
+
+// Shortcut so we don't type document.getElementById a hundred times
+const el = id => document.getElementById(id);
+
+// Fill the three dropdowns from the list above (so we only write the list once)
+["nativeSelect", "learningSelect", "translateSelect"].forEach(id => {
+  LANGUAGES.forEach(lang => el(id).add(new Option(lang, lang)));
+});
+el("learningSelect").value = "Spanish";
+
+// REAL-TIME: open an always-on connection to the server
+const socket = io();
+
+// Show one screen, hide the others
+function showScreen(id) {
+  ["authScreen", "lobby", "chatScreen"].forEach(screen => (el(screen).hidden = screen !== id));
+  el("logoutBtn").hidden = id === "authScreen";
+}
+
+// Talk to OUR server (Flask), always including the login token
+async function api(path, options = {}) {
+  options.headers = { "Content-Type": "application/json", Authorization: "Bearer " + token };
+  const response = await fetch(path, options);
+  return response.json();
+}
+
+
+// ---------- LOGIN (Supabase) ----------
+async function start() {
+  const config = await (await fetch("/api/config")).json();
+  sb = supabase.createClient(config.url, config.anonKey);
+
+  // Runs whenever login state changes: page load, log in, log out, token refresh
+  sb.auth.onAuthStateChange((event, session) => {
+    token = session ? session.access_token : null;
+    if (session && !loggedIn) {
+      loggedIn = true;
+      enterLobby();
+    } else if (!session) {
+      loggedIn = false;
+      showScreen("authScreen");
+    }
+  });
+}
+
+el("authForm").onsubmit = async event => {
+  event.preventDefault();
+  const { error } = await sb.auth.signInWithPassword({
+    email: el("emailInput").value,
+    password: el("passwordInput").value,
+  });
+  el("authStatus").textContent = error ? error.message : "";
+};
+
+el("signupBtn").onclick = async () => {
+  const { data, error } = await sb.auth.signUp({
+    email: el("emailInput").value,
+    password: el("passwordInput").value,
+  });
+  if (error) el("authStatus").textContent = error.message;
+  else if (!data.session) el("authStatus").textContent = "Check your email to confirm your account, then log in.";
+};
+
+el("logoutBtn").onclick = () => {
+  socket.emit("leave");
+  sb.auth.signOut();
+};
+
+
+// ---------- LOBBY ----------
+async function enterLobby() {
+  profile = await api("/api/profile");
+  if (profile) {  // returning user: fill in their saved choices
+    el("nameInput").value = profile.username;
+    el("nativeSelect").value = profile.native;
+    el("learningSelect").value = profile.learning;
+    el("translateSelect").value = profile.translate_to;
+  }
+  el("status").textContent = "";
+  showScreen("lobby");
+  loadDeck();
+}
+
+el("lobbyForm").onsubmit = async event => {
+  event.preventDefault();
+  profile = {
+    username: el("nameInput").value.trim(),
+    native: el("nativeSelect").value,
+    learning: el("learningSelect").value,
+    translate_to: el("translateSelect").value,
+  };
+  if (profile.native === profile.learning) {
+    el("status").textContent = "Pick two different languages!";
+    return;
+  }
+  await api("/api/profile", { method: "PUT", body: JSON.stringify(profile) }); // save to database
+  findPartner();
+};
+
+function findPartner() {
+  socket.emit("find_partner", { token });
+  showScreen("lobby");
+  el("status").textContent =
+    `Looking for someone who speaks ${profile.learning} and is learning ${profile.native}...`;
+}
+
+// NEXT: leave this partner and look for a new one
+el("nextBtn").onclick = findPartner;
+
+
+// ---------- CHAT ----------
+// The server found us a partner!
+socket.on("matched", partner => {
+  messages = [];
+  partnerName = partner.name;
+  el("partnerInfo").textContent =
+    `💬 ${partner.name} · speaks ${partner.native} · learning ${partner.learning}`;
+  showScreen("chatScreen");
+  render();
+});
+
+// Our partner clicked Next or closed their tab
+socket.on("partner_left", () => {
+  messages.push({ from: "system", text: "Your partner left. Click Next to find someone new." });
+  render();
+});
+
+// A new chat message (from me or my partner), with its translation
+socket.on("chat_message", msg => {
+  messages.push(msg);
+  el("typing").textContent = ""; // they sent it, so they're done typing
+  render();
+});
+
+// When I submit the form, send my text to the server
+el("chatForm").onsubmit = event => {
+  event.preventDefault(); // stop the page from reloading (forms do that by default)
+  const input = el("chatInput");
+  if (input.value.trim() === "") return; // ignore empty messages
+  socket.emit("chat_message", input.value);
+  input.value = ""; // clear the box
+};
+
+// TYPING INDICATOR: tell the server I'm typing (at most once per second)
+let lastTypingSent = 0;
+el("chatInput").oninput = () => {
+  if (Date.now() - lastTypingSent > 1000) {
+    socket.emit("typing");
+    lastTypingSent = Date.now();
+  }
+};
+
+// Show "Ana is typing..." and hide it again after 2 seconds of silence
+let typingTimer;
+socket.on("partner_typing", () => {
+  el("typing").textContent = `${partnerName} is typing...`;
+  clearTimeout(typingTimer);
+  typingTimer = setTimeout(() => (el("typing").textContent = ""), 2000);
+});
+
+
+// ---------- FLASHCARDS ----------
+// 1. Ask the backend for MY saved flashcards, then draw everything
+async function loadDeck() {
+  const cards = await api("/api/flashcards"); // HTTP GET
+  deck = {};
+  cards.forEach(card => (deck[card.word] = card.color));
+  render();
+}
+
+// 2. Save a word (HTTP POST with JSON body)
+async function saveWord(word) {
+  const color = el("colorPicker").value;
+  await api("/api/flashcards", { method: "POST", body: JSON.stringify({ word, color }) });
+  loadDeck();
+}
+
+// 3. Remove a word (HTTP DELETE)
+async function deleteWord(word) {
+  await api("/api/flashcards/" + encodeURIComponent(word), { method: "DELETE" });
+  loadDeck();
+}
+
+// Turn "Hola!" into "hola" so punctuation doesn't matter
+function clean(word) {
+  return word.toLowerCase().replace(/[^\p{L}]/gu, "");
+}
+
+
+// ---------- DRAWING ----------
+// Draw the chat + deck on the page (DOM = the page as JS objects)
+function render() {
+  const box = el("messages");
+  box.innerHTML = "";
+  messages.forEach(msg => {
+    const div = document.createElement("div");
+    // System notices ("partner left") are plain grey text, not clickable words
+    if (msg.from === "system") {
+      div.className = "message system";
+      div.textContent = msg.text;
+      box.appendChild(div);
+      return;
+    }
+    // socket.id is MY connection id. If it matches, I sent this message.
+    div.className = "message" + (msg.from === socket.id ? " me" : "");
+    msg.text.split(" ").forEach(raw => {
+      const span = document.createElement("span");
+      span.className = "word";
+      span.textContent = raw + " ";
+      const key = clean(raw);
+      if (deck[key]) span.style.color = deck[key]; // ⭐ the highlight!
+      span.onclick = () => saveWord(key);
+      div.appendChild(span);
+    });
+    // The automatic translation, like a subtitle
+    if (msg.translation) {
+      const sub = document.createElement("div");
+      sub.className = "translation";
+      sub.textContent = msg.translation;
+      div.appendChild(sub);
+    }
+    box.appendChild(div);
+  });
+  box.scrollTop = box.scrollHeight; // auto-scroll to the newest message
+
+  const list = el("deckList");
+  list.innerHTML = "";
+  Object.entries(deck).forEach(([word, color]) => {
+    const li = document.createElement("li");
+    li.innerHTML = `<span class="swatch" style="background:${color}">${word}</span>`;
+    const del = document.createElement("button");
+    del.textContent = "✕";
+    del.onclick = () => deleteWord(word);
+    li.appendChild(del);
+    list.appendChild(li);
+  });
+}
+
+start(); // run when the page opens

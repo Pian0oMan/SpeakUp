@@ -1,0 +1,125 @@
+/* CSS = how the page LOOKS. Pattern: selector { property: value; } */
+
+body {
+  font-family: system-ui, sans-serif;
+  margin: 0;
+  background: #f4f6fb;
+  color: #222;
+}
+
+header {
+  background: #907cad;
+  color: white;
+  padding: 16px 24px;
+  display: flex;                    /* title on the left, log out on the right */
+  justify-content: space-between;
+  align-items: center;
+}
+#logoutBtn { color: white; border: 1px solid white; border-radius: 20px; padding: 6px 14px; }
+
+main { padding: 24px; }
+
+/* Make sure anything with the "hidden" attribute really disappears */
+[hidden] { display: none !important; }
+
+#chatScreen {
+  display: flex;      /* puts chat and deck side by side */
+  gap: 24px;
+  flex-wrap: wrap;    /* stacks them on small screens */
+}
+
+/* ---------- Login + Lobby (both use class="lobby") ---------- */
+.lobby { max-width: 400px; margin: 40px auto; }
+.lobby form { display: flex; flex-direction: column; gap: 14px; }
+.lobby label { display: flex; flex-direction: column; gap: 4px; font-weight: 600; }
+.lobby input, .lobby select {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: normal;
+}
+.lobby button, #nextBtn {
+  background: #907cad;
+  color: white;
+  padding: 10px 18px;
+  border-radius: 20px;
+}
+.lobby button.secondary { background: white; color: #907cad; border: 1px solid #907cad; }
+.status { color: #666; text-align: center; }
+
+/* ---------- Chat ---------- */
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+}
+.hint { color: #888; font-size: 14px; margin: 6px 0 0; }
+#messages { height: 400px; overflow-y: auto; }  /* scroll instead of growing forever */
+.message.system {
+  background: none;
+  color: #888;
+  font-style: italic;
+  text-align: center;
+  max-width: 100%;
+}
+
+section {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.chat { flex: 2; min-width: 280px; }
+.deck { flex: 1; min-width: 220px; }
+
+.message {
+  padding: 10px 14px;
+  border-radius: 16px;
+  margin: 8px 0;
+  max-width: 80%;
+  background: #eef1ff;
+}
+.message.me { background: #d9f7e3; margin-left: auto; }
+
+/* The automatic translation, shown like a subtitle under the message */
+.translation {
+  font-size: 13px;
+  color: #666;
+  font-style: italic;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  margin-top: 6px;
+  padding-top: 4px;
+}
+#typing { color: #888; font-size: 13px; font-style: italic; height: 16px; margin: 4px 0 0; }
+
+/* Each word is a <span class="word"> so it can be clicked */
+.word { cursor: pointer; border-radius: 4px; padding: 0 2px; }
+.word:hover { outline: 1px dashed #494c55; }
+
+#deckList li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 6px 0;
+}
+.swatch { padding: 2px 8px; border-radius: 4px; }
+#chatForm { display: flex; gap: 8px; margin-top: 12px; }
+#chatInput {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  font-size: 15px;
+}
+#chatForm button {
+  background: #3c9608;
+  color: white;
+  padding: 8px 18px;
+  border-radius: 20px;
+}
+
+button { border: none; background: none; cursor: pointer; font-size: 16px; }

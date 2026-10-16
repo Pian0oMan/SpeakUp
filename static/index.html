@@ -1,0 +1,89 @@
+<!-- HTML = the STRUCTURE of the page (what's on it) -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Speak Up</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Speak Up!! 🗣️</h1>
+      <p>Learn a language by talking to people who speak it.</p>
+    </div>
+    <button id="logoutBtn" hidden>Log out</button>
+  </header>
+
+  <main>
+    <!-- SCREEN 1: log in or sign up -->
+    <section id="authScreen" class="lobby" hidden>
+      <h2>Welcome!</h2>
+      <form id="authForm">
+        <label>Email
+          <input id="emailInput" type="email" required>
+        </label>
+        <label>Password
+          <input id="passwordInput" type="password" minlength="6" required>
+        </label>
+        <button type="submit">Log in</button>
+        <button type="button" id="signupBtn" class="secondary">Create account</button>
+      </form>
+      <p id="authStatus" class="status"></p>
+    </section>
+
+    <!-- SCREEN 2: the lobby. Your profile + find a partner. -->
+    <section id="lobby" class="lobby" hidden>
+      <h2>Find a language partner</h2>
+      <form id="lobbyForm">
+        <label>Your name
+          <input id="nameInput" maxlength="20" placeholder="e.g. Alex" required>
+        </label>
+        <label>I speak
+          <select id="nativeSelect"></select>
+        </label>
+        <label>I'm learning
+          <select id="learningSelect"></select>
+        </label>
+        <label>Show translations in
+          <select id="translateSelect"></select>
+        </label>
+        <button type="submit">Find a partner</button>
+      </form>
+      <p id="status" class="status"></p>
+    </section>
+
+    <!-- SCREEN 3: chat + deck. Shown once we're matched with someone. -->
+    <div id="chatScreen" hidden>
+    <section class="chat">
+      <div class="chat-header">
+        <span id="partnerInfo"></span>
+        <button id="nextBtn">Next ⏭</button>
+      </div>
+      <p class="hint">Click any word to save it to your deck.</p>
+      <div id="messages"></div>
+      <p id="typing"></p>
+      <!-- A <form> lets Enter key AND the button both send -->
+      <form id="chatForm">
+        <input id="chatInput" placeholder="Type a message..." autocomplete="off">
+        <button type="submit">Send</button>
+      </form>
+    </section>
+
+    <section class="deck">
+      <h2>My Deck</h2>
+      <label>Highlight color:
+        <input type="color" id="colorPicker" value="#ffd54f">
+      </label>
+      <ul id="deckList"></ul>
+    </section>
+    </div>
+  </main>
+
+  <!-- Libraries: Socket.IO (real-time chat) and Supabase (login) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+  <script src="/static/script.js"></script>
+</body>
+</html>
