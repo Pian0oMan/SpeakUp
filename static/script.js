@@ -123,6 +123,7 @@ el("nextBtn").onclick = findPartner;
 // The server found us a partner!
 socket.on("matched", partner => {
   messages = [];
+  nextIcebreakerAt = 0;
   partnerName = partner.name;
   el("partnerInfo").textContent =
     `💬 ${partner.name} · speaks ${partner.native} · learning ${partner.learning}`;
@@ -133,6 +134,7 @@ socket.on("matched", partner => {
 // Our partner clicked Next or closed their tab
 socket.on("partner_left", () => {
   messages.push({ from: "system", text: "Your partner left. Click Next to find someone new." });
+  nextIcebreakerAt = 0; // no more questions in this chat
   render();
 });
 
@@ -142,6 +144,37 @@ socket.on("chat_message", msg => {
   el("typing").textContent = ""; // they sent it, so they're done typing
   render();
 });
+
+
+// ---------- ICEBREAKERS ----------
+let nextIcebreakerAt = 0; // when the next question arrives (a Date.now() time), 0 = none coming
+
+// The server sent a new question. It goes into the chat like a special message.
+socket.on("icebreaker", icebreaker => {
+  messages.push({
+    from: "icebreaker",
+    text: icebreaker.question,
+    translation: icebreaker.translation,
+    answered: [], // connection ids of people who answered
+  });
+  nextIcebreakerAt = Date.now() + icebreaker.next_in * 1000;
+  render();
+});
+
+// Someone answered: update the ✅ / ⏳ on the newest question card
+socket.on("icebreaker_answered", answered => {
+  const card = messages.findLast(msg => msg.from === "icebreaker");
+  if (card) card.answered = answered;
+  render();
+});
+
+// Every second, update the countdown, e.g. "Next question in 1:05"
+setInterval(() => {
+  const seconds = Math.max(0, Math.round((nextIcebreakerAt - Date.now()) / 1000));
+  const minutes = Math.floor(seconds / 60);
+  const rest = String(seconds % 60).padStart(2, "0"); // 5 -> "05"
+  el("icebreakerTimer").textContent = nextIcebreakerAt ? `🧊 Next question in ${minutes}:${rest}` : "";
+}, 1000);
 
 // When I submit the form, send my text to the server
 el("chatForm").onsubmit = event => {
@@ -199,6 +232,14 @@ function clean(word) {
 
 
 // ---------- DRAWING ----------
+// Add a small line of text with a CSS class inside a message, e.g. a translation
+function addLine(parent, className, text) {
+  const line = document.createElement("div");
+  line.className = className;
+  line.textContent = text;
+  parent.appendChild(line);
+}
+
 // Draw the chat + deck on the page (DOM = the page as JS objects)
 function render() {
   const box = el("messages");
@@ -212,8 +253,13 @@ function render() {
       box.appendChild(div);
       return;
     }
-    // socket.id is MY connection id. If it matches, I sent this message.
-    div.className = "message" + (msg.from === socket.id ? " me" : "");
+    if (msg.from === "icebreaker") {
+      div.className = "message icebreaker";
+      addLine(div, "icebreaker-label", "🧊 Icebreaker");
+    } else {
+      // socket.id is MY connection id. If it matches, I sent this message.
+      div.className = "message" + (msg.from === socket.id ? " me" : "");
+    }
     msg.text.split(" ").forEach(raw => {
       const span = document.createElement("span");
       span.className = "word";
@@ -224,12 +270,15 @@ function render() {
       div.appendChild(span);
     });
     // The automatic translation, like a subtitle
-    if (msg.translation) {
-      const sub = document.createElement("div");
-      sub.className = "translation";
-      sub.textContent = msg.translation;
-      div.appendChild(sub);
+    if (msg.translation) addLine(div, "translation", msg.translation);
+    // Who has answered the question so far
+    if (msg.from === "icebreaker") {
+      const meDone = msg.answered.includes(socket.id) ? "✅" : "⏳";
+      const partnerDone = msg.answered.some(id => id !== socket.id) ? "✅" : "⏳";
+      addLine(div, "icebreaker-status", `You ${meDone} · ${partnerName} ${partnerDone}`);
     }
+    // This message was someone's answer to an icebreaker
+    if (msg.answer) addLine(div, "answer-badge", "💬 Answer");
     box.appendChild(div);
   });
   box.scrollTop = box.scrollHeight; // auto-scroll to the newest message

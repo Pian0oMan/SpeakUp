@@ -1,6 +1,8 @@
 # BACKEND: Python + Flask. It serves the website, matches chat partners,
 # translates messages, and talks to the Supabase database.
 import os
+import random
+from functools import lru_cache
 import requests
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify, send_from_directory
@@ -133,19 +135,76 @@ def translate(text, language, context=""):
 # because it only matters while people are online.
 waiting = []   # people looking for a partner, e.g. {"sid": ..., "name": "Ana", "native": "Spanish", ...}
 partners = {}  # sid -> that person's partner, e.g. partners["abc"] = {"sid": "xyz", "name": "Ana", ...}
-histories = {} # sid -> recent chat lines, e.g. ["Alex: hey!", "Ana: hola"] (both people share one list)
+chats = {}     # sid -> the chat they're in. Both people point to the SAME chat, e.g.
+               # {"history": ["Alex: hey!"], "question": "...", "answered": {"abc"}, "active": True}
 
 
 def leave_current_chat(sid):
     # Take this person off the waiting list (if they were on it)
     waiting[:] = [person for person in waiting if person["sid"] != sid]
-    # If they were chatting, break up the pair and tell the partner
+    # If they were chatting, end the chat, break up the pair, and tell the partner
+    chat = chats.pop(sid, None)
+    if chat:
+        chat["active"] = False  # this stops the icebreaker timer
     partner = partners.pop(sid, None)
-    histories.pop(sid, None)
     if partner:
         partners.pop(partner["sid"], None)
-        histories.pop(partner["sid"], None)
+        chats.pop(partner["sid"], None)
         socketio.emit("partner_left", to=partner["sid"])
+
+
+# ---------- ICEBREAKERS ----------
+ICEBREAKER_SECONDS = 90  # how often a new question appears
+
+ICEBREAKERS = [
+    "What is your favorite food?",
+    "What do you like to do on weekends?",
+    "What is a movie or show you love?",
+    "If you could visit any country, where would you go?",
+    "What music are you listening to lately?",
+    "What is the best thing that happened to you this week?",
+    "Do you have any pets? Tell me about them.",
+    "What is a food from your country that I should try?",
+    "What did you want to be when you were a kid?",
+    "What is your favorite season, and why?",
+    "What is a hobby you would like to start?",
+    "What is something people in your country do that might surprise me?",
+    "Are you a morning person or a night person?",
+    "What is the last thing that made you laugh?",
+    "Why are you learning a new language?",
+    "What is your dream job?",
+    "What would you do with a free day and no plans?",
+    "What is a word in your language that is hard to translate?",
+]
+
+
+@lru_cache(maxsize=None)  # remembers results, so each question is only translated once per language
+def in_language(text, language):
+    """The icebreakers are written in English. This returns one in any language."""
+    if language == "English":
+        return text
+    return translate(text, language) or text
+
+
+def send_icebreaker(chat):
+    question = chat["questions"].pop()
+    chat["question"] = question
+    chat["answered"] = set()
+    for person in chat["people"]:
+        shown = in_language(question, person["learning"])         # practice reading it...
+        subtitle = in_language(question, person["translate_to"])  # ...with help underneath
+        socketio.emit("icebreaker", {
+            "question": shown,
+            "translation": subtitle if subtitle != shown else None,
+            "next_in": ICEBREAKER_SECONDS,
+        }, to=person["sid"])
+
+
+def icebreaker_timer(chat):
+    # Runs in the background for as long as the chat lasts
+    while chat["active"] and chat["questions"]:
+        send_icebreaker(chat)
+        socketio.sleep(ICEBREAKER_SECONDS)
 
 
 @socketio.on("find_partner")
@@ -171,9 +230,18 @@ def find_partner(data):
             waiting.remove(other)
             partners[me["sid"]] = other
             partners[other["sid"]] = me
-            histories[me["sid"]] = histories[other["sid"]] = []  # one shared list for both
+            chat = {
+                "people": [me, other],
+                "history": [],
+                "questions": random.sample(ICEBREAKERS, len(ICEBREAKERS)),  # shuffled, no repeats
+                "question": None,
+                "answered": set(),
+                "active": True,
+            }
+            chats[me["sid"]] = chats[other["sid"]] = chat  # one shared chat for both
             socketio.emit("matched", other, to=me["sid"])  # tell me who I got
             socketio.emit("matched", me, to=other["sid"])  # tell them who they got
+            socketio.start_background_task(icebreaker_timer, chat)
             return
 
     waiting.append(me)  # nobody fits yet, so wait for someone
@@ -192,11 +260,18 @@ def handle_chat_message(text):
         return  # not in a chat, nobody to send to
     me = partners[partner["sid"]]  # my partner's partner is me!
 
+    chat = chats[request.sid]
+
     # The last 6 lines of this conversation help DeepL understand slang and tone
-    history = histories[request.sid]
+    history = chat["history"]
     # (The first line describes the situation, so even the very first message has context.)
     context = "\n".join(["Casual text chat between two friends."] + history[-6:])
     history.append(f"{me['name']}: {text}")
+
+    # My first message after an icebreaker counts as my answer
+    is_answer = chat["question"] is not None and request.sid not in chat["answered"]
+    if is_answer:
+        chat["answered"].add(request.sid)
 
     # Each person gets the message translated into THEIR preferred language
     for person in (me, partner):
@@ -204,7 +279,12 @@ def handle_chat_message(text):
             "from": request.sid,
             "text": text,
             "translation": translate(text, person["translate_to"], context),
+            "answer": is_answer,
         }, to=person["sid"])
+
+    if is_answer:  # update the ✅ / ⏳ on the question card for both people
+        for person in (me, partner):
+            socketio.emit("icebreaker_answered", list(chat["answered"]), to=person["sid"])
 
 
 @socketio.on("typing")
