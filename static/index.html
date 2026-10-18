@@ -5,107 +5,161 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Speak Up</title>
+  <!-- Poppins: a bold, modern font from Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-  <header>
-    <div>
-      <h1>Speak Up!! 🗣️</h1>
-      <p>Learn a language by talking to people who speak it.</p>
+  <!-- Every screen is a <section class="screen">. JavaScript shows one at a time. -->
+
+  <!-- ===== LOG IN ===== -->
+  <section id="loginScreen" class="screen auth" hidden>
+    <div class="card">
+      <h1 class="logo">Speak Up!! 🗣️</h1>
+      <p class="tagline">Learn a language by talking to people who speak it.</p>
+      <form id="loginForm">
+        <label>Email <input id="loginEmail" type="email" required></label>
+        <label>Password <input id="loginPassword" type="password" required></label>
+        <button type="submit" class="primary">Log in</button>
+      </form>
+      <p id="loginStatus" class="status"></p>
+      <p class="switch">New here? <a href="#" id="toRegister">Create an account</a></p>
     </div>
-    <button id="logoutBtn" hidden>Log out</button>
-  </header>
+  </section>
 
-  <main>
-    <!-- SCREEN 1: log in or sign up -->
-    <section id="authScreen" class="lobby" hidden>
-      <h2>Welcome!</h2>
-      <form id="authForm">
-        <label>Email
-          <input id="emailInput" type="email" required>
+  <!-- ===== CREATE ACCOUNT (languages are chosen here, once) ===== -->
+  <section id="registerScreen" class="screen auth" hidden>
+    <div class="card">
+      <h1 class="logo">Speak Up!! 🗣️</h1>
+      <p class="tagline">Create your account</p>
+      <form id="registerForm">
+        <label>Your name <input id="regName" maxlength="20" placeholder="e.g. Alex" required></label>
+        <label>Email <input id="regEmail" type="email" required></label>
+        <label>Password <small>(at least 6 characters)</small>
+          <input id="regPassword" type="password" minlength="6" required>
         </label>
-        <label>Password
-          <input id="passwordInput" type="password" minlength="6" required>
-        </label>
-        <button type="submit">Log in</button>
-        <button type="button" id="signupBtn" class="secondary">Create account</button>
+        <label>Confirm password <input id="regConfirm" type="password" minlength="6" required></label>
+        <div class="row">
+          <label>I speak <select id="regNative" class="lang-select"></select></label>
+          <label>I'm learning <select id="regLearning" class="lang-select"></select></label>
+        </div>
+        <label>Show translations in <select id="regTranslate" class="lang-select"></select></label>
+        <button type="submit" class="primary">Create account</button>
       </form>
-      <p id="authStatus" class="status"></p>
-    </section>
+      <p id="registerStatus" class="status"></p>
+      <p class="switch">Already have an account? <a href="#" id="toLogin">Log in</a></p>
+    </div>
+  </section>
 
-    <!-- SCREEN 2: the lobby. Your profile + find a partner. -->
-    <section id="lobby" class="lobby" hidden>
-      <h2>Find a language partner</h2>
-      <form id="lobbyForm">
-        <label>Your name
-          <input id="nameInput" maxlength="20" placeholder="e.g. Alex" required>
-        </label>
-        <label>I speak
-          <select id="nativeSelect"></select>
-        </label>
-        <label>I'm learning
-          <select id="learningSelect"></select>
-        </label>
-        <label>Show translations in
-          <select id="translateSelect"></select>
-        </label>
-        <button type="submit">Find a partner</button>
-      </form>
-      <p id="status" class="status"></p>
-    </section>
+  <!-- ===== MAIN MENU ===== -->
+  <section id="menuScreen" class="screen page" hidden>
+    <div class="page-top">
+      <h2 id="greeting"></h2>
+      <button id="logoutBtn" class="ghost">Log out</button>
+    </div>
+    <div class="menu-grid">
+      <button id="quickMatchBtn" class="menu-card big">
+        <span class="icon">⚡</span>
+        <strong>Quick Match</strong>
+        <span id="quickMatchInfo"></span>
+      </button>
+      <button class="menu-card" disabled>
+        <span class="icon">🎙️</span>
+        <strong>Voice Rooms</strong>
+        <span>Coming soon</span>
+      </button>
+      <button id="deckMenuBtn" class="menu-card">
+        <span class="icon">🃏</span>
+        <strong>My Deck</strong>
+        <span id="deckCount"></span>
+      </button>
+      <button id="profileMenuBtn" class="menu-card">
+        <span class="icon">👤</span>
+        <strong>Profile</strong>
+        <span>Name and languages</span>
+      </button>
+    </div>
+  </section>
 
-    <!-- SCREEN 3: chat + deck. Shown once we're matched with someone. -->
-    <div id="chatScreen" hidden>
-    <section class="chat">
-      <div class="chat-header">
-        <span id="partnerInfo"></span>
-        <div class="header-buttons">
-          <button id="callBtn">🎥 Call</button>
-          <button id="nextBtn">Next ⏭</button>
-        </div>
+  <!-- ===== PROFILE (edit languages later) ===== -->
+  <section id="profileScreen" class="screen page" hidden>
+    <div class="page-top">
+      <h2>Your profile</h2>
+      <button class="ghost back-to-menu">← Menu</button>
+    </div>
+    <form id="profileForm" class="card">
+      <label>Your name <input id="profName" maxlength="20" required></label>
+      <div class="row">
+        <label>I speak <select id="profNative" class="lang-select"></select></label>
+        <label>I'm learning <select id="profLearning" class="lang-select"></select></label>
       </div>
-      <p class="hint">Click any word to save it to your deck.</p>
-      <p id="icebreakerTimer" class="hint"></p>
+      <label>Show translations in <select id="profTranslate" class="lang-select"></select></label>
+      <button type="submit" class="primary">Save</button>
+      <p id="profileStatus" class="status"></p>
+    </form>
+  </section>
 
-      <!-- Incoming call: "Ana wants to video call" + Accept / Decline -->
-      <div id="callInvite" class="call-invite" hidden>
-        <span id="callInviteText"></span>
-        <button id="acceptCallBtn">Accept</button>
-        <button id="declineCallBtn" class="secondary">Decline</button>
+  <!-- ===== MY DECK ===== -->
+  <section id="deckScreen" class="screen page" hidden>
+    <div class="page-top">
+      <h2>My Deck</h2>
+      <button class="ghost back-to-menu">← Menu</button>
+    </div>
+    <div class="card">
+      <p class="hint">Words you saved from chats. They stay highlighted in every conversation.</p>
+      <ul class="deck-list"></ul>
+    </div>
+  </section>
+
+  <!-- ===== SEARCHING FOR A PARTNER ===== -->
+  <section id="searchScreen" class="screen center" hidden>
+    <div class="spinner"></div>
+    <p id="searchStatus"></p>
+    <button id="cancelSearchBtn" class="ghost">Cancel</button>
+  </section>
+
+  <!-- ===== CHAT + VIDEO ===== -->
+  <section id="chatScreen" class="screen" hidden>
+    <div class="topbar">
+      <button id="menuBtn" class="ghost">☰ Menu</button>
+      <span id="partnerInfo"></span>
+      <button id="nextBtn" class="primary">Next ⏭</button>
+    </div>
+
+    <!-- LEFT: video. Joined automatically, with camera and mic OFF. -->
+    <div class="stage">
+      <video id="remoteVideo" autoplay playsinline></video>
+      <!-- Shown when my partner's camera is off -->
+      <div id="partnerPlaceholder" class="placeholder">
+        <div id="partnerAvatar" class="avatar"></div>
+        <p id="callStatus"></p>
       </div>
-
-      <!-- The video call itself. Hidden until a call starts. -->
-      <div id="callArea" hidden>
-        <div class="videos">
-          <video id="remoteVideo" autoplay playsinline></video>
-          <!-- "muted" so you don't hear your own microphone -->
-          <video id="localVideo" autoplay playsinline muted></video>
-        </div>
-        <div class="call-controls">
-          <button id="micBtn">🎤 Mute</button>
-          <button id="camBtn">📷 Camera off</button>
-          <button id="endCallBtn" class="danger">End call</button>
-        </div>
+      <!-- My own camera, small in the corner. "muted" so I don't hear myself. -->
+      <video id="localVideo" autoplay playsinline muted hidden></video>
+      <div class="call-controls">
+        <button id="micBtn" class="round off" title="Microphone">🎤</button>
+        <button id="camBtn" class="round off" title="Camera">📷</button>
       </div>
+    </div>
 
+    <!-- RIGHT: text chat -->
+    <div class="side">
+      <div class="side-top">
+        <span id="icebreakerTimer"></span>
+        <label class="color-label" title="Color for words you save">
+          Highlight <input type="color" id="colorPicker" value="#ffd54f">
+        </label>
+      </div>
       <div id="messages"></div>
       <p id="typing"></p>
-      <!-- A <form> lets Enter key AND the button both send -->
+      <!-- A <form> lets the Enter key AND the button both send -->
       <form id="chatForm">
-        <input id="chatInput" placeholder="Type a message..." autocomplete="off">
+        <input id="chatInput" placeholder="Type a message... (click any word to save it)" autocomplete="off">
         <button type="submit">Send</button>
       </form>
-    </section>
-
-    <section class="deck">
-      <h2>My Deck</h2>
-      <label>Highlight color:
-        <input type="color" id="colorPicker" value="#ffd54f">
-      </label>
-      <ul id="deckList"></ul>
-    </section>
     </div>
-  </main>
+  </section>
 
   <!-- Libraries: Socket.IO (real-time chat) and Supabase (login) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>

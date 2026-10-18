@@ -1,134 +1,254 @@
 /* CSS = how the page LOOKS. Pattern: selector { property: value; } */
 
+/* COLORS: change them here and the whole site updates */
+:root {
+  --brand: #907cad;       /* main purple */
+  --brand-dark: #6f5b8e;
+  --send: #3c9608;        /* green send button */
+  --accent: #ff8a1f;      /* orange, for icebreakers */
+  --accent-light: #fff4e5;
+  --bg: #f4f6fb;
+  --text: #222;
+  --muted: #777;
+  --card: #ffffff;
+}
+
+* { box-sizing: border-box; }  /* padding doesn't make things wider than their width */
+
 body {
-  font-family: system-ui, sans-serif;
+  font-family: "Poppins", system-ui, sans-serif;
   margin: 0;
-  background: #f4f6fb;
-  color: #222;
+  background: var(--bg);
+  color: var(--text);
 }
-
-header {
-  background: #907cad;
-  color: white;
-  padding: 16px 24px;
-  display: flex;                    /* title on the left, log out on the right */
-  justify-content: space-between;
-  align-items: center;
-}
-#logoutBtn { color: white; border: 1px solid white; border-radius: 20px; padding: 6px 14px; }
-
-main { padding: 24px; }
 
 /* Make sure anything with the "hidden" attribute really disappears */
 [hidden] { display: none !important; }
 
-#chatScreen {
-  display: flex;      /* puts chat and deck side by side */
-  gap: 24px;
-  flex-wrap: wrap;    /* stacks them on small screens */
+/* ---------- Buttons ---------- */
+button {
+  font: inherit;
+  border: none;
+  background: none;
+  cursor: pointer;
+  transition: transform 0.1s, background 0.2s;
 }
-
-/* ---------- Login + Lobby (both use class="lobby") ---------- */
-.lobby { max-width: 400px; margin: 40px auto; }
-.lobby form { display: flex; flex-direction: column; gap: 14px; }
-.lobby label { display: flex; flex-direction: column; gap: 4px; font-weight: 600; }
-.lobby input, .lobby select {
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 15px;
-  font-weight: normal;
-}
-.lobby button, #nextBtn {
-  background: #907cad;
+button:active { transform: scale(0.95); }  /* "press" feedback on every button */
+button.primary {
+  background: var(--brand);
   color: white;
-  padding: 10px 18px;
-  border-radius: 20px;
-}
-.lobby button.secondary { background: white; color: #907cad; border: 1px solid #907cad; }
-.status { color: #666; text-align: center; }
-
-/* ---------- Chat ---------- */
-.chat-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
+  padding: 10px 20px;
+  border-radius: 999px;
   font-weight: 600;
 }
-.hint { color: #888; font-size: 14px; margin: 6px 0 0; }
-#messages { height: 400px; overflow-y: auto; }  /* scroll instead of growing forever */
-
-/* ---------- Video call ---------- */
-.header-buttons { display: flex; gap: 8px; }
-#callBtn, .call-controls button, .call-invite button {
-  background: #907cad;
-  color: white;
-  padding: 10px 18px;
-  border-radius: 20px;
+button.primary:hover { background: var(--brand-dark); }
+button.ghost {
+  color: var(--brand-dark);
+  border: 1px solid var(--brand);
+  padding: 8px 16px;
+  border-radius: 999px;
 }
-.call-invite {
+button.ghost:hover { background: rgba(144, 124, 173, 0.1); }
+
+/* ---------- Forms ---------- */
+form { display: flex; flex-direction: column; gap: 14px; }
+label { display: flex; flex-direction: column; gap: 4px; font-weight: 600; font-size: 14px; flex: 1; }
+label small { font-weight: 400; color: var(--muted); }
+input, select {
+  font: inherit;
+  font-weight: 400;
+  padding: 10px 12px;
+  border: 1px solid #d6d6e0;
+  border-radius: 10px;
+}
+input:focus, select:focus { outline: 2px solid var(--brand); border-color: transparent; }
+.row { display: flex; gap: 12px; }  /* two fields side by side */
+.status { color: #c62828; text-align: center; min-height: 1em; margin: 8px 0 0; }
+.hint { color: var(--muted); font-size: 14px; margin: 0 0 12px; }
+
+.card {
+  background: var(--card);
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+}
+
+/* ---------- Login + Register ---------- */
+.auth {
+  min-height: 100vh;
   display: flex;
   align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  background: #fff4e5;
-  border: 1px solid #ffb74d;
-  border-radius: 12px;
-  padding: 10px 14px;
-  margin-top: 12px;
+  justify-content: center;
+  padding: 16px;
+  background: linear-gradient(135deg, var(--brand) 0%, #c9b8e6 100%);
 }
-.call-invite span { flex: 1; font-weight: 600; }
-.call-invite button.secondary { background: white; color: #907cad; border: 1px solid #907cad; }
-.videos {
-  position: relative;          /* lets my small video sit on top of the big one */
-  background: #111;
-  border-radius: 12px;
+.auth .card { width: 100%; max-width: 420px; }
+.logo { font-size: 32px; font-weight: 800; margin: 0; color: var(--brand-dark); }
+.tagline { color: var(--muted); margin: 4px 0 20px; }
+.switch { text-align: center; font-size: 14px; margin: 16px 0 0; }
+.switch a { color: var(--brand-dark); font-weight: 600; }
+
+/* ---------- Pages: menu, profile, deck ---------- */
+.page { max-width: 900px; margin: 0 auto; padding: 32px 16px; }
+.page-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+.page-top h2 { margin: 0; font-size: 28px; font-weight: 800; }
+.page .card { max-width: 560px; }
+
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+.menu-card {
+  background: var(--card);
+  border-radius: 20px;
+  padding: 24px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+.menu-card:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1); }
+.menu-card:disabled { opacity: 0.5; cursor: default; }
+.menu-card .icon { font-size: 32px; }
+.menu-card strong { font-size: 20px; }
+.menu-card span:last-child { color: var(--muted); font-size: 14px; }
+.menu-card.big {
+  grid-column: 1 / -1;  /* Quick Match takes the whole first row */
+  background: linear-gradient(135deg, var(--brand) 0%, var(--brand-dark) 100%);
+  color: white;
+}
+.menu-card.big span:last-child { color: rgba(255, 255, 255, 0.85); }
+
+/* ---------- Searching ---------- */
+.center {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 16px;
+  text-align: center;
+}
+.spinner {
+  width: 56px;
+  height: 56px;
+  border: 6px solid #e0d8ee;
+  border-top-color: var(--brand);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---------- Chat + video screen ---------- */
+/* A grid: top bar across the top, video on the left, chat on the right */
+#chatScreen {
+  height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  grid-template-rows: auto 1fr;
+}
+.topbar {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px;
+  background: var(--card);
+  border-bottom: 1px solid #e6e6ee;
+}
+#partnerInfo { font-weight: 600; text-align: center; }
+
+.stage {
+  position: relative;  /* lets the small video and buttons sit on top */
+  background: #1b1924;
   overflow: hidden;
-  aspect-ratio: 16 / 9;
-  margin-top: 12px;
 }
 #remoteVideo { width: 100%; height: 100%; object-fit: cover; }
+.placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  background: #1b1924;
+}
+.avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: var(--brand);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 52px;
+  font-weight: 800;
+}
+#callStatus { color: #bbb; font-size: 14px; }
 #localVideo {
-  position: absolute;          /* small picture-in-picture in the corner */
-  right: 10px;
-  bottom: 10px;
-  width: 28%;
+  position: absolute;
+  right: 16px;
+  bottom: 84px;
+  width: 22%;
+  min-width: 120px;
   border: 2px solid white;
-  border-radius: 8px;
-  transform: scaleX(-1);       /* mirror, like looking in a mirror */
-}
-.call-controls { display: flex; justify-content: center; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
-.call-controls button.danger { background: #d32f2f; }
-/* During a call, make the message area shorter so everything fits */
-#callArea:not([hidden]) ~ #messages { height: 220px; }
-.message.system {
-  background: none;
-  color: #888;
-  font-style: italic;
-  text-align: center;
-  max-width: 100%;
-}
-
-section {
-  background: white;
   border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transform: scaleX(-1);  /* mirror, like looking in a mirror */
 }
+.call-controls {
+  position: absolute;
+  bottom: 16px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+.round {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  font-size: 22px;
+  background: rgba(255, 255, 255, 0.9);
+}
+.round.off { background: #d32f2f; }  /* red = switched off */
 
-.chat { flex: 2; min-width: 280px; }
-.deck { flex: 1; min-width: 220px; }
+.side {
+  display: flex;
+  flex-direction: column;
+  background: var(--card);
+  border-left: 1px solid #e6e6ee;
+  min-height: 0;  /* lets the messages area scroll instead of stretching the page */
+  padding: 12px;
+}
+.side-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+.color-label { flex-direction: row; align-items: center; gap: 6px; flex: 0; font-weight: 400; font-size: 13px; white-space: nowrap; }
+.color-label input { padding: 0; width: 28px; height: 28px; border: none; background: none; }
+#messages { flex: 1; overflow-y: auto; min-height: 0; padding: 4px 0; }
 
 .message {
-  padding: 10px 14px;
+  padding: 8px 12px;
   border-radius: 16px;
   margin: 8px 0;
-  max-width: 80%;
+  max-width: 85%;
+  width: fit-content;
   background: #eef1ff;
 }
 .message.me { background: #d9f7e3; margin-left: auto; }
-
+.message.system {
+  background: none;
+  color: var(--muted);
+  font-style: italic;
+  font-size: 13px;
+  text-align: center;
+  max-width: 100%;
+  width: auto;
+}
 /* The automatic translation, shown like a subtitle under the message */
 .translation {
   font-size: 13px;
@@ -141,12 +261,13 @@ section {
 /* Icebreaker question cards */
 .message.icebreaker {
   max-width: 100%;
-  background: #fff4e5;
-  border: 1px solid #ffb74d;
+  width: auto;
+  background: var(--accent-light);
+  border: 1px solid var(--accent);
 }
 .icebreaker-label {
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 800;
   color: #e65100;
   text-transform: uppercase;
   margin-bottom: 4px;
@@ -154,32 +275,37 @@ section {
 .icebreaker-status { font-size: 13px; color: #555; margin-top: 6px; }
 .answer-badge { font-size: 11px; font-weight: 600; color: #e65100; margin-top: 4px; }
 
-#typing { color: #888; font-size: 13px; font-style: italic; height: 16px; margin: 4px 0 0; }
+#typing { color: var(--muted); font-size: 13px; font-style: italic; height: 18px; margin: 0; }
 
 /* Each word is a <span class="word"> so it can be clicked */
 .word { cursor: pointer; border-radius: 4px; padding: 0 2px; }
 .word:hover { outline: 1px dashed #494c55; }
 
-#deckList li {
+#chatForm { flex-direction: row; gap: 8px; }
+#chatInput { flex: 1; border-radius: 999px; padding: 10px 16px; }
+#chatForm button {
+  background: var(--send);
+  color: white;
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+/* ---------- Deck list ---------- */
+.deck-list { list-style: none; padding: 0; margin: 0; }
+.deck-list li {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 6px 0;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f4;
 }
-.swatch { padding: 2px 8px; border-radius: 4px; }
-#chatForm { display: flex; gap: 8px; margin-top: 12px; }
-#chatInput {
-  flex: 1;
-  padding: 10px 14px;
-  border: 1px solid #ccc;
-  border-radius: 20px;
-  font-size: 15px;
-}
-#chatForm button {
-  background: #3c9608;
-  color: white;
-  padding: 8px 18px;
-  border-radius: 20px;
-}
+.swatch { padding: 2px 10px; border-radius: 6px; font-weight: 600; }
 
-button { border: none; background: none; cursor: pointer; font-size: 16px; }
+/* ---------- Phones: stack the video on top of the chat ---------- */
+@media (max-width: 800px) {
+  #chatScreen { grid-template-columns: 1fr; grid-template-rows: auto 40vh 1fr; }
+  .side { border-left: none; }
+  .row { flex-direction: column; }
+  #localVideo { bottom: 80px; width: 30%; min-width: 90px; }
+}

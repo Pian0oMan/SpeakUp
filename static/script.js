@@ -1,11 +1,12 @@
 // JAVASCRIPT = the BEHAVIOR. It reacts to clicks and talks to the backend.
 
-let sb;              // Supabase client: handles logging in
-let token = null;    // my login "ID card", sent to our server to prove who I am
+let sb;                  // Supabase client: handles logging in
+let token = null;        // my login "ID card", sent to our server to prove who I am
 let loggedIn = false;
-let profile = null;  // my name + languages
-let messages = [];   // chat messages with the current partner
-let deck = {};       // { "hola": "#ffd54f", ... }  word -> color
+let registering = false; // true while "Create account" is still saving the profile
+let profile = null;      // my name + languages
+let messages = [];       // chat messages with the current partner
+let deck = {};           // { "hola": "#ffd54f", ... }  word -> color
 let partnerName = "";
 
 const LANGUAGES = ["English", "Spanish", "French", "German", "Japanese", "Chinese", "Russian"];
@@ -13,19 +14,18 @@ const LANGUAGES = ["English", "Spanish", "French", "German", "Japanese", "Chines
 // Shortcut so we don't type document.getElementById a hundred times
 const el = id => document.getElementById(id);
 
-// Fill the three dropdowns from the list above (so we only write the list once)
-["nativeSelect", "learningSelect", "translateSelect"].forEach(id => {
-  LANGUAGES.forEach(lang => el(id).add(new Option(lang, lang)));
+// Fill every language dropdown from the list above (so we only write the list once)
+document.querySelectorAll(".lang-select").forEach(select => {
+  LANGUAGES.forEach(lang => select.add(new Option(lang, lang)));
 });
-el("learningSelect").value = "Spanish";
+el("regLearning").value = "Spanish";
 
 // REAL-TIME: open an always-on connection to the server
 const socket = io();
 
-// Show one screen, hide the others
+// Every screen is a <section class="screen">. Show one, hide the rest.
 function showScreen(id) {
-  ["authScreen", "lobby", "chatScreen"].forEach(screen => (el(screen).hidden = screen !== id));
-  el("logoutBtn").hidden = id === "authScreen";
+  document.querySelectorAll(".screen").forEach(screen => (screen.hidden = screen.id !== id));
 }
 
 // Talk to OUR server (Flask), always including the login token
@@ -35,8 +35,18 @@ async function api(path, options = {}) {
   return response.json();
 }
 
+// Read the name + language fields of a form. prefix "reg" reads regName, regNative, ...
+function readProfileForm(prefix) {
+  return {
+    username: el(prefix + "Name").value.trim(),
+    native: el(prefix + "Native").value,
+    learning: el(prefix + "Learning").value,
+    translate_to: el(prefix + "Translate").value,
+  };
+}
 
-// ---------- LOGIN (Supabase) ----------
+
+// ---------- LOG IN + CREATE ACCOUNT (Supabase) ----------
 async function start() {
   const config = await (await fetch("/api/config")).json();
   sb = supabase.createClient(config.url, config.anonKey);
@@ -44,81 +54,140 @@ async function start() {
   // Runs whenever login state changes: page load, log in, log out, token refresh
   sb.auth.onAuthStateChange((event, session) => {
     token = session ? session.access_token : null;
-    if (session && !loggedIn) {
-      loggedIn = true;
-      enterLobby();
+    if (session && !loggedIn && !registering) {
+      enterApp();
     } else if (!session) {
       loggedIn = false;
-      showScreen("authScreen");
+      showScreen("loginScreen");
     }
   });
 }
 
-el("authForm").onsubmit = async event => {
+el("toRegister").onclick = event => {
+  event.preventDefault(); // it's a link: don't jump to "#"
+  showScreen("registerScreen");
+};
+el("toLogin").onclick = event => {
   event.preventDefault();
-  const { error } = await sb.auth.signInWithPassword({
-    email: el("emailInput").value,
-    password: el("passwordInput").value,
-  });
-  el("authStatus").textContent = error ? error.message : "";
+  showScreen("loginScreen");
 };
 
-el("signupBtn").onclick = async () => {
-  const { data, error } = await sb.auth.signUp({
-    email: el("emailInput").value,
-    password: el("passwordInput").value,
+el("loginForm").onsubmit = async event => {
+  event.preventDefault();
+  el("loginStatus").textContent = "Logging in...";
+  const { error } = await sb.auth.signInWithPassword({
+    email: el("loginEmail").value,
+    password: el("loginPassword").value,
   });
-  if (error) el("authStatus").textContent = error.message;
-  else if (!data.session) el("authStatus").textContent = "Check your email to confirm your account, then log in.";
+  el("loginStatus").textContent = error ? error.message : "";
+};
+
+// Create account: languages are chosen HERE, once
+el("registerForm").onsubmit = async event => {
+  event.preventDefault();
+  const status = el("registerStatus");
+  const newProfile = readProfileForm("reg");
+  if (el("regPassword").value !== el("regConfirm").value) {
+    status.textContent = "The passwords don't match.";
+    return;
+  }
+  if (newProfile.native === newProfile.learning) {
+    status.textContent = "Pick two different languages!";
+    return;
+  }
+
+  status.textContent = "Creating your account...";
+  registering = true;
+  const { data, error } = await sb.auth.signUp({
+    email: el("regEmail").value,
+    password: el("regPassword").value,
+  });
+  if (error || !data.session) {
+    registering = false;
+    status.textContent = error ? error.message : "Check your email to confirm your account, then log in.";
+    return;
+  }
+  token = data.session.access_token;
+  await api("/api/profile", { method: "PUT", body: JSON.stringify(newProfile) }); // save languages
+  registering = false;
+  status.textContent = "";
+  enterApp();
 };
 
 el("logoutBtn").onclick = () => {
-  endCall();
-  socket.emit("leave");
+  leaveChat();
   sb.auth.signOut();
 };
 
 
-// ---------- LOBBY ----------
-async function enterLobby() {
+// ---------- MAIN MENU, PROFILE, DECK ----------
+async function enterApp() {
+  loggedIn = true;
   profile = await api("/api/profile");
-  if (profile) {  // returning user: fill in their saved choices
-    el("nameInput").value = profile.username;
-    el("nativeSelect").value = profile.native;
-    el("learningSelect").value = profile.learning;
-    el("translateSelect").value = profile.translate_to;
-  }
-  el("status").textContent = "";
-  showScreen("lobby");
-  loadDeck();
+  await loadDeck();
+  if (profile) openMenu();
+  else openProfile("Welcome! Pick your languages to get started."); // e.g. confirmed by email
 }
 
-el("lobbyForm").onsubmit = async event => {
+function openMenu() {
+  if (!profile) return openProfile("Save your profile first.");
+  el("greeting").textContent = `Hi, ${profile.username} 👋`;
+  el("quickMatchInfo").textContent =
+    `Talk 1-on-1 with someone who speaks ${profile.learning} and is learning ${profile.native}`;
+  el("deckCount").textContent = `${Object.keys(deck).length} saved words`;
+  showScreen("menuScreen");
+}
+
+function openProfile(message) {
+  if (profile) {
+    el("profName").value = profile.username;
+    el("profNative").value = profile.native;
+    el("profLearning").value = profile.learning;
+    el("profTranslate").value = profile.translate_to;
+  }
+  el("profileStatus").textContent = message;
+  showScreen("profileScreen");
+}
+
+el("profileMenuBtn").onclick = () => openProfile("");
+el("deckMenuBtn").onclick = () => showScreen("deckScreen");
+document.querySelectorAll(".back-to-menu").forEach(button => (button.onclick = openMenu));
+
+el("profileForm").onsubmit = async event => {
   event.preventDefault();
-  profile = {
-    username: el("nameInput").value.trim(),
-    native: el("nativeSelect").value,
-    learning: el("learningSelect").value,
-    translate_to: el("translateSelect").value,
-  };
-  if (profile.native === profile.learning) {
-    el("status").textContent = "Pick two different languages!";
+  const newProfile = readProfileForm("prof");
+  if (newProfile.native === newProfile.learning) {
+    el("profileStatus").textContent = "Pick two different languages!";
     return;
   }
-  await api("/api/profile", { method: "PUT", body: JSON.stringify(profile) }); // save to database
-  findPartner();
+  await api("/api/profile", { method: "PUT", body: JSON.stringify(newProfile) }); // save to database
+  profile = newProfile;
+  openMenu();
 };
 
+
+// ---------- MATCHING ----------
+el("quickMatchBtn").onclick = findPartner;
+el("nextBtn").onclick = findPartner;    // leave this partner and find a new one
+el("menuBtn").onclick = leaveChat;
+el("cancelSearchBtn").onclick = leaveChat;
+
 function findPartner() {
-  endCall(); // hang up any video call with the old partner
+  hangUp(); // end the video link with the old partner (my camera/mic stay as they were)
   socket.emit("find_partner", { token });
-  showScreen("lobby");
-  el("status").textContent =
+  el("searchStatus").textContent =
     `Looking for someone who speaks ${profile.learning} and is learning ${profile.native}...`;
+  showScreen("searchScreen");
 }
 
-// NEXT: leave this partner and look for a new one
-el("nextBtn").onclick = findPartner;
+// Leave the chat (or the search) and go back to the menu
+function leaveChat() {
+  socket.emit("leave");
+  hangUp();
+  stopMyMedia(); // switch off camera + mic
+  nextIcebreakerAt = 0;
+  openMenu();
+}
 
 
 // ---------- CHAT ----------
@@ -127,18 +196,20 @@ socket.on("matched", partner => {
   messages = [];
   nextIcebreakerAt = 0;
   partnerName = partner.name;
-  el("partnerInfo").textContent =
-    `💬 ${partner.name} · speaks ${partner.native} · learning ${partner.learning}`;
+  el("partnerInfo").textContent = `${partner.name} · speaks ${partner.native} · learning ${partner.learning}`;
+  el("partnerAvatar").textContent = partner.name[0].toUpperCase();
   showScreen("chatScreen");
   render();
+  startCall(partner.initiator); // join the call automatically
 });
 
 // Our partner clicked Next or closed their tab
 socket.on("partner_left", () => {
-  messages.push({ from: "system", text: "Your partner left. Click Next to find someone new." });
+  addSystemMessage("Your partner left. Click Next to find someone new.");
   nextIcebreakerAt = 0; // no more questions in this chat
-  endCall();
-  render();
+  hangUp();
+  callState = "ended";
+  updatePartnerUI();
 });
 
 // A new chat message (from me or my partner), with its translation
@@ -146,6 +217,37 @@ socket.on("chat_message", msg => {
   messages.push(msg);
   el("typing").textContent = ""; // they sent it, so they're done typing
   render();
+});
+
+function addSystemMessage(text) {
+  messages.push({ from: "system", text });
+  render();
+}
+
+// When I submit the form, send my text to the server
+el("chatForm").onsubmit = event => {
+  event.preventDefault(); // stop the page from reloading (forms do that by default)
+  const input = el("chatInput");
+  if (input.value.trim() === "") return; // ignore empty messages
+  socket.emit("chat_message", input.value);
+  input.value = ""; // clear the box
+};
+
+// TYPING INDICATOR: tell the server I'm typing (at most once per second)
+let lastTypingSent = 0;
+el("chatInput").oninput = () => {
+  if (Date.now() - lastTypingSent > 1000) {
+    socket.emit("typing");
+    lastTypingSent = Date.now();
+  }
+};
+
+// Show "Ana is typing..." and hide it again after 2 seconds of silence
+let typingTimer;
+socket.on("partner_typing", () => {
+  el("typing").textContent = `${partnerName} is typing...`;
+  clearTimeout(typingTimer);
+  typingTimer = setTimeout(() => (el("typing").textContent = ""), 2000);
 });
 
 
@@ -180,11 +282,15 @@ setInterval(() => {
 }, 1000);
 
 
-// ---------- VIDEO CALLS (WebRTC) ----------
+// ---------- VIDEO CALL (WebRTC) ----------
+// You join the call automatically when matched, with camera and mic OFF.
 // The video and audio go DIRECTLY between the two browsers. Our server only
 // passes small "call" messages so the browsers can find each other ("signaling").
-let peer = null;        // RTCPeerConnection: the direct browser-to-browser link
-let localStream = null; // my camera + microphone
+let peer = null;      // RTCPeerConnection: the direct browser-to-browser link
+let micTrack = null;  // my microphone (null = off)
+let camTrack = null;  // my camera (null = off)
+let callState = "connecting";                 // connecting | connected | failed | ended
+let partnerMedia = { mic: false, cam: false }; // is my partner's mic / camera on?
 
 // A free public "STUN" server tells each browser its address on the internet
 const ICE_SERVERS = [{ urls: "stun:stun.l.google.com:19302" }];
@@ -193,128 +299,63 @@ function sendCall(data) {
   socket.emit("call", data);
 }
 
-function addSystemMessage(text) {
-  messages.push({ from: "system", text });
-  render();
-}
+function startCall(initiator) {
+  hangUp();
+  const connection = new RTCPeerConnection({ iceServers: ICE_SERVERS });
+  peer = connection;
+  callState = "connecting";
+  updatePartnerUI();
 
-// Turn on my camera + microphone (or just the microphone if there's no camera)
-async function startMedia() {
-  if (localStream) return; // already on
-  try {
-    localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-  } catch {
-    localStream = await navigator.mediaDevices.getUserMedia({ audio: true }); // voice-only call
-  }
-  el("localVideo").srcObject = localStream;
-  el("camBtn").hidden = localStream.getVideoTracks().length === 0;
-  el("callArea").hidden = false;
-  el("callBtn").hidden = true;
-}
-
-// Create the direct link and connect my camera/mic to it
-function createPeer() {
-  peer = new RTCPeerConnection({ iceServers: ICE_SERVERS });
-  localStream.getTracks().forEach(track => peer.addTrack(track, localStream));
+  // My partner's audio/video arrives here
+  const remoteStream = new MediaStream();
+  el("remoteVideo").srcObject = remoteStream;
+  connection.ontrack = event => {
+    remoteStream.addTrack(event.track);
+    el("remoteVideo").play().catch(() => {});
+  };
   // My browser found a possible route to me: tell my partner about it
-  peer.onicecandidate = event => {
+  connection.onicecandidate = event => {
     if (event.candidate) sendCall({ type: "candidate", candidate: event.candidate });
   };
-  // My partner's video/audio arrived: show it
-  peer.ontrack = event => {
-    el("remoteVideo").srcObject = event.streams[0];
+  connection.onconnectionstatechange = () => {
+    if (connection !== peer) return; // an old call, ignore it
+    if (connection.connectionState === "connected") callState = "connected";
+    if (connection.connectionState === "failed") callState = "failed";
+    updatePartnerUI();
   };
-}
 
-// Hang up and switch off the camera
-function endCall() {
-  if (peer) peer.close();
-  peer = null;
-  if (localStream) localStream.getTracks().forEach(track => track.stop());
-  localStream = null;
-  el("localVideo").srcObject = null;
-  el("remoteVideo").srcObject = null;
-  el("callArea").hidden = true;
-  el("callInvite").hidden = true;
-  el("callBtn").hidden = false;
-  el("micBtn").textContent = "🎤 Mute";
-  el("camBtn").textContent = "📷 Camera off";
-}
-
-// 1. I click "Call": turn on my camera and invite my partner
-el("callBtn").onclick = async () => {
-  try {
-    await startMedia();
-  } catch {
-    addSystemMessage("Couldn't use your microphone. Check your browser permissions.");
-    return;
+  if (initiator) {
+    // Reserve one audio + one video "slot" now. They stay empty until the mic or
+    // camera is turned on, so switching them on later needs no new connection.
+    connection.addTransceiver("audio", { direction: "sendrecv" });
+    connection.addTransceiver("video", { direction: "sendrecv" });
+    attachMyMedia();
+    connection.createOffer()
+      .then(offer => connection.setLocalDescription(offer))
+      .then(() => {
+        sendCall({ type: "offer", description: connection.localDescription });
+        sendMediaState();
+      });
   }
-  sendCall({ type: "invite" });
-  addSystemMessage(`Calling ${partnerName}...`);
-};
-
-// 2. My partner accepts: turn on my camera and get ready for their offer
-el("acceptCallBtn").onclick = async () => {
-  el("callInvite").hidden = true;
-  try {
-    await startMedia();
-  } catch {
-    addSystemMessage("Couldn't use your microphone. Check your browser permissions.");
-    sendCall({ type: "decline" });
-    return;
-  }
-  createPeer();
-  sendCall({ type: "accept" });
-};
-
-el("declineCallBtn").onclick = () => {
-  el("callInvite").hidden = true;
-  sendCall({ type: "decline" });
-};
-
-el("endCallBtn").onclick = () => {
-  endCall();
-  sendCall({ type: "end" });
-  addSystemMessage("Call ended.");
-};
-
-// Mute / unmute: the track stays connected, it just sends silence (or black video)
-el("micBtn").onclick = () => {
-  const track = localStream.getAudioTracks()[0];
-  track.enabled = !track.enabled;
-  el("micBtn").textContent = track.enabled ? "🎤 Mute" : "🔇 Unmute";
-};
-el("camBtn").onclick = () => {
-  const track = localStream.getVideoTracks()[0];
-  track.enabled = !track.enabled;
-  el("camBtn").textContent = track.enabled ? "📷 Camera off" : "📷 Camera on";
-};
+}
 
 // Messages from my partner's browser, passed along by the server
 async function handleCall(data) {
-  if (data.type === "invite") {
-    el("callInviteText").textContent = `📞 ${partnerName} wants to video call`;
-    el("callInvite").hidden = false;
-  } else if (data.type === "decline") {
-    endCall();
-    addSystemMessage(`${partnerName} declined the call.`);
-  } else if (data.type === "end") {
-    endCall();
-    addSystemMessage(`${partnerName} ended the call.`);
-  } else if (data.type === "accept") {
-    // 3. They accepted: I create an "offer" describing my video/audio
-    el("callInvite").hidden = true;
-    createPeer();
-    await peer.setLocalDescription(await peer.createOffer());
-    sendCall({ type: "offer", description: peer.localDescription });
-  } else if (data.type === "offer" && peer) {
-    // 4. They reply with an "answer" describing theirs
+  if (data.type === "media") {
+    partnerMedia = { mic: data.mic, cam: data.cam };
+    updatePartnerUI();
+  }
+  if (!peer) return;
+  if (data.type === "offer") {
     await peer.setRemoteDescription(data.description);
+    peer.getTransceivers().forEach(transceiver => (transceiver.direction = "sendrecv"));
+    attachMyMedia();
     await peer.setLocalDescription(await peer.createAnswer());
     sendCall({ type: "answer", description: peer.localDescription });
-  } else if (data.type === "answer" && peer) {
+    sendMediaState();
+  } else if (data.type === "answer") {
     await peer.setRemoteDescription(data.description);
-  } else if (data.type === "candidate" && peer) {
+  } else if (data.type === "candidate") {
     await peer.addIceCandidate(data.candidate);
   }
 }
@@ -326,31 +367,92 @@ socket.on("call", data => {
   callQueue = callQueue.then(() => handleCall(data)).catch(error => console.error("Call error:", error));
 });
 
-// When I submit the form, send my text to the server
-el("chatForm").onsubmit = event => {
-  event.preventDefault(); // stop the page from reloading (forms do that by default)
-  const input = el("chatInput");
-  if (input.value.trim() === "") return; // ignore empty messages
-  socket.emit("chat_message", input.value);
-  input.value = ""; // clear the box
-};
+// End the link with my partner (my own camera/mic are NOT switched off here)
+function hangUp() {
+  if (peer) peer.close();
+  peer = null;
+  el("remoteVideo").srcObject = null;
+  partnerMedia = { mic: false, cam: false };
+}
 
-// TYPING INDICATOR: tell the server I'm typing (at most once per second)
-let lastTypingSent = 0;
-el("chatInput").oninput = () => {
-  if (Date.now() - lastTypingSent > 1000) {
-    socket.emit("typing");
-    lastTypingSent = Date.now();
+// The audio or video "slot" in the connection
+function senderFor(kind) {
+  if (!peer) return null;
+  const transceiver = peer.getTransceivers().find(t => t.receiver.track.kind === kind);
+  return transceiver ? transceiver.sender : null;
+}
+
+// Put my current mic/camera (or nothing) into the connection
+function attachMyMedia() {
+  senderFor("audio")?.replaceTrack(micTrack).catch(() => {});
+  senderFor("video")?.replaceTrack(camTrack).catch(() => {});
+}
+
+// Tell my partner whether my mic / camera is on
+function sendMediaState() {
+  sendCall({ type: "media", mic: !!micTrack, cam: !!camTrack });
+}
+
+el("micBtn").onclick = async () => {
+  if (micTrack) {
+    micTrack.stop();
+    micTrack = null;
+  } else {
+    try {
+      micTrack = (await navigator.mediaDevices.getUserMedia({ audio: true })).getAudioTracks()[0];
+    } catch {
+      addSystemMessage("Couldn't use your microphone. Check your browser permissions.");
+      return;
+    }
   }
+  attachMyMedia();
+  updateMyButtons();
+  sendMediaState();
 };
 
-// Show "Ana is typing..." and hide it again after 2 seconds of silence
-let typingTimer;
-socket.on("partner_typing", () => {
-  el("typing").textContent = `${partnerName} is typing...`;
-  clearTimeout(typingTimer);
-  typingTimer = setTimeout(() => (el("typing").textContent = ""), 2000);
-});
+el("camBtn").onclick = async () => {
+  if (camTrack) {
+    camTrack.stop(); // this also turns off the camera light
+    camTrack = null;
+  } else {
+    try {
+      camTrack = (await navigator.mediaDevices.getUserMedia({ video: true })).getVideoTracks()[0];
+    } catch {
+      addSystemMessage("Couldn't use your camera. Check your browser permissions.");
+      return;
+    }
+  }
+  attachMyMedia();
+  updateMyButtons();
+  sendMediaState();
+};
+
+function stopMyMedia() {
+  if (micTrack) micTrack.stop();
+  if (camTrack) camTrack.stop();
+  micTrack = camTrack = null;
+  updateMyButtons();
+}
+
+// Red buttons = off. Show my own camera in the corner when it's on.
+function updateMyButtons() {
+  el("micBtn").classList.toggle("off", !micTrack);
+  el("camBtn").classList.toggle("off", !camTrack);
+  el("localVideo").srcObject = camTrack ? new MediaStream([camTrack]) : null;
+  el("localVideo").hidden = !camTrack;
+}
+
+// Show my partner's video, or their avatar + a status line when their camera is off
+function updatePartnerUI() {
+  el("partnerPlaceholder").hidden = callState === "connected" && partnerMedia.cam;
+  const mic = partnerMedia.mic ? "🎤 Mic on" : "🔇 Mic off";
+  el("callStatus").textContent = {
+    connecting: "Connecting...",
+    connected: `Camera off · ${mic}`,
+    failed: "Couldn't connect the call. Text chat still works.",
+    ended: "Your partner left.",
+  }[callState];
+}
 
 
 // ---------- FLASHCARDS ----------
@@ -433,16 +535,20 @@ function render() {
   });
   box.scrollTop = box.scrollHeight; // auto-scroll to the newest message
 
-  const list = el("deckList");
-  list.innerHTML = "";
-  Object.entries(deck).forEach(([word, color]) => {
-    const li = document.createElement("li");
-    li.innerHTML = `<span class="swatch" style="background:${color}">${word}</span>`;
-    const del = document.createElement("button");
-    del.textContent = "✕";
-    del.onclick = () => deleteWord(word);
-    li.appendChild(del);
-    list.appendChild(li);
+  document.querySelectorAll(".deck-list").forEach(list => {
+    list.innerHTML = "";
+    if (Object.keys(deck).length === 0) {
+      list.innerHTML = "<li>No words yet. Click words in a chat to save them!</li>";
+    }
+    Object.entries(deck).forEach(([word, color]) => {
+      const li = document.createElement("li");
+      li.innerHTML = `<span class="swatch" style="background:${color}">${word}</span>`;
+      const del = document.createElement("button");
+      del.textContent = "✕";
+      del.onclick = () => deleteWord(word);
+      li.appendChild(del);
+      list.appendChild(li);
+    });
   });
 }
 

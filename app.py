@@ -239,8 +239,10 @@ def find_partner(data):
                 "active": True,
             }
             chats[me["sid"]] = chats[other["sid"]] = chat  # one shared chat for both
-            socketio.emit("matched", other, to=me["sid"])  # tell me who I got
-            socketio.emit("matched", me, to=other["sid"])  # tell them who they got
+            # Tell each person who they got. ONE of them ("initiator") starts the
+            # video connection, otherwise both browsers would try at the same time.
+            socketio.emit("matched", {**other, "initiator": True}, to=me["sid"])
+            socketio.emit("matched", {**me, "initiator": False}, to=other["sid"])
             socketio.start_background_task(icebreaker_timer, chat)
             return
 
