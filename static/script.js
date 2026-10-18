@@ -73,6 +73,7 @@ el("signupBtn").onclick = async () => {
 };
 
 el("logoutBtn").onclick = () => {
+  endCall();
   socket.emit("leave");
   sb.auth.signOut();
 };
@@ -109,6 +110,7 @@ el("lobbyForm").onsubmit = async event => {
 };
 
 function findPartner() {
+  endCall(); // hang up any video call with the old partner
   socket.emit("find_partner", { token });
   showScreen("lobby");
   el("status").textContent =
@@ -135,6 +137,7 @@ socket.on("matched", partner => {
 socket.on("partner_left", () => {
   messages.push({ from: "system", text: "Your partner left. Click Next to find someone new." });
   nextIcebreakerAt = 0; // no more questions in this chat
+  endCall();
   render();
 });
 
@@ -175,6 +178,153 @@ setInterval(() => {
   const rest = String(seconds % 60).padStart(2, "0"); // 5 -> "05"
   el("icebreakerTimer").textContent = nextIcebreakerAt ? `🧊 Next question in ${minutes}:${rest}` : "";
 }, 1000);
+
+
+// ---------- VIDEO CALLS (WebRTC) ----------
+// The video and audio go DIRECTLY between the two browsers. Our server only
+// passes small "call" messages so the browsers can find each other ("signaling").
+let peer = null;        // RTCPeerConnection: the direct browser-to-browser link
+let localStream = null; // my camera + microphone
+
+// A free public "STUN" server tells each browser its address on the internet
+const ICE_SERVERS = [{ urls: "stun:stun.l.google.com:19302" }];
+
+function sendCall(data) {
+  socket.emit("call", data);
+}
+
+function addSystemMessage(text) {
+  messages.push({ from: "system", text });
+  render();
+}
+
+// Turn on my camera + microphone (or just the microphone if there's no camera)
+async function startMedia() {
+  if (localStream) return; // already on
+  try {
+    localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+  } catch {
+    localStream = await navigator.mediaDevices.getUserMedia({ audio: true }); // voice-only call
+  }
+  el("localVideo").srcObject = localStream;
+  el("camBtn").hidden = localStream.getVideoTracks().length === 0;
+  el("callArea").hidden = false;
+  el("callBtn").hidden = true;
+}
+
+// Create the direct link and connect my camera/mic to it
+function createPeer() {
+  peer = new RTCPeerConnection({ iceServers: ICE_SERVERS });
+  localStream.getTracks().forEach(track => peer.addTrack(track, localStream));
+  // My browser found a possible route to me: tell my partner about it
+  peer.onicecandidate = event => {
+    if (event.candidate) sendCall({ type: "candidate", candidate: event.candidate });
+  };
+  // My partner's video/audio arrived: show it
+  peer.ontrack = event => {
+    el("remoteVideo").srcObject = event.streams[0];
+  };
+}
+
+// Hang up and switch off the camera
+function endCall() {
+  if (peer) peer.close();
+  peer = null;
+  if (localStream) localStream.getTracks().forEach(track => track.stop());
+  localStream = null;
+  el("localVideo").srcObject = null;
+  el("remoteVideo").srcObject = null;
+  el("callArea").hidden = true;
+  el("callInvite").hidden = true;
+  el("callBtn").hidden = false;
+  el("micBtn").textContent = "🎤 Mute";
+  el("camBtn").textContent = "📷 Camera off";
+}
+
+// 1. I click "Call": turn on my camera and invite my partner
+el("callBtn").onclick = async () => {
+  try {
+    await startMedia();
+  } catch {
+    addSystemMessage("Couldn't use your microphone. Check your browser permissions.");
+    return;
+  }
+  sendCall({ type: "invite" });
+  addSystemMessage(`Calling ${partnerName}...`);
+};
+
+// 2. My partner accepts: turn on my camera and get ready for their offer
+el("acceptCallBtn").onclick = async () => {
+  el("callInvite").hidden = true;
+  try {
+    await startMedia();
+  } catch {
+    addSystemMessage("Couldn't use your microphone. Check your browser permissions.");
+    sendCall({ type: "decline" });
+    return;
+  }
+  createPeer();
+  sendCall({ type: "accept" });
+};
+
+el("declineCallBtn").onclick = () => {
+  el("callInvite").hidden = true;
+  sendCall({ type: "decline" });
+};
+
+el("endCallBtn").onclick = () => {
+  endCall();
+  sendCall({ type: "end" });
+  addSystemMessage("Call ended.");
+};
+
+// Mute / unmute: the track stays connected, it just sends silence (or black video)
+el("micBtn").onclick = () => {
+  const track = localStream.getAudioTracks()[0];
+  track.enabled = !track.enabled;
+  el("micBtn").textContent = track.enabled ? "🎤 Mute" : "🔇 Unmute";
+};
+el("camBtn").onclick = () => {
+  const track = localStream.getVideoTracks()[0];
+  track.enabled = !track.enabled;
+  el("camBtn").textContent = track.enabled ? "📷 Camera off" : "📷 Camera on";
+};
+
+// Messages from my partner's browser, passed along by the server
+async function handleCall(data) {
+  if (data.type === "invite") {
+    el("callInviteText").textContent = `📞 ${partnerName} wants to video call`;
+    el("callInvite").hidden = false;
+  } else if (data.type === "decline") {
+    endCall();
+    addSystemMessage(`${partnerName} declined the call.`);
+  } else if (data.type === "end") {
+    endCall();
+    addSystemMessage(`${partnerName} ended the call.`);
+  } else if (data.type === "accept") {
+    // 3. They accepted: I create an "offer" describing my video/audio
+    el("callInvite").hidden = true;
+    createPeer();
+    await peer.setLocalDescription(await peer.createOffer());
+    sendCall({ type: "offer", description: peer.localDescription });
+  } else if (data.type === "offer" && peer) {
+    // 4. They reply with an "answer" describing theirs
+    await peer.setRemoteDescription(data.description);
+    await peer.setLocalDescription(await peer.createAnswer());
+    sendCall({ type: "answer", description: peer.localDescription });
+  } else if (data.type === "answer" && peer) {
+    await peer.setRemoteDescription(data.description);
+  } else if (data.type === "candidate" && peer) {
+    await peer.addIceCandidate(data.candidate);
+  }
+}
+
+// Handle call messages ONE AT A TIME, in the order they arrived
+// (e.g. a "candidate" must never be handled before the "offer" it belongs to)
+let callQueue = Promise.resolve();
+socket.on("call", data => {
+  callQueue = callQueue.then(() => handleCall(data)).catch(error => console.error("Call error:", error));
+});
 
 // When I submit the form, send my text to the server
 el("chatForm").onsubmit = event => {

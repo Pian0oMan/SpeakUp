@@ -294,6 +294,17 @@ def handle_typing():
         socketio.emit("partner_typing", to=partner["sid"])
 
 
+# ---------- VIDEO CALLS ----------
+# The video and audio go DIRECTLY between the two browsers (WebRTC).
+# The server only passes small "call" messages between them so they can
+# find each other: invite, accept, decline, offer, answer, candidate, end.
+@socketio.on("call")
+def relay_call(data):
+    partner = partners.get(request.sid)
+    if partner:
+        socketio.emit("call", data, to=partner["sid"])
+
+
 # Closing the tab counts as leaving
 @socketio.on("disconnect")
 def handle_disconnect(reason=None):

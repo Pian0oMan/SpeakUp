@@ -59,10 +59,35 @@
     <section class="chat">
       <div class="chat-header">
         <span id="partnerInfo"></span>
-        <button id="nextBtn">Next ⏭</button>
+        <div class="header-buttons">
+          <button id="callBtn">🎥 Call</button>
+          <button id="nextBtn">Next ⏭</button>
+        </div>
       </div>
       <p class="hint">Click any word to save it to your deck.</p>
       <p id="icebreakerTimer" class="hint"></p>
+
+      <!-- Incoming call: "Ana wants to video call" + Accept / Decline -->
+      <div id="callInvite" class="call-invite" hidden>
+        <span id="callInviteText"></span>
+        <button id="acceptCallBtn">Accept</button>
+        <button id="declineCallBtn" class="secondary">Decline</button>
+      </div>
+
+      <!-- The video call itself. Hidden until a call starts. -->
+      <div id="callArea" hidden>
+        <div class="videos">
+          <video id="remoteVideo" autoplay playsinline></video>
+          <!-- "muted" so you don't hear your own microphone -->
+          <video id="localVideo" autoplay playsinline muted></video>
+        </div>
+        <div class="call-controls">
+          <button id="micBtn">🎤 Mute</button>
+          <button id="camBtn">📷 Camera off</button>
+          <button id="endCallBtn" class="danger">End call</button>
+        </div>
+      </div>
+
       <div id="messages"></div>
       <p id="typing"></p>
       <!-- A <form> lets Enter key AND the button both send -->
