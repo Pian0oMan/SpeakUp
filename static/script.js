@@ -129,13 +129,24 @@ async function enterApp() {
   else openProfile("Welcome! Pick your languages to get started."); // e.g. confirmed by email
 }
 
+// Show the app (sidebar + content) with one view: homeView, deckView or profileView
+function showView(id) {
+  showScreen("appScreen");
+  document.querySelectorAll(".view").forEach(view => (view.hidden = view.id !== id));
+  // Highlight the sidebar button for this view
+  document.querySelectorAll(".nav-item").forEach(item => {
+    item.classList.toggle("active", item.dataset.view === id);
+  });
+}
+
 function openMenu() {
   if (!profile) return openProfile("Save your profile first.");
   el("greeting").textContent = `Hi, ${profile.username} 👋`;
-  el("quickMatchInfo").textContent =
-    `Talk 1-on-1 with someone who speaks ${profile.learning} and is learning ${profile.native}`;
-  el("deckCount").textContent = `${Object.keys(deck).length} saved words`;
-  showScreen("menuScreen");
+  el("nativeChip").textContent = profile.native;
+  el("learningChip").textContent = profile.learning;
+  el("learningStat").textContent = profile.learning;
+  el("deckCount").textContent = Object.keys(deck).length;
+  showView("homeView");
 }
 
 function openProfile(message) {
@@ -146,12 +157,13 @@ function openProfile(message) {
     el("profTranslate").value = profile.translate_to;
   }
   el("profileStatus").textContent = message;
-  showScreen("profileScreen");
+  showView("profileView");
 }
 
-el("profileMenuBtn").onclick = () => openProfile("");
-el("deckMenuBtn").onclick = () => showScreen("deckScreen");
-document.querySelectorAll(".back-to-menu").forEach(button => (button.onclick = openMenu));
+// Sidebar buttons
+el("navHome").onclick = openMenu;
+el("navDeck").onclick = () => showView("deckView");
+el("navProfile").onclick = () => openProfile("");
 
 el("profileForm").onsubmit = async event => {
   event.preventDefault();
@@ -534,6 +546,8 @@ function render() {
     box.appendChild(div);
   });
   box.scrollTop = box.scrollHeight; // auto-scroll to the newest message
+
+  el("deckCount").textContent = Object.keys(deck).length;
 
   document.querySelectorAll(".deck-list").forEach(list => {
     list.innerHTML = "";

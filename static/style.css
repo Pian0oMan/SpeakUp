@@ -88,38 +88,85 @@ input:focus, select:focus { outline: 2px solid var(--brand); border-color: trans
 .switch { text-align: center; font-size: 14px; margin: 16px 0 0; }
 .switch a { color: var(--brand-dark); font-weight: 600; }
 
-/* ---------- Pages: menu, profile, deck ---------- */
-.page { max-width: 900px; margin: 0 auto; padding: 32px 16px; }
-.page-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-.page-top h2 { margin: 0; font-size: 28px; font-weight: 800; }
-.page .card { max-width: 560px; }
-
-.menu-grid {
+/* ---------- The app: sidebar + content ---------- */
+.shell {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
+  grid-template-columns: 220px 1fr;  /* sidebar | content */
+  min-height: 100vh;
 }
-.menu-card {
+.sidebar {
   background: var(--card);
-  border-radius: 20px;
-  padding: 24px;
-  text-align: left;
+  border-right: 1px solid #e6e6ee;
+  padding: 24px 12px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
+}
+.brand { font-size: 22px; font-weight: 800; color: var(--brand-dark); padding: 0 12px 20px; }
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #444;
+}
+.nav-item:hover:not(:disabled) { background: #f1edf7; }
+.nav-item.active { background: var(--brand); color: white; }  /* the page you're on */
+.nav-item:disabled { opacity: 0.45; cursor: default; }
+.nav-item.logout { margin-top: auto; color: #c62828; }  /* pushed to the bottom */
+
+.content { padding: 40px; max-width: 900px; width: 100%; }
+.content h2 { margin: 0 0 24px; font-size: 30px; font-weight: 800; }
+.content .card { max-width: 560px; }
+
+.hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  padding: 32px;
+  border-radius: 24px;
+  color: white;
+  background: linear-gradient(135deg, var(--brand) 0%, var(--brand-dark) 100%);
+  box-shadow: 0 10px 30px rgba(111, 91, 142, 0.35);
+}
+.hero h3 { margin: 0 0 6px; font-size: 24px; font-weight: 800; }
+.hero p { margin: 0 0 14px; opacity: 0.9; }
+.chips { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.chip { background: rgba(255, 255, 255, 0.2); padding: 4px 12px; border-radius: 999px; font-weight: 600; }
+.start-btn {
+  background: white;
+  color: var(--brand-dark);
+  font-size: 20px;
+  font-weight: 800;
+  padding: 16px 36px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.start-btn:hover { transform: scale(1.05); }
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+.stat {
+  background: var(--card);
+  border-radius: 20px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
 }
-.menu-card:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1); }
-.menu-card:disabled { opacity: 0.5; cursor: default; }
-.menu-card .icon { font-size: 32px; }
-.menu-card strong { font-size: 20px; }
-.menu-card span:last-child { color: var(--muted); font-size: 14px; }
-.menu-card.big {
-  grid-column: 1 / -1;  /* Quick Match takes the whole first row */
-  background: linear-gradient(135deg, var(--brand) 0%, var(--brand-dark) 100%);
-  color: white;
-}
-.menu-card.big span:last-child { color: rgba(255, 255, 255, 0.85); }
+.stat strong { font-size: 26px; font-weight: 800; }
+.stat span { color: var(--muted); font-size: 14px; }
+.stat.soon { opacity: 0.6; }
+.stat.soon strong { font-size: 18px; }
 
 /* ---------- Searching ---------- */
 .center {
@@ -304,6 +351,27 @@ input:focus, select:focus { outline: 2px solid var(--brand); border-color: trans
 
 /* ---------- Phones: stack the video on top of the chat ---------- */
 @media (max-width: 800px) {
+  /* The sidebar becomes a tab bar at the bottom of the screen */
+  .shell { grid-template-columns: 1fr; padding-bottom: 72px; }
+  .sidebar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    flex-direction: row;
+    justify-content: space-around;
+    padding: 6px;
+    border-right: none;
+    border-top: 1px solid #e6e6ee;
+  }
+  .brand { display: none; }
+  .nav-item { flex-direction: column; gap: 2px; padding: 8px; font-size: 12px; }
+  .nav-item.logout { margin-top: 0; }
+  .content { padding: 24px 16px; }
+  .hero { flex-direction: column; align-items: stretch; text-align: center; }
+  .chips { justify-content: center; }
+
   #chatScreen { grid-template-columns: 1fr; grid-template-rows: auto 40vh 1fr; }
   .side { border-left: none; }
   .row { flex-direction: column; }

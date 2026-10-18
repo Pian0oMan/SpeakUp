@@ -52,64 +52,71 @@
     </div>
   </section>
 
-  <!-- ===== MAIN MENU ===== -->
-  <section id="menuScreen" class="screen page" hidden>
-    <div class="page-top">
-      <h2 id="greeting"></h2>
-      <button id="logoutBtn" class="ghost">Log out</button>
-    </div>
-    <div class="menu-grid">
-      <button id="quickMatchBtn" class="menu-card big">
-        <span class="icon">⚡</span>
-        <strong>Quick Match</strong>
-        <span id="quickMatchInfo"></span>
-      </button>
-      <button class="menu-card" disabled>
-        <span class="icon">🎙️</span>
-        <strong>Voice Rooms</strong>
-        <span>Coming soon</span>
-      </button>
-      <button id="deckMenuBtn" class="menu-card">
-        <span class="icon">🃏</span>
-        <strong>My Deck</strong>
-        <span id="deckCount"></span>
-      </button>
-      <button id="profileMenuBtn" class="menu-card">
-        <span class="icon">👤</span>
-        <strong>Profile</strong>
-        <span>Name and languages</span>
-      </button>
-    </div>
-  </section>
+  <!-- ===== THE APP: sidebar on the left, one "view" at a time on the right ===== -->
+  <section id="appScreen" class="screen shell" hidden>
+    <nav class="sidebar">
+      <div class="brand">Speak Up</div>
+      <button id="navHome" class="nav-item" data-view="homeView">⚡ <span>Match</span></button>
+      <button class="nav-item" disabled title="Coming soon">🎙️ <span>Rooms</span></button>
+      <button id="navDeck" class="nav-item" data-view="deckView">🃏 <span>Deck</span></button>
+      <button id="navProfile" class="nav-item" data-view="profileView">👤 <span>Profile</span></button>
+      <button id="logoutBtn" class="nav-item logout">⏻ <span>Log out</span></button>
+    </nav>
 
-  <!-- ===== PROFILE (edit languages later) ===== -->
-  <section id="profileScreen" class="screen page" hidden>
-    <div class="page-top">
-      <h2>Your profile</h2>
-      <button class="ghost back-to-menu">← Menu</button>
-    </div>
-    <form id="profileForm" class="card">
-      <label>Your name <input id="profName" maxlength="20" required></label>
-      <div class="row">
-        <label>I speak <select id="profNative" class="lang-select"></select></label>
-        <label>I'm learning <select id="profLearning" class="lang-select"></select></label>
+    <main class="content">
+      <!-- HOME -->
+      <div id="homeView" class="view">
+        <h2 id="greeting"></h2>
+        <div class="hero">
+          <div>
+            <h3>⚡ Quick Match</h3>
+            <p>Talk 1-on-1 with someone who speaks the language you're learning.</p>
+            <div class="chips">
+              <span id="nativeChip" class="chip"></span> → <span id="learningChip" class="chip"></span>
+            </div>
+          </div>
+          <button id="quickMatchBtn" class="start-btn">Start</button>
+        </div>
+        <div class="stats">
+          <div class="stat">
+            <strong id="deckCount">0</strong>
+            <span>words saved</span>
+          </div>
+          <div class="stat">
+            <strong id="learningStat"></strong>
+            <span>you're learning</span>
+          </div>
+          <div class="stat soon">
+            <strong>🎙️ Voice Rooms</strong>
+            <span>coming soon</span>
+          </div>
+        </div>
       </div>
-      <label>Show translations in <select id="profTranslate" class="lang-select"></select></label>
-      <button type="submit" class="primary">Save</button>
-      <p id="profileStatus" class="status"></p>
-    </form>
-  </section>
 
-  <!-- ===== MY DECK ===== -->
-  <section id="deckScreen" class="screen page" hidden>
-    <div class="page-top">
-      <h2>My Deck</h2>
-      <button class="ghost back-to-menu">← Menu</button>
-    </div>
-    <div class="card">
-      <p class="hint">Words you saved from chats. They stay highlighted in every conversation.</p>
-      <ul class="deck-list"></ul>
-    </div>
+      <!-- MY DECK -->
+      <div id="deckView" class="view" hidden>
+        <h2>My Deck</h2>
+        <div class="card">
+          <p class="hint">Words you saved from chats. They stay highlighted in every conversation.</p>
+          <ul class="deck-list"></ul>
+        </div>
+      </div>
+
+      <!-- PROFILE (change languages later) -->
+      <div id="profileView" class="view" hidden>
+        <h2>Your profile</h2>
+        <form id="profileForm" class="card">
+          <label>Your name <input id="profName" maxlength="20" required></label>
+          <div class="row">
+            <label>I speak <select id="profNative" class="lang-select"></select></label>
+            <label>I'm learning <select id="profLearning" class="lang-select"></select></label>
+          </div>
+          <label>Show translations in <select id="profTranslate" class="lang-select"></select></label>
+          <button type="submit" class="primary">Save</button>
+          <p id="profileStatus" class="status"></p>
+        </form>
+      </div>
+    </main>
   </section>
 
   <!-- ===== SEARCHING FOR A PARTNER ===== -->
