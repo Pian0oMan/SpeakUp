@@ -93,13 +93,19 @@
         </div>
       </div>
 
-      <!-- MY DECK -->
+      <!-- MY DECKS -->
       <div id="deckView" class="view" hidden>
-        <h2>My Deck</h2>
-        <div class="card">
-          <p class="hint">Words you saved from chats. They stay highlighted in every conversation.</p>
-          <ul class="deck-list"></ul>
-        </div>
+        <h2>My Decks</h2>
+        <p class="hint">
+          Words you saved from chats. They stay highlighted in every conversation.
+          Click a translation to fix it.
+        </p>
+        <form id="newDeckForm" class="new-deck">
+          <input id="newDeckName" maxlength="40" placeholder="New deck name, e.g. Food" required>
+          <button type="submit" class="primary">+ Create deck</button>
+        </form>
+        <!-- JavaScript draws one card per deck in here -->
+        <div id="deckGroups"></div>
       </div>
 
       <!-- PROFILE (change languages later) -->
@@ -154,9 +160,12 @@
     <div class="side">
       <div class="side-top">
         <span id="icebreakerTimer"></span>
-        <label class="color-label" title="Color for words you save">
-          Highlight <input type="color" id="colorPicker" value="#ffd54f">
-        </label>
+        <div class="save-options">
+          <label class="inline-label" title="Deck for words you save">
+            Save to <select id="deckSelect"></select>
+          </label>
+          <input type="color" id="colorPicker" value="#ffd54f" title="Highlight color for words you save">
+        </div>
       </div>
       <div id="messages"></div>
       <p id="typing"></p>
@@ -167,6 +176,9 @@
       </form>
     </div>
   </section>
+
+  <!-- Small pop-up message, e.g. "Saved banco → bench" -->
+  <div id="toast" class="toast" hidden></div>
 
   <!-- Libraries: Socket.IO (real-time chat) and Supabase (login) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>

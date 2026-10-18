@@ -67,21 +67,79 @@ def save_profile():
     return jsonify({"ok": True})
 
 
+# ---------- DECKS ----------
+def get_decks(db):
+    """This user's decks, oldest first. Everyone gets a "My Words" deck to start."""
+    rows = db.table("decks").select("id, name").order("id").execute().data
+    if not rows:
+        rows = db.table("decks").insert({"name": "My Words"}).execute().data
+    return rows
+
+
+@app.route("/api/decks", methods=["GET"])
+def list_decks():
+    return jsonify(get_decks(db_for(token_from_request())))
+
+
+@app.route("/api/decks", methods=["POST"])
+def create_deck():
+    name = request.get_json()["name"].strip()[:40]
+    rows = db_for(token_from_request()).table("decks").insert({"name": name}).execute().data
+    return jsonify(rows[0])
+
+
+@app.route("/api/decks/<int:deck_id>", methods=["DELETE"])
+def delete_deck(deck_id):
+    # Its cards are deleted too ("on delete cascade" in the SQL)
+    db_for(token_from_request()).table("decks").delete().eq("id", deck_id).execute()
+    return jsonify({"ok": True})
+
+
 # ---------- FLASHCARDS ----------
 @app.route("/api/flashcards", methods=["GET"])
 def list_flashcards():
-    rows = db_for(token_from_request()).table("flashcards").select("word, color").execute().data
+    rows = (db_for(token_from_request()).table("flashcards")
+            .select("word, color, translation, deck_id").order("created_at").execute().data)
     return jsonify(rows)
 
 
 @app.route("/api/flashcards", methods=["POST"])
 def save_flashcard():
-    data = request.get_json()  # e.g. {"word": "hola", "color": "#ffd54f"}
-    # upsert = insert, or update the color if this user already saved this word
-    db_for(token_from_request()).table("flashcards").upsert(
-        {"word": data["word"].lower(), "color": data["color"]},
-        on_conflict="user_id,word",
-    ).execute()
+    # e.g. {"word": "banco", "color": "#ffd54f", "deck_id": 3, "sentence": "Me senté en el banco"}
+    data = request.get_json()
+    db = db_for(token_from_request())
+    word = data["word"].lower()
+    deck_id = data.get("deck_id") or get_decks(db)[0]["id"]
+
+    existing = db.table("flashcards").select("word").eq("word", word).execute().data
+    if existing:
+        # Already saved: just change its color/deck (keep the translation, it may have been edited)
+        db.table("flashcards").update({"color": data["color"], "deck_id": deck_id}).eq("word", word).execute()
+        return jsonify({"word": word, "translation": None})
+
+    # New card: translate it, using the sentence it came from as context.
+    # Try the user's translation language first; if the word is ALREADY in that
+    # language (DeepL returns None), translate it into the language they're learning.
+    profile = db.table("profiles").select("translate_to, learning").execute().data[0]
+    context = data.get("sentence", "")
+    translation = (translate(word, profile["translate_to"], context)
+                   or translate(word, profile["learning"], context))
+
+    db.table("flashcards").insert({
+        "word": word,
+        "color": data["color"],
+        "deck_id": deck_id,
+        "translation": translation,
+    }).execute()
+    return jsonify({"word": word, "translation": translation})
+
+
+@app.route("/api/flashcards/<word>", methods=["PATCH"])
+def edit_flashcard(word):
+    # Change a card's translation and/or deck, e.g. {"translation": "bench"}
+    data = request.get_json()
+    changes = {key: data[key] for key in ("translation", "deck_id") if key in data}
+    db_for(token_from_request()).table("flashcards").update(changes).eq("word", word.lower()).execute()
     return jsonify({"ok": True})
 
 

@@ -6,7 +6,8 @@ let loggedIn = false;
 let registering = false; // true while "Create account" is still saving the profile
 let profile = null;      // my name + languages
 let messages = [];       // chat messages with the current partner
-let deck = {};           // { "hola": "#ffd54f", ... }  word -> color
+let deck = {};           // word -> card, e.g. { "hola": { color: "#ffd54f", translation: "hello", deck_id: 3 } }
+let decks = [];          // my decks, e.g. [{ id: 3, name: "My Words" }, { id: 4, name: "Food" }]
 let partnerName = "";
 
 const LANGUAGES = ["English", "Spanish", "French", "German", "Japanese", "Chinese", "Russian"];
@@ -467,19 +468,29 @@ function updatePartnerUI() {
 }
 
 
-// ---------- FLASHCARDS ----------
-// 1. Ask the backend for MY saved flashcards, then draw everything
+// ---------- FLASHCARDS + DECKS ----------
+// 1. Ask the backend for MY decks and flashcards (both at once), then draw everything
 async function loadDeck() {
-  const cards = await api("/api/flashcards"); // HTTP GET
+  const [deckRows, cards] = await Promise.all([api("/api/decks"), api("/api/flashcards")]);
+  decks = deckRows;
   deck = {};
-  cards.forEach(card => (deck[card.word] = card.color));
+  cards.forEach(card => (deck[card.word] = card));
   render();
 }
 
-// 2. Save a word (HTTP POST with JSON body)
-async function saveWord(word) {
-  const color = el("colorPicker").value;
-  await api("/api/flashcards", { method: "POST", body: JSON.stringify({ word, color }) });
+// 2. Save a word into the chosen deck. The sentence helps DeepL pick the right meaning.
+async function saveWord(word, sentence) {
+  if (!word) return;
+  const card = await api("/api/flashcards", {
+    method: "POST",
+    body: JSON.stringify({
+      word,
+      sentence,
+      color: el("colorPicker").value,
+      deck_id: Number(el("deckSelect").value),
+    }),
+  });
+  showToast(card.translation ? `Saved "${word}" → ${card.translation}` : `Saved "${word}"`);
   loadDeck();
 }
 
@@ -487,6 +498,39 @@ async function saveWord(word) {
 async function deleteWord(word) {
   await api("/api/flashcards/" + encodeURIComponent(word), { method: "DELETE" });
   loadDeck();
+}
+
+// 4. Fix a translation (HTTP PATCH = change part of something)
+async function editTranslation(word) {
+  const newTranslation = prompt(`Translation for "${word}":`, deck[word].translation || "");
+  if (newTranslation === null) return; // clicked Cancel
+  await api("/api/flashcards/" + encodeURIComponent(word), {
+    method: "PATCH",
+    body: JSON.stringify({ translation: newTranslation.trim() }),
+  });
+  loadDeck();
+}
+
+el("newDeckForm").onsubmit = async event => {
+  event.preventDefault();
+  await api("/api/decks", { method: "POST", body: JSON.stringify({ name: el("newDeckName").value }) });
+  el("newDeckName").value = "";
+  loadDeck();
+};
+
+async function deleteDeck(deckToDelete) {
+  if (!confirm(`Delete the deck "${deckToDelete.name}" and all its cards?`)) return;
+  await api("/api/decks/" + deckToDelete.id, { method: "DELETE" });
+  loadDeck();
+}
+
+// Small pop-up that disappears after 2.5 seconds
+let toastTimer;
+function showToast(text) {
+  el("toast").textContent = text;
+  el("toast").hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => (el("toast").hidden = true), 2500);
 }
 
 // Turn "Hola!" into "hola" so punctuation doesn't matter
@@ -529,8 +573,11 @@ function render() {
       span.className = "word";
       span.textContent = raw + " ";
       const key = clean(raw);
-      if (deck[key]) span.style.color = deck[key]; // ⭐ the highlight!
-      span.onclick = () => saveWord(key);
+      if (deck[key]) {
+        span.style.color = deck[key].color; // ⭐ the highlight!
+        if (deck[key].translation) span.title = deck[key].translation; // hover to see the meaning
+      }
+      span.onclick = () => saveWord(key, msg.text);
       div.appendChild(span);
     });
     // The automatic translation, like a subtitle
@@ -549,20 +596,65 @@ function render() {
 
   el("deckCount").textContent = Object.keys(deck).length;
 
-  document.querySelectorAll(".deck-list").forEach(list => {
-    list.innerHTML = "";
-    if (Object.keys(deck).length === 0) {
-      list.innerHTML = "<li>No words yet. Click words in a chat to save them!</li>";
-    }
-    Object.entries(deck).forEach(([word, color]) => {
+  renderDecks();
+}
+
+// Draw the "Save to" dropdown in the chat and one card per deck on the My Decks page
+function renderDecks() {
+  const select = el("deckSelect");
+  const chosen = select.value;
+  select.innerHTML = "";
+  decks.forEach(d => select.add(new Option(d.name, d.id)));
+  if (decks.some(d => String(d.id) === chosen)) select.value = chosen; // keep my choice
+
+  const groups = el("deckGroups");
+  groups.innerHTML = "";
+  decks.forEach(d => {
+    const cards = Object.values(deck).filter(card => card.deck_id === d.id);
+    const box = document.createElement("div");
+    box.className = "card";
+
+    const head = document.createElement("div");
+    head.className = "deck-head";
+    const title = document.createElement("h3");
+    title.textContent = d.name + " ";
+    const count = document.createElement("span");
+    count.textContent = `${cards.length} cards`;
+    title.appendChild(count);
+    const del = document.createElement("button");
+    del.className = "danger-text";
+    del.textContent = "Delete deck";
+    del.onclick = () => deleteDeck(d);
+    head.append(title, del);
+
+    const list = document.createElement("ul");
+    list.className = "deck-list";
+    if (cards.length === 0) {
       const li = document.createElement("li");
-      li.innerHTML = `<span class="swatch" style="background:${color}">${word}</span>`;
-      const del = document.createElement("button");
-      del.textContent = "✕";
-      del.onclick = () => deleteWord(word);
-      li.appendChild(del);
+      li.className = "empty";
+      li.textContent = "No words yet. Click words in a chat to save them here!";
+      list.appendChild(li);
+    }
+    cards.forEach(card => {
+      const li = document.createElement("li");
+      const word = document.createElement("span");
+      word.className = "swatch";
+      word.style.background = card.color;
+      word.textContent = card.word;
+      const translation = document.createElement("span");
+      translation.className = "card-translation" + (card.translation ? "" : " missing");
+      translation.textContent = card.translation || "add translation";
+      translation.onclick = () => editTranslation(card.word);
+      const remove = document.createElement("button");
+      remove.textContent = "✕";
+      remove.title = "Delete card";
+      remove.onclick = () => deleteWord(card.word);
+      li.append(word, translation, remove);
       list.appendChild(li);
     });
+
+    box.append(head, list);
+    groups.appendChild(box);
   });
 }
 
