@@ -21,6 +21,25 @@ document.querySelectorAll(".lang-select").forEach(select => {
 });
 el("regLearning").value = "Spanish";
 
+// Language PAIRS ("I speak" + "I'm learning"): the language picked on one side
+// is blocked (greyed out) on the other side, so they can never be the same.
+const LANGUAGE_PAIRS = [
+  ["regNative", "regLearning"],
+  ["profNative", "profLearning"],
+  ["matchNative", "matchLearning"],
+];
+
+function blockSameLanguage([firstId, secondId]) {
+  const first = el(firstId), second = el(secondId);
+  [...first.options].forEach(option => (option.disabled = option.value === second.value));
+  [...second.options].forEach(option => (option.disabled = option.value === first.value));
+}
+
+LANGUAGE_PAIRS.forEach(pair => {
+  pair.forEach(id => el(id).addEventListener("change", () => blockSameLanguage(pair)));
+  blockSameLanguage(pair);
+});
+
 // REAL-TIME: open an always-on connection to the server
 const socket = io();
 
@@ -143,8 +162,9 @@ function showView(id) {
 function openMenu() {
   if (!profile) return openProfile("Save your profile first.");
   el("greeting").textContent = `Hi, ${profile.username} 👋`;
-  el("nativeChip").textContent = profile.native;
-  el("learningChip").textContent = profile.learning;
+  el("matchNative").value = profile.native;
+  el("matchLearning").value = profile.learning;
+  blockSameLanguage(["matchNative", "matchLearning"]);
   el("learningStat").textContent = profile.learning;
   el("deckCount").textContent = Object.keys(deck).length;
   showView("homeView");
@@ -156,10 +176,22 @@ function openProfile(message) {
     el("profNative").value = profile.native;
     el("profLearning").value = profile.learning;
     el("profTranslate").value = profile.translate_to;
+    blockSameLanguage(["profNative", "profLearning"]);
   }
   el("profileStatus").textContent = message;
   showView("profileView");
 }
+
+// Changing languages on the Quick Match banner saves them to my profile,
+// so the server matches me with the new languages (and they're remembered next time)
+["matchNative", "matchLearning"].forEach(id => {
+  el(id).addEventListener("change", async () => {
+    profile = { ...profile, native: el("matchNative").value, learning: el("matchLearning").value };
+    el("learningStat").textContent = profile.learning;
+    await api("/api/profile", { method: "PUT", body: JSON.stringify(profile) });
+    showToast(`Now practicing ${profile.learning}`);
+  });
+});
 
 // Sidebar buttons
 el("navHome").onclick = openMenu;

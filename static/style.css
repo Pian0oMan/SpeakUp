@@ -135,8 +135,20 @@ input:focus, select:focus { outline: 2px solid var(--brand); border-color: trans
 }
 .hero h3 { margin: 0 0 6px; font-size: 24px; font-weight: 800; }
 .hero p { margin: 0 0 14px; opacity: 0.9; }
-.chips { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.chip { background: rgba(255, 255, 255, 0.2); padding: 4px 12px; border-radius: 999px; font-weight: 600; }
+.chips { display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap; }
+.chip-label { flex: 0; font-size: 12px; font-weight: 400; opacity: 0.9; }
+.chip {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.chip option { color: var(--text); }        /* the dropdown list itself stays readable */
+.chip option:disabled { color: #bbb; }       /* the language already picked on the other side */
+.arrow { font-size: 20px; font-weight: 800; padding-bottom: 6px; }
 .start-btn {
   background: white;
   color: var(--brand-dark);

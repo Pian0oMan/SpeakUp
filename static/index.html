@@ -71,8 +71,15 @@
           <div>
             <h3>⚡ Quick Match</h3>
             <p>Talk 1-on-1 with someone who speaks the language you're learning.</p>
+            <!-- Pick the languages for this match. Changes are saved to your profile. -->
             <div class="chips">
-              <span id="nativeChip" class="chip"></span> → <span id="learningChip" class="chip"></span>
+              <label class="chip-label">I speak
+                <select id="matchNative" class="lang-select chip"></select>
+              </label>
+              <span class="arrow">→</span>
+              <label class="chip-label">I want to practice
+                <select id="matchLearning" class="lang-select chip"></select>
+              </label>
             </div>
           </div>
           <button id="quickMatchBtn" class="start-btn">Start</button>
