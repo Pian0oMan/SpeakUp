@@ -307,7 +307,7 @@ def leave_current_chat(sid):
 
 
 # ---------- ICEBREAKERS ----------
-ICEBREAKER_SECONDS = 90  # how often a new question appears
+ICEBREAKER_SECONDS = 360  # how often a new question appears
 
 ICEBREAKERS = [
     "What is your favorite food?",
@@ -409,12 +409,18 @@ def handle_leave():
 # ---------- CHAT ----------
 @socketio.on("chat_message")
 def handle_chat_message(text):
-    partner = partners.get(request.sid)
+    send_chat_message(request.sid, text)
+
+
+def send_chat_message(sid, text, voice=False, language=None):
+    """Send a message from sid to their partner (and back to them).
+    voice=True means it was spoken in the call (a finished live caption)."""
+    partner = partners.get(sid)
     if not partner:
         return  # not in a chat, nobody to send to
     me = partners[partner["sid"]]  # my partner's partner is me!
 
-    chat = chats[request.sid]
+    chat = chats[sid]
 
     # The last 6 lines of this conversation help DeepL understand slang and tone
     history = chat["history"]
@@ -422,26 +428,44 @@ def handle_chat_message(text):
     context = "\n".join(["Casual text chat between two friends."] + history[-6:])
     history.append(f"{me['name']}: {text}")
 
-    # My first message after an icebreaker counts as my answer
-    is_answer = chat["question"] is not None and request.sid not in chat["answered"]
+    # My first message after an icebreaker counts as my answer (spoken ones too!)
+    is_answer = chat["question"] is not None and sid not in chat["answered"]
     if is_answer:
-        chat["answered"].add(request.sid)
+        chat["answered"].add(sid)
 
     # Messages are NOT translated automatically: people hover over words to translate
     # them. We only find out which language the message is IN. The word popup shows
     # it, and it makes single-word translations much more accurate.
-    language = detect_language(text, me, context)
+    # (For speech we already know: it's the language the speech recognizer listened for.)
+    language = language or detect_language(text, me, context)
     for person in (me, partner):
         socketio.emit("chat_message", {
-            "from": request.sid,
+            "from": sid,
             "text": text,
             "language": language,
             "answer": is_answer,
+            "voice": voice,
         }, to=person["sid"])
 
     if is_answer:  # update the ✅ / ⏳ on the question card for both people
         for person in (me, partner):
             socketio.emit("icebreaker_answered", list(chat["answered"]), to=person["sid"])
+
+
+# ---------- LIVE CAPTIONS ----------
+# While someone talks, their browser turns speech into text and sends it here,
+# e.g. {"text": "ラーメンが好き", "final": False, "language": "Japanese"}.
+# "final" = they finished the sentence; then it's also added to the chat.
+@socketio.on("caption")
+def handle_caption(data):
+    partner = partners.get(request.sid)
+    text = str(data.get("text", "")).strip()[:500]
+    language = data.get("language") if data.get("language") in DEEPL_CODES else None
+    if not partner or not text:
+        return
+    socketio.emit("caption", {"text": text, "language": language}, to=partner["sid"])
+    if data.get("final"):
+        send_chat_message(request.sid, text, voice=True, language=language)
 
 
 @socketio.on("typing")

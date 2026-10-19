@@ -252,7 +252,7 @@ input:focus, select:focus { outline: 2px solid var(--brand); border-color: trans
 #localVideo {
   position: absolute;
   right: 16px;
-  bottom: 84px;
+  top: 16px;  /* top corner, so it never covers the captions */
   width: 22%;
   min-width: 120px;
   border: 2px solid white;
@@ -276,6 +276,48 @@ input:focus, select:focus { outline: 2px solid var(--brand); border-color: trans
   background: rgba(255, 255, 255, 0.9);
 }
 .round.off { background: #d32f2f; }  /* red = switched off */
+.speak-label {
+  flex-direction: row;
+  align-items: center;
+  flex: 0;
+  gap: 6px;
+  color: white;
+  font-size: 13px;
+  font-weight: 400;
+  background: rgba(0, 0, 0, 0.45);
+  padding: 6px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.speak-label select { padding: 2px 6px; font-size: 13px; }
+
+/* ---------- Live captions ---------- */
+.captions {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 84px;  /* just above the mic/camera buttons */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  pointer-events: none;  /* clicks go through to the video... */
+}
+.caption {
+  pointer-events: auto;  /* ...except on the caption itself, so words can be hovered */
+  max-width: 80%;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  font-size: 20px;
+  padding: 6px 14px;
+  border-radius: 10px;
+  text-align: center;
+}
+.caption.mine { font-size: 14px; opacity: 0.75; }  /* what I'm saying: smaller */
+.caption .word:hover { outline-color: white; }
+
+/* A spoken message in the chat history */
+.voice-label { font-size: 11px; font-weight: 600; color: var(--brand-dark); text-transform: uppercase; margin-bottom: 2px; }
 
 .side {
   display: flex;
@@ -481,5 +523,7 @@ dialog h3 { margin: 0; }
   #chatScreen { grid-template-columns: 1fr; grid-template-rows: auto 40vh 1fr; }
   .side { border-left: none; }
   .row { flex-direction: column; }
-  #localVideo { bottom: 80px; width: 30%; min-width: 90px; }
+  #localVideo { width: 30%; min-width: 90px; }
+  .caption { font-size: 16px; max-width: 100%; }
+  .speak-label { font-size: 12px; }
 }

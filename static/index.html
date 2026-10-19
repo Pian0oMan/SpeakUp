@@ -185,9 +185,18 @@
       </div>
       <!-- My own camera, small in the corner. "muted" so I don't hear myself. -->
       <video id="localVideo" autoplay playsinline muted hidden></video>
+      <!-- LIVE CAPTIONS: what my partner is saying right now (hover words to translate) -->
+      <div class="captions">
+        <div id="partnerCaption" class="caption" hidden></div>
+        <div id="myCaption" class="caption mine" hidden></div>
+      </div>
       <div class="call-controls">
         <button id="micBtn" class="round off" title="Microphone">🎤</button>
         <button id="camBtn" class="round off" title="Camera">📷</button>
+        <!-- Live captions need to know which language you're speaking -->
+        <label class="speak-label" title="The language you're speaking, for live captions">
+          Speaking <select id="speakLang"></select>
+        </label>
       </div>
     </div>
 

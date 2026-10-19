@@ -246,6 +246,13 @@ socket.on("matched", partner => {
   partnerName = partner.name;
   el("partnerInfo").textContent = `${partner.name} · speaks ${partner.native} · learning ${partner.learning}`;
   el("partnerAvatar").textContent = partner.name[0].toUpperCase();
+  // "Speaking" choices for live captions: the language I'm learning (default) or my own
+  const speakLang = el("speakLang");
+  const current = speakLang.value;
+  speakLang.innerHTML = "";
+  [profile.learning, profile.native].forEach(lang => speakLang.add(new Option(lang, lang)));
+  if (current === profile.native) speakLang.value = current; // keep my choice between matches
+  showCaption(el("partnerCaption"), "", null);
   showScreen("chatScreen");
   render();
   startCall(partner.initiator); // join the call automatically
@@ -454,6 +461,8 @@ el("micBtn").onclick = async () => {
       return;
     }
   }
+  if (micTrack) startCaptions(); // mic on = live captions on
+  else stopCaptions();
   attachMyMedia();
   updateMyButtons();
   sendMediaState();
@@ -477,6 +486,7 @@ el("camBtn").onclick = async () => {
 };
 
 function stopMyMedia() {
+  stopCaptions();
   if (micTrack) micTrack.stop();
   if (camTrack) camTrack.stop();
   micTrack = camTrack = null;
@@ -502,6 +512,96 @@ function updatePartnerUI() {
     ended: "Your partner left.",
   }[callState];
 }
+
+
+// ---------- LIVE CAPTIONS (speech to text) ----------
+// The browser's built-in speech recognition turns what I say into text.
+// (Chrome and Edge have it. In Chrome, the audio is processed by Google.)
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+const SPEECH_LOCALES = {
+  English: "en-US", Spanish: "es-ES", French: "fr-FR", German: "de-DE",
+  Japanese: "ja-JP", Chinese: "zh-CN", Russian: "ru-RU",
+};
+let recognizer = null;       // the speech recognizer while it's running
+let captionsWanted = false;  // should captions be running? (= my mic is on)
+let lastCaptionSent = 0;
+let warnedNoCaptions = false;
+
+function startCaptions() {
+  if (!SpeechRecognition) {
+    if (!warnedNoCaptions) addSystemMessage("Live captions work in Chrome and Edge.");
+    warnedNoCaptions = true;
+    return;
+  }
+  captionsWanted = true;
+  if (recognizer) return; // already running
+
+  const language = el("speakLang").value;
+  recognizer = new SpeechRecognition();
+  recognizer.lang = SPEECH_LOCALES[language];
+  recognizer.continuous = true;      // keep listening, don't stop after one sentence
+  recognizer.interimResults = true;  // give me words WHILE I'm still talking
+
+  recognizer.onresult = event => {
+    let unfinished = "";
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const text = event.results[i][0].transcript.trim();
+      if (!text) continue;
+      if (event.results[i].isFinal) {
+        // A finished sentence: my partner sees it, and it goes into the chat
+        socket.emit("caption", { text, final: true, language });
+      } else {
+        unfinished += text + " ";
+      }
+    }
+    unfinished = unfinished.trim();
+    // Words so far (sent at most ~3 times a second, so we don't flood the server)
+    if (unfinished && Date.now() - lastCaptionSent > 300) {
+      lastCaptionSent = Date.now();
+      socket.emit("caption", { text: unfinished, final: false, language });
+    }
+    showCaption(el("myCaption"), unfinished, language); // so I can see it's working
+  };
+
+  // Chrome stops listening after a few seconds of silence: just start again
+  recognizer.onend = () => {
+    recognizer = null;
+    showCaption(el("myCaption"), "", language);
+    if (captionsWanted) setTimeout(startCaptions, 300);
+  };
+  recognizer.onerror = event => {
+    if (event.error === "not-allowed" || event.error === "service-not-allowed") {
+      captionsWanted = false;
+      addSystemMessage("Live captions need microphone permission.");
+    }
+  };
+  recognizer.start();
+}
+
+function stopCaptions() {
+  captionsWanted = false;
+  if (recognizer) recognizer.stop();
+}
+
+// Switching the "Speaking" language: restart the recognizer with the new language
+el("speakLang").onchange = () => {
+  if (recognizer) recognizer.stop(); // onend starts it again, with the new language
+};
+
+// Show a caption, word by word, so words can be hovered for a translation
+function showCaption(box, text, language) {
+  box.innerHTML = "";
+  box.hidden = !text;
+  if (text) appendWords(box, text, language);
+}
+
+// My partner is talking: show their words, then hide them after 4 seconds of quiet
+let captionTimer;
+socket.on("caption", caption => {
+  showCaption(el("partnerCaption"), caption.text, caption.language);
+  clearTimeout(captionTimer);
+  captionTimer = setTimeout(() => showCaption(el("partnerCaption"), "", null), 4000);
+});
 
 
 // ---------- FLASHCARDS + DECKS ----------
@@ -828,6 +928,23 @@ function addLine(parent, className, text) {
   parent.appendChild(line);
 }
 
+// Put text into the page word by word. Every word can be hovered (translation popup)
+// and gets its highlight color if it's in my deck. Used by chat messages AND captions.
+function appendWords(container, text, language) {
+  splitWords(text, language).forEach(part => {
+    const span = document.createElement("span");
+    span.textContent = part.segment;
+    if (part.isWordLike) { // a real word (not a space or punctuation)
+      span.className = "word";
+      const key = clean(part.segment);
+      if (deck[key]) span.style.background = deck[key].color; // ⭐ the highlight!
+      // hover or tap: see what it means. part.index = where the word starts in the text
+      attachWordPopup(span, key, text, language, part.index);
+    }
+    container.appendChild(span);
+  });
+}
+
 // Draw the chat + deck on the page (DOM = the page as JS objects)
 function render() {
   const box = el("messages");
@@ -848,18 +965,8 @@ function render() {
       // socket.id is MY connection id. If it matches, I sent this message.
       div.className = "message" + (msg.from === socket.id ? " me" : "");
     }
-    splitWords(msg.text, msg.language).forEach(part => {
-      const span = document.createElement("span");
-      span.textContent = part.segment;
-      if (part.isWordLike) { // a real word (not a space or punctuation)
-        span.className = "word";
-        const key = clean(part.segment);
-        if (deck[key]) span.style.color = deck[key].color; // ⭐ the highlight!
-        // hover or tap: see what it means. part.index = where the word starts in the message
-        attachWordPopup(span, key, msg.text, msg.language, part.index);
-      }
-      div.appendChild(span);
-    });
+    if (msg.voice) addLine(div, "voice-label", "Spoken");
+    appendWords(div, msg.text, msg.language);
     // The automatic translation, like a subtitle
     if (msg.translation) addLine(div, "translation", msg.translation);
     // Who has answered the question so far
