@@ -572,6 +572,19 @@ function showToast(text) {
   toastTimer = setTimeout(() => (el("toast").hidden = true), 2500);
 }
 
+// Split a message into words. Intl.Segmenter (built into the browser) knows where
+// words start and end in every language, even Japanese and Chinese, which don't
+// put spaces between words: "公園のベンチに座った" -> 公園 | の | ベンチ | に | 座っ | た
+const LOCALES = { English: "en", Spanish: "es", French: "fr", German: "de", Japanese: "ja", Chinese: "zh", Russian: "ru" };
+
+function splitWords(text, language) {
+  if (!window.Intl || !Intl.Segmenter) {
+    // Very old browser: just split on spaces
+    return text.split(/(\s+)/).map(part => ({ segment: part, isWordLike: /\S/.test(part) }));
+  }
+  return [...new Intl.Segmenter(LOCALES[language], { granularity: "word" }).segment(text)];
+}
+
 // Turn "Hola!" into "hola" so punctuation doesn't matter
 function clean(word) {
   return word.toLowerCase().replace(/[^\p{L}]/gu, "");
@@ -794,13 +807,15 @@ function render() {
       // socket.id is MY connection id. If it matches, I sent this message.
       div.className = "message" + (msg.from === socket.id ? " me" : "");
     }
-    msg.text.split(" ").forEach(raw => {
+    splitWords(msg.text, msg.language).forEach(part => {
       const span = document.createElement("span");
-      span.className = "word";
-      span.textContent = raw + " ";
-      const key = clean(raw);
-      if (deck[key]) span.style.color = deck[key].color; // ⭐ the highlight!
-      attachWordPopup(span, key, msg.text, msg.language); // hover or tap: see what it means
+      span.textContent = part.segment;
+      if (part.isWordLike) { // a real word (not a space or punctuation)
+        span.className = "word";
+        const key = clean(part.segment);
+        if (deck[key]) span.style.color = deck[key].color; // ⭐ the highlight!
+        attachWordPopup(span, key, msg.text, msg.language); // hover or tap: see what it means
+      }
       div.appendChild(span);
     });
     // The automatic translation, like a subtitle

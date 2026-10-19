@@ -2,6 +2,7 @@
 # translates messages, and talks to the Supabase database.
 import os
 import random
+import re
 from functools import lru_cache
 import requests
 from dotenv import load_dotenv
@@ -237,19 +238,49 @@ def translate_detail(text, language, context="", source=None):
     return result["text"], detected
 
 
+LATIN_SCRIPT = {"English", "Spanish", "French", "German"}  # languages written with a, b, c...
+
+
+def detect_language(text, sender, context=""):
+    """Which language is a chat message in? It's almost always one of the sender's
+    two languages, and the writing system usually tells us which one."""
+    pair = [sender["native"], sender["learning"]]
+    if re.search(r"[぀-ヿ]", text):        # hiragana / katakana
+        return "Japanese"
+    if re.search(r"[Ѐ-ӿ]", text):        # Cyrillic
+        return "Russian"
+    if re.search(r"[一-鿿]", text):        # Chinese characters (Japanese uses them too)
+        return "Japanese" if "Japanese" in pair else "Chinese"
+    latin = [language for language in pair if language in LATIN_SCRIPT]
+    if len(latin) == 1:                            # e.g. English <-> Japanese: a, b, c means English
+        return latin[0]
+    # Both languages use a, b, c (e.g. English <-> Spanish): ask DeepL, but only
+    # trust its answer if it's one of the sender's languages. Unknown beats wrong.
+    target = next(language for language in DEEPL_CODES if language not in pair)
+    _, detected = translate_detail(text, target, context)
+    return detected if detected in pair else None
+
+
 def translate(text, language, context=""):
     """Like translate_detail, but only returns the translation."""
     return translate_detail(text, language, context)[0]
 
 
 def translate_for(person, text, context="", source=None):
-    """Translate for one person: into their translation language, or, if the text is
-    ALREADY in that language, into the language they're learning ("how to say it")."""
-    translation, detected = translate_detail(text, person["translate_to"], context, source)
-    if translation is None:
-        translation, detected_again = translate_detail(text, person["learning"], context, source)
-        detected = detected or detected_again
-    return translation, detected
+    """Translate for one person: into their translation language. If the text is
+    ALREADY in that language, try the language they're learning ("how to say it"),
+    and then the language they speak (in case their settings point to the same language)."""
+    detected = None
+    tried = []
+    for language in (person["translate_to"], person["learning"], person.get("native")):
+        if not language or language in tried:
+            continue
+        tried.append(language)
+        translation, found = translate_detail(text, language, context, source)
+        detected = detected or found
+        if translation:
+            return translation, detected
+    return None, detected
 
 
 # ---------- MATCHMAKING ----------
@@ -313,11 +344,9 @@ def send_icebreaker(chat):
     chat["question"] = question
     chat["answered"] = set()
     for person in chat["people"]:
-        shown = in_language(question, person["learning"])         # practice reading it...
-        subtitle = in_language(question, person["translate_to"])  # ...with help underneath
+        # Shown in the language they're learning. Hover over words for help.
         socketio.emit("icebreaker", {
-            "question": shown,
-            "translation": subtitle if subtitle != shown else None,
+            "question": in_language(question, person["learning"]),
             "language": person["learning"],
             "next_in": ICEBREAKER_SECONDS,
         }, to=person["sid"])
@@ -398,16 +427,15 @@ def handle_chat_message(text):
     if is_answer:
         chat["answered"].add(request.sid)
 
-    # Each person gets the message translated into THEIR preferred language.
-    # If it's ALREADY in that language (DeepL returns None), they see it in the
-    # language they're learning instead: "here's how to say that in Japanese".
+    # Messages are NOT translated automatically: people hover over words to translate
+    # them. We only find out which language the message is IN. The word popup shows
+    # it, and it makes single-word translations much more accurate.
+    language = detect_language(text, me, context)
     for person in (me, partner):
-        translation, language = translate_for(person, text, context)
         socketio.emit("chat_message", {
             "from": request.sid,
             "text": text,
-            "translation": translation,
-            "language": language,  # the language the message is IN (for the word popup)
+            "language": language,
             "answer": is_answer,
         }, to=person["sid"])
 
