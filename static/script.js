@@ -580,7 +580,12 @@ const LOCALES = { English: "en", Spanish: "es", French: "fr", German: "de", Japa
 function splitWords(text, language) {
   if (!window.Intl || !Intl.Segmenter) {
     // Very old browser: just split on spaces
-    return text.split(/(\s+)/).map(part => ({ segment: part, isWordLike: /\S/.test(part) }));
+    let index = 0;
+    return text.split(/(\s+)/).map(part => {
+      const piece = { segment: part, index, isWordLike: /\S/.test(part) };
+      index += part.length;
+      return piece;
+    });
   }
   return [...new Intl.Segmenter(LOCALES[language], { granularity: "word" }).segment(text)];
 }
@@ -596,19 +601,43 @@ function clean(word) {
 // the language it's in, and buttons to save it or report a bad translation.
 let popupWord = null;   // the word the popup is showing: { word, sentence, language, translation }
 let showTimer, hideTimer;
-const wordCache = {};   // remembers translations, so hovering the same word twice is instant
+const translationCache = {}; // remembers translations, so hovering the same thing twice is instant
 
-function attachWordPopup(span, word, sentence, language) {
+function attachWordPopup(span, word, sentence, language, index) {
   if (!word) return; // e.g. a lonely "?" or emoji
+  const open = () => openWordPopup(span, word, sentence, language, index);
   span.onmouseenter = () => {
     clearTimeout(hideTimer);
-    showTimer = setTimeout(() => openWordPopup(span, word, sentence, language), 300); // small delay
+    showTimer = setTimeout(open, 300); // small delay, so moving the mouse across text doesn't flash popups
   };
   span.onmouseleave = () => {
     clearTimeout(showTimer);
     hidePopupSoon();
   };
-  span.onclick = () => openWordPopup(span, word, sentence, language); // phones have no hover
+  span.onclick = open; // phones have no hover
+}
+
+// The part of the sentence around a word: everything between the nearest
+// punctuation marks (Western and Japanese/Chinese ones) before and after it.
+// "Ayer fui al mercado, y compré manzanas." + "compré" -> "y compré manzanas"
+const CLAUSE_BREAKS = /[,.!?;:\n。、！？；，…]/;
+
+function clauseAround(text, index) {
+  let start = index;
+  let end = index;
+  while (start > 0 && !CLAUSE_BREAKS.test(text[start - 1])) start--;
+  while (end < text.length && !CLAUSE_BREAKS.test(text[end])) end++;
+  return text.slice(start, end).trim();
+}
+
+// Ask the server to translate a word or phrase (each one only once)
+function translateText(text, sentence, language) {
+  const key = text + "|" + sentence;
+  translationCache[key] ??= api("/api/translate-word", {
+    method: "POST",
+    body: JSON.stringify({ word: text, sentence, language }),
+  });
+  return translationCache[key];
 }
 
 // Moving the mouse from the word INTO the popup shouldn't close it
@@ -624,30 +653,42 @@ function hidePopupSoon() {
   hideTimer = setTimeout(() => (el("wordPopup").hidden = true), 300);
 }
 
-async function openWordPopup(span, word, sentence, language) {
+async function openWordPopup(span, word, sentence, language, index) {
   clearTimeout(hideTimer);
   const saved = deck[word];
-  popupWord = { word, sentence, language, translation: saved ? saved.translation : null };
+  const showing = { word, sentence, language, translation: saved ? saved.translation : null };
+  popupWord = showing;
+
+  // The phrase around the word (not shown if the phrase IS just the word)
+  const phrase = clauseAround(sentence, index);
+  const showPhrase = phrase.length > 0 && clean(phrase) !== word;
 
   el("popupWord").textContent = word;
   el("popupLang").textContent = language || "";
   el("popupTranslation").textContent = saved ? saved.translation || "(no translation)" : "Translating...";
+  el("popupPhraseBox").hidden = !showPhrase;
+  el("popupPhrase").textContent = `"${phrase}"`;
+  el("popupPhraseTranslation").textContent = "...";
   el("popupAddBtn").textContent = saved ? "✓ In your deck" : "+ Add to deck";
   el("popupAddBtn").disabled = !!saved;
   placePopup(span);
-  if (saved) return; // we already know its translation
 
-  // Ask the server (once per word + sentence)
-  const key = word + "|" + sentence;
-  wordCache[key] ??= api("/api/translate-word", {
-    method: "POST",
-    body: JSON.stringify({ word, sentence, language }),
-  });
-  const result = await wordCache[key];
-  if (!popupWord || popupWord.word !== word) return; // the mouse already moved to another word
-  popupWord.translation = result.translation;
-  el("popupTranslation").textContent = result.translation || "(no translation found)";
-  el("popupLang").textContent = result.language || "";
+  // Translate the word and the phrase at the same time
+  const [wordResult, phraseResult] = await Promise.all([
+    saved ? null : translateText(word, sentence, language),
+    showPhrase ? translateText(phrase, sentence, language) : null,
+  ]);
+  if (popupWord !== showing) return; // the mouse already moved to another word
+
+  if (wordResult) {
+    showing.translation = wordResult.translation;
+    el("popupTranslation").textContent = wordResult.translation || "(no translation found)";
+    el("popupLang").textContent = wordResult.language || "";
+  }
+  if (phraseResult) {
+    el("popupPhraseTranslation").textContent = phraseResult.translation || "(no translation found)";
+  }
+  placePopup(span); // the popup got taller, so place it again
 }
 
 // Put the popup just above the word (or below it, if there's no room above)
@@ -814,7 +855,8 @@ function render() {
         span.className = "word";
         const key = clean(part.segment);
         if (deck[key]) span.style.color = deck[key].color; // ⭐ the highlight!
-        attachWordPopup(span, key, msg.text, msg.language); // hover or tap: see what it means
+        // hover or tap: see what it means. part.index = where the word starts in the message
+        attachWordPopup(span, key, msg.text, msg.language, part.index);
       }
       div.appendChild(span);
     });

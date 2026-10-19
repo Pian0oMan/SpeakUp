@@ -382,7 +382,7 @@ input:focus, select:focus { outline: 2px solid var(--brand); border-color: trans
 .word-popup {
   position: fixed;  /* JavaScript places it right above/below the word */
   z-index: 30;
-  width: 240px;
+  width: 280px;
   background: var(--card);
   border-radius: 14px;
   padding: 12px 14px;
@@ -393,6 +393,15 @@ input:focus, select:focus { outline: 2px solid var(--brand); border-color: trans
 .popup-head strong { font-size: 18px; }
 .popup-lang { color: var(--muted); font-size: 12px; }
 .popup-translation { margin: 4px 0 10px; color: #444; }
+.popup-phrase {
+  border-top: 1px solid #ece8f3;
+  padding-top: 8px;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+.popup-phrase-text { color: var(--muted); font-style: italic; }
+.popup-phrase-translation { color: #444; margin-top: 2px; }
+.popup-phrase-translation::before { content: "→ "; color: var(--brand); font-weight: 600; }
 .popup-actions { display: flex; justify-content: space-between; align-items: center; }
 button.small { padding: 6px 14px; font-size: 14px; }
 button.primary:disabled { background: #b9b0c9; cursor: default; }
