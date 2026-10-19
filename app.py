@@ -185,6 +185,10 @@ def translate(text, language, context=""):
     # e.g. detected "ES" and target "ES": it's already Spanish, no subtitle needed
     if DEEPL_CODES[language].startswith(result["detected_source_language"]):
         return None
+    # Got the same text back: it was already in that language. (DeepL sometimes
+    # guesses wrong on short messages, e.g. it thinks "I love ramen" is Swedish.)
+    if result["text"].strip().lower() == text.strip().lower():
+        return None
     return result["text"]
 
 
@@ -333,12 +337,16 @@ def handle_chat_message(text):
     if is_answer:
         chat["answered"].add(request.sid)
 
-    # Each person gets the message translated into THEIR preferred language
+    # Each person gets the message translated into THEIR preferred language.
+    # If it's ALREADY in that language (DeepL returns None), they see it in the
+    # language they're learning instead: "here's how to say that in Japanese".
     for person in (me, partner):
+        translation = (translate(text, person["translate_to"], context)
+                       or translate(text, person["learning"], context))
         socketio.emit("chat_message", {
             "from": request.sid,
             "text": text,
-            "translation": translate(text, person["translate_to"], context),
+            "translation": translation,
             "answer": is_answer,
         }, to=person["sid"])
 

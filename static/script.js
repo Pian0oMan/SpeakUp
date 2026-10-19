@@ -40,6 +40,9 @@ LANGUAGE_PAIRS.forEach(pair => {
   blockSameLanguage(pair);
 });
 
+// When creating an account, translations default to the language you speak
+el("regNative").addEventListener("change", () => (el("regTranslate").value = el("regNative").value));
+
 // REAL-TIME: open an always-on connection to the server
 const socket = io();
 
