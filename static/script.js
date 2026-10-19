@@ -308,6 +308,7 @@ socket.on("icebreaker", icebreaker => {
     from: "icebreaker",
     text: icebreaker.question,
     translation: icebreaker.translation,
+    language: icebreaker.language,
     answered: [], // connection ids of people who answered
   });
   nextIcebreakerAt = Date.now() + icebreaker.next_in * 1000;
@@ -513,20 +514,23 @@ async function loadDeck() {
   render();
 }
 
-// 2. Save a word into the chosen deck. The sentence helps DeepL pick the right meaning.
-async function saveWord(word, sentence) {
+// 2. Save a word into the chosen deck, with the translation the popup showed.
+//    The sentence is saved too, as an example for studying.
+async function saveWord(word, sentence, translation, language) {
   if (!word) return;
   const card = await api("/api/flashcards", {
     method: "POST",
     body: JSON.stringify({
       word,
       sentence,
+      translation,
+      language,
       color: el("colorPicker").value,
       deck_id: Number(el("deckSelect").value),
     }),
   });
   showToast(card.translation ? `Saved "${word}" → ${card.translation}` : `Saved "${word}"`);
-  loadDeck();
+  await loadDeck();
 }
 
 // 3. Remove a word (HTTP DELETE)
@@ -574,6 +578,193 @@ function clean(word) {
 }
 
 
+// ---------- WORD POPUP ----------
+// Hover over a word (or tap it on a phone) to see a short translation,
+// the language it's in, and buttons to save it or report a bad translation.
+let popupWord = null;   // the word the popup is showing: { word, sentence, language, translation }
+let showTimer, hideTimer;
+const wordCache = {};   // remembers translations, so hovering the same word twice is instant
+
+function attachWordPopup(span, word, sentence, language) {
+  if (!word) return; // e.g. a lonely "?" or emoji
+  span.onmouseenter = () => {
+    clearTimeout(hideTimer);
+    showTimer = setTimeout(() => openWordPopup(span, word, sentence, language), 300); // small delay
+  };
+  span.onmouseleave = () => {
+    clearTimeout(showTimer);
+    hidePopupSoon();
+  };
+  span.onclick = () => openWordPopup(span, word, sentence, language); // phones have no hover
+}
+
+// Moving the mouse from the word INTO the popup shouldn't close it
+el("wordPopup").onmouseenter = () => clearTimeout(hideTimer);
+el("wordPopup").onmouseleave = hidePopupSoon;
+
+// Clicking anywhere else closes the popup
+document.addEventListener("click", event => {
+  if (!event.target.closest("#wordPopup, .word")) el("wordPopup").hidden = true;
+});
+
+function hidePopupSoon() {
+  hideTimer = setTimeout(() => (el("wordPopup").hidden = true), 300);
+}
+
+async function openWordPopup(span, word, sentence, language) {
+  clearTimeout(hideTimer);
+  const saved = deck[word];
+  popupWord = { word, sentence, language, translation: saved ? saved.translation : null };
+
+  el("popupWord").textContent = word;
+  el("popupLang").textContent = language || "";
+  el("popupTranslation").textContent = saved ? saved.translation || "(no translation)" : "Translating...";
+  el("popupAddBtn").textContent = saved ? "✓ In your deck" : "+ Add to deck";
+  el("popupAddBtn").disabled = !!saved;
+  placePopup(span);
+  if (saved) return; // we already know its translation
+
+  // Ask the server (once per word + sentence)
+  const key = word + "|" + sentence;
+  wordCache[key] ??= api("/api/translate-word", {
+    method: "POST",
+    body: JSON.stringify({ word, sentence, language }),
+  });
+  const result = await wordCache[key];
+  if (!popupWord || popupWord.word !== word) return; // the mouse already moved to another word
+  popupWord.translation = result.translation;
+  el("popupTranslation").textContent = result.translation || "(no translation found)";
+  el("popupLang").textContent = result.language || "";
+}
+
+// Put the popup just above the word (or below it, if there's no room above)
+function placePopup(span) {
+  const popup = el("wordPopup");
+  popup.hidden = false;
+  const word = span.getBoundingClientRect();
+  const left = Math.min(Math.max(8, word.left), window.innerWidth - popup.offsetWidth - 8);
+  let top = word.top - popup.offsetHeight - 8;
+  if (top < 8) top = word.bottom + 8;
+  popup.style.left = left + "px";
+  popup.style.top = top + "px";
+}
+
+el("popupAddBtn").onclick = async () => {
+  const { word, sentence, translation, language } = popupWord;
+  el("popupAddBtn").disabled = true;
+  await saveWord(word, sentence, translation, language);
+  el("popupAddBtn").textContent = "✓ In your deck";
+};
+
+el("popupReportBtn").onclick = () => {
+  el("wordPopup").hidden = true;
+  openReport(popupWord.word, popupWord.translation, popupWord.sentence);
+};
+
+
+// ---------- REPORT A WRONG TRANSLATION ----------
+let reporting = null; // { word, shown, sentence }
+
+function openReport(word, shown, sentence) {
+  reporting = { word, shown, sentence };
+  el("reportWord").textContent = word;
+  el("reportShown").textContent = shown || "(nothing)";
+  el("reportSuggestion").value = "";
+  el("reportNote").value = "";
+  el("reportDialog").showModal(); // opens the pop-up window and darkens the page
+}
+
+el("reportCancelBtn").onclick = () => el("reportDialog").close();
+
+el("reportForm").onsubmit = async event => {
+  event.preventDefault();
+  await api("/api/reports", {
+    method: "POST",
+    body: JSON.stringify({
+      word: reporting.word,
+      shown_translation: reporting.shown,
+      suggested_translation: el("reportSuggestion").value.trim(),
+      note: el("reportNote").value.trim(),
+      sentence: reporting.sentence,
+    }),
+  });
+  el("reportDialog").close();
+  showToast("Thanks! The developers will review it.");
+};
+
+
+// ---------- STUDY MODE ----------
+let studyDeck = null;  // the deck being studied
+let studyCards = [];   // its cards, in random order
+let studyIndex = 0;    // which card we're on
+let knownCount = 0;
+
+function startStudy(deckToStudy) {
+  studyDeck = deckToStudy;
+  studyCards = Object.values(deck).filter(card => card.deck_id === deckToStudy.id);
+  // Shuffle: swap every card with a random card before it ("Fisher-Yates shuffle")
+  for (let i = studyCards.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [studyCards[i], studyCards[j]] = [studyCards[j], studyCards[i]];
+  }
+  studyIndex = 0;
+  knownCount = 0;
+  el("studyTitle").textContent = `Studying: ${deckToStudy.name}`;
+  showView("studyView");
+  showStudyCard();
+}
+
+function showStudyCard() {
+  const done = studyIndex >= studyCards.length;
+  el("studyCard").hidden = done;
+  el("studyDone").hidden = !done;
+  el("studyReportBtn").hidden = true;
+  el("showAnswerBtn").hidden = done;
+  el("stillLearningBtn").hidden = el("knowItBtn").hidden = true;
+  if (done) {
+    el("studyProgress").textContent = "";
+    el("studySummary").textContent =
+      `You knew ${knownCount} of ${studyCards.length} cards. ${studyCards.length - knownCount} to keep practicing.`;
+    return;
+  }
+  const card = studyCards[studyIndex];
+  el("studyProgress").textContent = `${studyIndex + 1} / ${studyCards.length}`;
+  el("studyWord").textContent = card.word;
+  el("studyTranslation").textContent = card.translation || "(no translation yet)";
+  el("studyExample").textContent = card.example ? `"${card.example}"` : "";
+  el("studyAnswer").hidden = true;
+}
+
+el("showAnswerBtn").onclick = () => {
+  el("studyAnswer").hidden = false;
+  el("showAnswerBtn").hidden = true;
+  el("stillLearningBtn").hidden = el("knowItBtn").hidden = false;
+  el("studyReportBtn").hidden = false;
+};
+
+// Save how well I know the card, then go to the next one
+async function answerCard(status) {
+  const card = studyCards[studyIndex];
+  if (status === "known") knownCount++;
+  card.status = status;
+  studyIndex++;
+  showStudyCard();
+  await api("/api/flashcards/" + encodeURIComponent(card.word), {
+    method: "PATCH",
+    body: JSON.stringify({ status }),
+  });
+}
+
+el("knowItBtn").onclick = () => answerCard("known");
+el("stillLearningBtn").onclick = () => answerCard("learning");
+el("studyAgainBtn").onclick = () => startStudy(studyDeck);
+el("studyBackBtn").onclick = () => showView("deckView");
+el("studyReportBtn").onclick = () => {
+  const card = studyCards[studyIndex];
+  openReport(card.word, card.translation, card.example);
+};
+
+
 // ---------- DRAWING ----------
 // Add a small line of text with a CSS class inside a message, e.g. a translation
 function addLine(parent, className, text) {
@@ -608,11 +799,8 @@ function render() {
       span.className = "word";
       span.textContent = raw + " ";
       const key = clean(raw);
-      if (deck[key]) {
-        span.style.color = deck[key].color; // ⭐ the highlight!
-        if (deck[key].translation) span.title = deck[key].translation; // hover to see the meaning
-      }
-      span.onclick = () => saveWord(key, msg.text);
+      if (deck[key]) span.style.color = deck[key].color; // ⭐ the highlight!
+      attachWordPopup(span, key, msg.text, msg.language); // hover or tap: see what it means
       div.appendChild(span);
     });
     // The automatic translation, like a subtitle
@@ -656,11 +844,19 @@ function renderDecks() {
     const count = document.createElement("span");
     count.textContent = `${cards.length} cards`;
     title.appendChild(count);
+    const study = document.createElement("button");
+    study.className = "primary small";
+    study.textContent = "▶ Study";
+    study.disabled = cards.length === 0;
+    study.onclick = () => startStudy(d);
     const del = document.createElement("button");
     del.className = "danger-text";
     del.textContent = "Delete deck";
     del.onclick = () => deleteDeck(d);
-    head.append(title, del);
+    const buttons = document.createElement("div");
+    buttons.className = "deck-head-buttons";
+    buttons.append(study, del);
+    head.append(title, buttons);
 
     const list = document.createElement("ul");
     list.className = "deck-list";
@@ -675,7 +871,9 @@ function renderDecks() {
       const word = document.createElement("span");
       word.className = "swatch";
       word.style.background = card.color;
-      word.textContent = card.word;
+      // ✅ = I know it, 😅 = still learning (from study mode)
+      const icon = { known: " ✅", learning: " 😅" }[card.status] || "";
+      word.textContent = card.word + icon;
       const translation = document.createElement("span");
       translation.className = "card-translation" + (card.translation ? "" : " missing");
       translation.textContent = card.translation || "add translation";

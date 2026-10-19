@@ -115,6 +115,34 @@
         <div id="deckGroups"></div>
       </div>
 
+      <!-- STUDY: one flashcard at a time -->
+      <div id="studyView" class="view" hidden>
+        <div class="study-top">
+          <h2 id="studyTitle"></h2>
+          <span id="studyProgress"></span>
+        </div>
+        <div id="studyCard" class="study-card">
+          <div id="studyWord" class="study-word"></div>
+          <div id="studyAnswer" hidden>
+            <div id="studyTranslation" class="study-translation"></div>
+            <div id="studyExample" class="study-example"></div>
+          </div>
+        </div>
+        <div class="study-buttons">
+          <button id="showAnswerBtn" class="primary">Show answer</button>
+          <button id="stillLearningBtn" class="ghost" hidden>😅 Still learning</button>
+          <button id="knowItBtn" class="primary" hidden>✅ Know it</button>
+        </div>
+        <button id="studyReportBtn" class="link-btn" hidden>⚠️ This translation looks wrong</button>
+        <!-- Shown at the end -->
+        <div id="studyDone" class="card" hidden>
+          <h3>🎉 Deck finished!</h3>
+          <p id="studySummary"></p>
+          <button id="studyAgainBtn" class="primary">Study again</button>
+          <button id="studyBackBtn" class="ghost">Back to decks</button>
+        </div>
+      </div>
+
       <!-- PROFILE (change languages later) -->
       <div id="profileView" class="view" hidden>
         <h2>Your profile</h2>
@@ -183,6 +211,36 @@
       </form>
     </div>
   </section>
+
+  <!-- WORD POPUP: hover (or tap) a word to see what it means -->
+  <div id="wordPopup" class="word-popup" hidden>
+    <div class="popup-head">
+      <strong id="popupWord"></strong>
+      <span id="popupLang" class="popup-lang"></span>
+    </div>
+    <div id="popupTranslation" class="popup-translation"></div>
+    <div class="popup-actions">
+      <button id="popupAddBtn" class="primary small">+ Add to deck</button>
+      <button id="popupReportBtn" class="link-btn">Wrong?</button>
+    </div>
+  </div>
+
+  <!-- REPORT A WRONG TRANSLATION (a <dialog> is a built-in pop-up window) -->
+  <dialog id="reportDialog" class="card">
+    <form id="reportForm" method="dialog">
+      <h3>Report a translation</h3>
+      <p class="hint">
+        <strong id="reportWord"></strong> was translated as <em id="reportShown"></em>.
+        Your report helps us fix it for everyone.
+      </p>
+      <label>Correct translation <input id="reportSuggestion" maxlength="200" required></label>
+      <label>Note <small>(optional)</small> <input id="reportNote" maxlength="500" placeholder="e.g. it means bench here, not bank"></label>
+      <div class="dialog-buttons">
+        <button type="button" id="reportCancelBtn" class="ghost">Cancel</button>
+        <button type="submit" class="primary">Send report</button>
+      </div>
+    </form>
+  </dialog>
 
   <!-- Small pop-up message, e.g. "Saved banco → bench" -->
   <div id="toast" class="toast" hidden></div>

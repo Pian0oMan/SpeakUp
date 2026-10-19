@@ -96,16 +96,32 @@ def delete_deck(deck_id):
 
 
 # ---------- FLASHCARDS ----------
+def my_profile(db):
+    return db.table("profiles").select("*").execute().data[0]
+
+
+# Hovering over a word: a short translation + the language it's in
+@app.route("/api/translate-word", methods=["POST"])
+def translate_word():
+    # e.g. {"word": "banco", "sentence": "Me senté en el banco", "language": "Spanish"}
+    data = request.get_json()
+    person = my_profile(db_for(token_from_request()))
+    translation, detected = translate_for(person, data["word"], data.get("sentence", ""),
+                                          source=data.get("language"))
+    return jsonify({"translation": translation, "language": data.get("language") or detected})
+
+
 @app.route("/api/flashcards", methods=["GET"])
 def list_flashcards():
     rows = (db_for(token_from_request()).table("flashcards")
-            .select("word, color, translation, deck_id").order("created_at").execute().data)
+            .select("word, color, translation, deck_id, example, status").order("created_at").execute().data)
     return jsonify(rows)
 
 
 @app.route("/api/flashcards", methods=["POST"])
 def save_flashcard():
-    # e.g. {"word": "banco", "color": "#ffd54f", "deck_id": 3, "sentence": "Me senté en el banco"}
+    # e.g. {"word": "banco", "color": "#ffd54f", "deck_id": 3,
+    #       "sentence": "Me senté en el banco", "translation": "bench"}
     data = request.get_json()
     db = db_for(token_from_request())
     word = data["word"].lower()
@@ -117,28 +133,28 @@ def save_flashcard():
         db.table("flashcards").update({"color": data["color"], "deck_id": deck_id}).eq("word", word).execute()
         return jsonify({"word": word, "translation": None})
 
-    # New card: translate it, using the sentence it came from as context.
-    # Try the user's translation language first; if the word is ALREADY in that
-    # language (DeepL returns None), translate it into the language they're learning.
-    profile = db.table("profiles").select("translate_to, learning").execute().data[0]
-    context = data.get("sentence", "")
-    translation = (translate(word, profile["translate_to"], context)
-                   or translate(word, profile["learning"], context))
+    # New card. The hover popup usually sends the translation it already showed;
+    # if not, translate it now, using the sentence it came from as context.
+    sentence = data.get("sentence", "")
+    translation = data.get("translation")
+    if not translation:
+        translation, _ = translate_for(my_profile(db), word, sentence, source=data.get("language"))
 
     db.table("flashcards").insert({
         "word": word,
         "color": data["color"],
         "deck_id": deck_id,
         "translation": translation,
+        "example": sentence or None,
     }).execute()
     return jsonify({"word": word, "translation": translation})
 
 
 @app.route("/api/flashcards/<word>", methods=["PATCH"])
 def edit_flashcard(word):
-    # Change a card's translation and/or deck, e.g. {"translation": "bench"}
+    # Change a card's translation, deck, or study status, e.g. {"status": "known"}
     data = request.get_json()
-    changes = {key: data[key] for key in ("translation", "deck_id") if key in data}
+    changes = {key: data[key] for key in ("translation", "deck_id", "status") if key in data}
     db_for(token_from_request()).table("flashcards").update(changes).eq("word", word.lower()).execute()
     return jsonify({"ok": True})
 
@@ -149,6 +165,21 @@ def delete_flashcard(word):
     return jsonify({"ok": True})
 
 
+# ---------- TRANSLATION REPORTS ----------
+# "This translation is wrong" -> saved for the developers to review in Supabase
+@app.route("/api/reports", methods=["POST"])
+def report_translation():
+    data = request.get_json()
+    db_for(token_from_request()).table("translation_reports").insert({
+        "word": data["word"][:100],
+        "shown_translation": (data.get("shown_translation") or "")[:200],
+        "suggested_translation": (data.get("suggested_translation") or "")[:200],
+        "note": (data.get("note") or "")[:500],
+        "sentence": (data.get("sentence") or "")[:500],
+    }).execute()
+    return jsonify({"ok": True})
+
+
 # ---------- TRANSLATION (DeepL) ----------
 DEEPL_CODES = {
     "English": "EN-US", "Spanish": "ES", "French": "FR", "German": "DE",
@@ -156,40 +187,69 @@ DEEPL_CODES = {
 }
 
 
-def translate(text, language, context=""):
-    """Translate text into language. Returns None if it's already in that language.
-    context = the last few chat lines, so DeepL understands what's going on."""
+# The codes DeepL uses for the language it DETECTS, e.g. "JA" -> "Japanese"
+DEEPL_NAMES = {"EN": "English", "ES": "Spanish", "FR": "French", "DE": "German",
+               "JA": "Japanese", "ZH": "Chinese", "RU": "Russian"}
+SOURCE_CODES = {name: code for code, name in DEEPL_NAMES.items()}  # "Japanese" -> "JA"
+# Other languages DeepL might DETECT (we can't match people in these yet, but we can name them)
+DEEPL_NAMES.update({"PT": "Portuguese", "IT": "Italian", "NL": "Dutch", "PL": "Polish",
+                    "SV": "Swedish", "KO": "Korean", "TR": "Turkish", "UK": "Ukrainian"})
+
+
+def translate_detail(text, language, context="", source=None):
+    """Translate text into language.
+    Returns (translation, detected language name). translation is None if the
+    text is already in that language.
+    context = nearby text (chat lines or the sentence), so DeepL picks the right meaning.
+    source  = the language the text is in, if we already know it (more accurate for single words)."""
     if not DEEPL_API_KEY:
-        return None  # no key yet, so no translations
+        return None, None  # no key yet, so no translations
+    if source == language:
+        return None, source  # already in that language, no need to ask DeepL
     # Free DeepL keys end in ":fx" and use a different address
     url = "https://api-free.deepl.com/v2/translate" if DEEPL_API_KEY.endswith(":fx") \
         else "https://api.deepl.com/v2/translate"
+    body = {
+        "text": [text],
+        "target_lang": DEEPL_CODES[language],
+        "context": context,                         # free: not counted toward the quota
+        "formality": "prefer_less",                 # casual chat tone, not textbook
+        "model_type": "prefer_quality_optimized",   # DeepL's newer, smarter model
+    }
+    if source in SOURCE_CODES:
+        body["source_lang"] = SOURCE_CODES[source]
     try:
-        response = requests.post(
-            url,
-            headers={"Authorization": f"DeepL-Auth-Key {DEEPL_API_KEY}"},
-            json={
-                "text": [text],
-                "target_lang": DEEPL_CODES[language],
-                "context": context,                         # free: not counted toward the quota
-                "formality": "prefer_less",                 # casual chat tone, not textbook
-                "model_type": "prefer_quality_optimized",   # DeepL's newer, smarter model
-            },
-            timeout=5,
-        )
+        response = requests.post(url, headers={"Authorization": f"DeepL-Auth-Key {DEEPL_API_KEY}"},
+                                 json=body, timeout=5)
         response.raise_for_status()  # turns error responses (bad key, etc.) into exceptions
     except requests.RequestException as error:
         print("Translation failed:", error)
-        return None
+        return None, None
     result = response.json()["translations"][0]
+    detected = DEEPL_NAMES.get(result["detected_source_language"], result["detected_source_language"])
     # e.g. detected "ES" and target "ES": it's already Spanish, no subtitle needed
     if DEEPL_CODES[language].startswith(result["detected_source_language"]):
-        return None
+        return None, detected
     # Got the same text back: it was already in that language. (DeepL sometimes
     # guesses wrong on short messages, e.g. it thinks "I love ramen" is Swedish.)
     if result["text"].strip().lower() == text.strip().lower():
-        return None
-    return result["text"]
+        return None, language
+    return result["text"], detected
+
+
+def translate(text, language, context=""):
+    """Like translate_detail, but only returns the translation."""
+    return translate_detail(text, language, context)[0]
+
+
+def translate_for(person, text, context="", source=None):
+    """Translate for one person: into their translation language, or, if the text is
+    ALREADY in that language, into the language they're learning ("how to say it")."""
+    translation, detected = translate_detail(text, person["translate_to"], context, source)
+    if translation is None:
+        translation, detected_again = translate_detail(text, person["learning"], context, source)
+        detected = detected or detected_again
+    return translation, detected
 
 
 # ---------- MATCHMAKING ----------
@@ -258,6 +318,7 @@ def send_icebreaker(chat):
         socketio.emit("icebreaker", {
             "question": shown,
             "translation": subtitle if subtitle != shown else None,
+            "language": person["learning"],
             "next_in": ICEBREAKER_SECONDS,
         }, to=person["sid"])
 
@@ -341,12 +402,12 @@ def handle_chat_message(text):
     # If it's ALREADY in that language (DeepL returns None), they see it in the
     # language they're learning instead: "here's how to say that in Japanese".
     for person in (me, partner):
-        translation = (translate(text, person["translate_to"], context)
-                       or translate(text, person["learning"], context))
+        translation, language = translate_for(person, text, context)
         socketio.emit("chat_message", {
             "from": request.sid,
             "text": text,
             "translation": translation,
+            "language": language,  # the language the message is IN (for the word popup)
             "answer": is_answer,
         }, to=person["sid"])
 
