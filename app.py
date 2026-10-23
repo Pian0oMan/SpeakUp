@@ -130,7 +130,8 @@ def translate_word():
 def list_flashcards():
     db = db_for(token_from_request())
     rows = fetch_all(lambda: db.table("flashcards")
-                     .select("word, color, translation, deck_id, example, status, reading, explanation, source")
+                     .select("word, color, translation, deck_id, example, status, reading, explanation, "
+                             "source, language, proficiency")
                      .order("created_at"))
     return jsonify(rows)
 
@@ -163,6 +164,7 @@ def save_flashcard():
         "deck_id": deck_id,
         "translation": translation,
         "example": sentence or None,
+        "language": data.get("language") if data.get("language") in DEEPL_CODES else None,  # for pronunciation
     }).execute()
     return jsonify({"word": word, "translation": translation})
 
@@ -172,6 +174,8 @@ def edit_flashcard(word):
     # Change a card's translation, deck, or study status, e.g. {"status": "known"}
     data = request.get_json()
     changes = {key: data[key] for key in ("translation", "deck_id", "status") if key in data}
+    if "proficiency" in data:  # 0 to 100, from study mode
+        changes["proficiency"] = max(0, min(100, int(data["proficiency"])))
     db_for(token_from_request()).table("flashcards").update(changes).eq("word", word.lower()).execute()
     return jsonify({"ok": True})
 
@@ -183,9 +187,10 @@ def delete_flashcard(word):
 
 
 # ---------- LIBRARY + ANKI IMPORT ----------
-def add_cards(db, deck_id, cards, source):
+def add_cards(db, deck_id, cards, source, language=None):
     """Put many cards into one of my decks at once. Words that are already in one
-    of my decks are skipped (each word lives in one deck). Returns (added, skipped)."""
+    of my decks are skipped (each word lives in one deck). Returns (added, skipped).
+    language = the language of the words (for pronunciation), if we know it."""
     have = {row["word"] for row in fetch_all(lambda: db.table("flashcards").select("word"))}
     new_rows = []
     for card in cards:
@@ -202,6 +207,7 @@ def add_cards(db, deck_id, cards, source):
             "explanation": card.get("explanation"),
             "example": card.get("example"),
             "source": source,
+            "language": language or card.get("language"),
         })
     for start in range(0, len(new_rows), 500):  # send them in batches of 500
         db.table("flashcards").insert(new_rows[start:start + 500]).execute()
@@ -224,14 +230,14 @@ def list_library():
 def add_library_deck(library_id):
     """Copy a library deck into MY decks, so I can study it and track my progress."""
     db = db_for(token_from_request())
-    found = db.table("library_decks").select("name").eq("id", library_id).execute().data
+    found = db.table("library_decks").select("name, language").eq("id", library_id).execute().data
     if not found:
         return jsonify({"error": "That deck isn't in the library anymore."}), 404
     cards = fetch_all(lambda: db.table("library_cards")
                       .select("word, reading, translation, explanation, example")
                       .eq("deck_id", library_id).order("id"))
     new_deck = db.table("decks").insert({"name": found[0]["name"]}).execute().data[0]
-    added, skipped = add_cards(db, new_deck["id"], cards, "library")
+    added, skipped = add_cards(db, new_deck["id"], cards, "library", language=found[0]["language"])
     return jsonify({"deck": new_deck, "added": added, "skipped": skipped})
 
 
@@ -247,6 +253,11 @@ def import_anki():
         return jsonify({"error": str(error)}), 400
     name = os.path.splitext(file.filename or "")[0].strip()[:40] or "Anki deck"  # deck name = file name
     db = db_for(token_from_request())
+    # Anki files don't say which language the words are in: guess from the writing
+    # system (no DeepL calls for thousands of cards), or assume the language I'm learning
+    learning = my_profile(db)["learning"]
+    for card in cards:
+        card["language"] = script_language(card["word"], learning) or learning
     new_deck = db.table("decks").insert({"name": name}).execute().data[0]
     added, skipped = add_cards(db, new_deck["id"], cards, "anki")
     return jsonify({"deck": new_deck, "added": added, "skipped": skipped})
@@ -332,16 +343,25 @@ def translate_detail(text, language, context="", source=None):
 LATIN_SCRIPT = {"English", "Spanish", "French", "German"}  # languages written with a, b, c...
 
 
-def detect_language(text, sender, context=""):
-    """Which language is a chat message in? It's almost always one of the sender's
-    two languages, and the writing system usually tells us which one."""
-    pair = [sender["native"], sender["learning"]]
+def script_language(text, *likely):
+    """Guess the language from the writing system alone. None = it uses a, b, c
+    (could be English, Spanish, ...). likely = languages the person uses."""
     if re.search(r"[぀-ヿ]", text):        # hiragana / katakana
         return "Japanese"
     if re.search(r"[Ѐ-ӿ]", text):        # Cyrillic
         return "Russian"
     if re.search(r"[一-鿿]", text):        # Chinese characters (Japanese uses them too)
-        return "Japanese" if "Japanese" in pair else "Chinese"
+        return "Chinese" if "Chinese" in likely and "Japanese" not in likely else "Japanese"
+    return None
+
+
+def detect_language(text, sender, context=""):
+    """Which language is a chat message in? It's almost always one of the sender's
+    two languages, and the writing system usually tells us which one."""
+    pair = [sender["native"], sender["learning"]]
+    by_script = script_language(text, *pair)
+    if by_script:
+        return by_script
     latin = [language for language in pair if language in LATIN_SCRIPT]
     if len(latin) == 1:                            # e.g. English <-> Japanese: a, b, c means English
         return latin[0]

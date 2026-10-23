@@ -81,10 +81,21 @@ async function start() {
       enterApp();
     } else if (!session) {
       loggedIn = false;
-      showScreen("loginScreen");
+      showScreen("landingScreen"); // visitors start on the landing page
     }
   });
 }
+
+// LANDING PAGE buttons (there are several of each, so we use classes instead of ids)
+document.querySelectorAll(".to-login").forEach(button => (button.onclick = () => showScreen("loginScreen")));
+document.querySelectorAll(".to-register").forEach(button => (button.onclick = () => showScreen("registerScreen")));
+document.querySelectorAll(".to-landing").forEach(link => {
+  link.onclick = event => {
+    event.preventDefault();
+    showScreen("landingScreen");
+  };
+});
+el("howItWorksBtn").onclick = () => el("howItWorks").scrollIntoView({ behavior: "smooth" });
 
 el("toRegister").onclick = event => {
   event.preventDefault(); // it's a link: don't jump to "#"
@@ -914,6 +925,84 @@ function renderRoomMessages() {
 }
 
 
+// ---------- PRONUNCIATION ----------
+// The browser can read text out loud ("speech synthesis"), free, built into Chrome,
+// Edge, Safari and Firefox. It uses voices installed on the computer or phone.
+const SPEAKER_ICON = '<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z M16 9a4 4 0 0 1 0 6 M18.5 6.5a8 8 0 0 1 0 11"/></svg>';
+document.querySelectorAll(".speak-btn").forEach(button => (button.innerHTML = SPEAKER_ICON));
+
+function makeSpeakButton(text, language) {
+  const button = document.createElement("button");
+  button.className = "speak-btn";
+  button.title = "Listen";
+  button.innerHTML = SPEAKER_ICON;
+  button.onclick = event => {
+    event.stopPropagation(); // don't also trigger whatever is under the button
+    speak(text, language);
+  };
+  return button;
+}
+
+// If we don't know the language, guess from the writing system (or use what I'm learning)
+function guessLanguage(text) {
+  if (/[぀-ヿ]/.test(text)) return "Japanese";
+  if (/[Ѐ-ӿ]/.test(text)) return "Russian";
+  if (/[一-鿿]/.test(text)) return profile.learning === "Chinese" ? "Chinese" : "Japanese";
+  return profile.learning;
+}
+
+function speak(text, language) {
+  if (!text) return;
+  if (!window.speechSynthesis) {
+    showToast("Your browser can't read words out loud.");
+    return;
+  }
+  const lang = SPEECH_LOCALES[language || guessLanguage(text)];
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = lang;
+  // Pick a voice for that language if the computer has one
+  const voice = speechSynthesis.getVoices().find(v => v.lang.replace("_", "-").startsWith(lang.slice(0, 2)));
+  if (voice) utterance.voice = voice;
+  utterance.rate = 0.9; // a little slower than normal, easier for learners
+  speechSynthesis.cancel(); // stop anything that's still playing
+  speechSynthesis.speak(utterance);
+}
+
+el("popupSpeakWord").onclick = () => speak(popupWord.word, popupWord.language);
+el("popupSpeakPhrase").onclick = () => speak(popupWord.phrase, popupWord.language);
+el("studySpeakWord").onclick = () => {
+  const card = studyCards[studyIndex];
+  speak(card.word, card.language);
+};
+el("studySpeakExample").onclick = () => {
+  const card = studyCards[studyIndex];
+  speak(card.example, card.language);
+};
+
+
+// ---------- PROFICIENCY RINGS ----------
+// Every card has a proficiency from 0 to 100%. "Know it" in study mode adds 25,
+// "Still learning" takes away 10. The ring fills up and goes red -> yellow -> green.
+const KNOW_IT_BONUS = 25;
+const STILL_LEARNING_PENALTY = 10;
+
+function setRing(ring, percent) {
+  const p = Math.max(0, Math.min(100, Math.round(percent || 0)));
+  ring.style.setProperty("--p", p);                          // how much of the circle is filled
+  ring.style.setProperty("--ring", `hsl(${p * 1.2}, 85%, 58%)`); // hue 0 = red, 60 = yellow, 120 = green
+  ring.querySelector("span").textContent = p + "%";
+  ring.title = `${p}% proficiency`;
+}
+
+function makeRing(percent) {
+  const ring = document.createElement("div");
+  ring.className = "ring";
+  ring.appendChild(document.createElement("span"));
+  setRing(ring, percent);
+  return ring;
+}
+
+
 // ---------- LIBRARY ----------
 // Ready-made decks for everyone. "Add to my decks" copies one into my own decks.
 async function openLibrary() {
@@ -1138,6 +1227,7 @@ async function openWordPopup(span, word, sentence, language, index) {
   // The phrase around the word (not shown if the phrase IS just the word)
   const phrase = clauseAround(sentence, index);
   const showPhrase = phrase.length > 0 && clean(phrase) !== word;
+  showing.phrase = phrase; // for the speaker button
 
   el("popupWord").textContent = word;
   el("popupLang").textContent = language || "";
@@ -1264,6 +1354,8 @@ function showStudyCard() {
   el("studyTranslation").textContent = card.translation || "(no translation yet)";
   el("studyExplanation").textContent = card.explanation || ""; // notes from the library / Anki deck
   el("studyExample").textContent = card.example ? `"${card.example}"` : "";
+  el("studySpeakExample").hidden = !card.example;
+  setRing(el("studyRing"), card.proficiency);
   el("studyAnswer").hidden = true;
 }
 
@@ -1274,23 +1366,37 @@ el("showAnswerBtn").onclick = () => {
   el("studyReportBtn").hidden = false;
 };
 
-// Save how well I know the card, then go to the next one
+// Save how well I know the card (and its new proficiency), then go to the next one
 async function answerCard(status) {
   const card = studyCards[studyIndex];
-  if (status === "known") knownCount++;
+  const before = card.proficiency || 0;
+  if (status === "known") {
+    knownCount++;
+    card.proficiency = Math.min(100, before + KNOW_IT_BONUS);
+  } else {
+    card.proficiency = Math.max(0, before - STILL_LEARNING_PENALTY);
+  }
   card.status = status;
   studyIndex++;
   showStudyCard();
   await api("/api/flashcards/" + encodeURIComponent(card.word), {
     method: "PATCH",
-    body: JSON.stringify({ status }),
+    body: JSON.stringify({ status, proficiency: card.proficiency }),
   });
 }
 
 el("knowItBtn").onclick = () => answerCard("known");
 el("stillLearningBtn").onclick = () => answerCard("learning");
 el("studyAgainBtn").onclick = () => startStudy(studyDeck);
-el("studyBackBtn").onclick = () => showView("deckView");
+
+// Leave study mode: at the end, or halfway through. Cards I already answered are saved.
+function exitStudy() {
+  if (window.speechSynthesis) speechSynthesis.cancel(); // stop any pronunciation still playing
+  renderDecks(); // so the rings show my new progress
+  showView("deckView");
+}
+el("studyBackBtn").onclick = exitStudy;
+el("studyExitBtn").onclick = exitStudy;
 el("studyReportBtn").onclick = () => {
   const card = studyCards[studyIndex];
   openReport(card.word, card.translation, card.example);
@@ -1317,7 +1423,10 @@ function appendWords(container, text, language) {
       const key = clean(part.segment);
       // ⭐ the highlight! Only for words I saved myself from conversations
       // (imported decks can have thousands of words, that would color everything)
-      if (deck[key] && (deck[key].source || "chat") === "chat") span.style.background = deck[key].color;
+      if (deck[key] && (deck[key].source || "chat") === "chat") {
+        span.style.background = deck[key].color;
+        span.classList.add("saved"); // dark text, so it's readable on the highlight color
+      }
       // hover or tap: see what it means. part.index = where the word starts in the text
       attachWordPopup(span, key, text, language, part.index);
     }
@@ -1419,9 +1528,8 @@ function renderDecks() {
       const word = document.createElement("span");
       word.className = "swatch";
       word.style.background = card.color;
-      // ✅ = I know it, 😅 = still learning (from study mode)
-      const icon = { known: " ✅", learning: " 😅" }[card.status] || "";
-      word.textContent = card.word + icon;
+      word.textContent = card.word;
+      const ring = makeRing(card.proficiency); // how well I know it
       const translation = document.createElement("span");
       translation.className = "card-translation" + (card.translation ? "" : " missing");
       translation.textContent = card.translation || "add translation";
@@ -1430,7 +1538,7 @@ function renderDecks() {
       remove.textContent = "✕";
       remove.title = "Delete card";
       remove.onclick = () => deleteWord(card.word);
-      li.append(word, translation, remove);
+      li.append(ring, word, translation, makeSpeakButton(card.word, card.language), remove);
       list.appendChild(li);
     });
     if (cards.length > SHOWN) {

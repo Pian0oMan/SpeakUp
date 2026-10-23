@@ -13,10 +13,144 @@
 <body>
   <!-- Every screen is a <section class="screen">. JavaScript shows one at a time. -->
 
+  <!-- ===== LANDING PAGE: what visitors see before they log in ===== -->
+  <section id="landingScreen" class="screen landing" hidden>
+    <nav class="landing-nav">
+      <span class="wordmark">Speak Up</span>
+      <div class="nav-buttons">
+        <button class="ghost to-login">Log in</button>
+        <button class="primary to-register">Sign up</button>
+      </div>
+    </nav>
+
+    <!-- HERO: the big first impression -->
+    <header class="landing-hero">
+      <div>
+        <span class="eyebrow">Language learning, but you actually talk</span>
+        <h1>Stop studying.<br><span class="gradient-text">Start speaking.</span></h1>
+        <p class="lead">
+          Speak Up matches you with real people who speak the language you're learning,
+          and who want to learn yours. Video, voice, and chat, with translation one hover away.
+        </p>
+        <div class="hero-buttons">
+          <button class="primary to-register">Start speaking, it's free</button>
+          <button class="ghost" id="howItWorksBtn">How it works</button>
+        </div>
+      </div>
+
+      <!-- A pretend conversation, to show what it feels like -->
+      <div class="demo-chat" aria-hidden="true">
+        <div class="demo-top"><span class="demo-dot"></span> Yuki · speaks Japanese · learning English</div>
+        <div class="message">こんにちは！週末は何をしているの？</div>
+        <div class="message me">I usually go to the <span class="demo-highlight">park</span> and read!</div>
+        <div class="message">いいね！公園のベンチで読むの？</div>
+        <div class="message me">はい！ベンチで本を読みます</div>
+        <div class="demo-popup">
+          <strong>ベンチ</strong> <span class="muted">· Japanese</span>
+          <div>bench</div>
+          <div class="muted">"公園のベンチで読むの" → Do you read on a park bench?</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- "Hello" in many languages, scrolling forever -->
+    <div class="marquee" aria-hidden="true">
+      <div class="marquee-track">
+        <span>Hello</span><span>こんにちは</span><span>Hola</span><span>Bonjour</span><span>Hallo</span><span>你好</span><span>Привет</span>
+        <span>Hello</span><span>こんにちは</span><span>Hola</span><span>Bonjour</span><span>Hallo</span><span>你好</span><span>Привет</span>
+      </div>
+    </div>
+
+    <!-- HOW IT WORKS -->
+    <section id="howItWorks" class="landing-section">
+      <div class="section-title">
+        <h2>How it works</h2>
+        <p>Three steps from "I can't speak" to your first real conversation.</p>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <h3>Pick your languages</h3>
+          <p>Tell us what you speak and what you're learning. That's the whole setup.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <h3>Get matched, or join a room</h3>
+          <p>Quick Match pairs you with someone who's learning your language. Or drop into a voice room with up to 10 people.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <h3>Hover, save, remember</h3>
+          <p>Don't know a word? Hover over it. Save it to your deck, and practice it until the ring turns green.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="landing-section">
+      <div class="section-title">
+        <h2>Everything you need to really talk</h2>
+        <p>Built for conversation first, and studying second.</p>
+      </div>
+      <div class="features">
+        <div class="feature">
+          <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M3 7h12v10H3z M15 10l6-3v10l-6-3z"/></svg></div>
+          <h3>Video and voice calls</h3>
+          <p>Talk face to face, or keep your camera off. You decide when to turn things on.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3 3-5 6-5s6 2 6 5"/><circle cx="17" cy="9" r="2.5"/><path d="M16 15c3 0 5 2 5 5"/></svg></div>
+          <h3>Voice rooms</h3>
+          <p>Group conversations for 3 to 10 people, with a side chat for when you'd rather listen.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M4 5h9M8 3v2M6 5c0 4 3 7 6 8M11 5c-1 4-4 7-7 8M13 20l4-9 4 9M14.5 17h5"/></svg></div>
+          <h3>Hover to translate</h3>
+          <p>Every word and phrase can be translated in context, so you learn what it meant in your conversation.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 13h4M13 13h4M7 16h10"/></svg></div>
+          <h3>Live captions</h3>
+          <p>See what people say as they say it, and translate any spoken word.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 8 8"/></svg></div>
+          <h3>Decks that track you</h3>
+          <p>Every saved word gets a proficiency ring that fills up as you practice. Import your Anki decks, too.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg></div>
+          <h3>Icebreakers</h3>
+          <p>Never run out of things to say. A new question pops up every 90 seconds.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- DEMO SCREENSHOTS (pictures come later) -->
+    <section class="landing-section">
+      <div class="section-title">
+        <h2>See it in action</h2>
+        <p>Screenshots coming soon.</p>
+      </div>
+      <div class="screens">
+        <div class="screen-frame">Video call + live captions</div>
+        <div class="screen-frame">Your decks + proficiency rings</div>
+      </div>
+    </section>
+
+    <div class="final-cta">
+      <h2>Your first conversation is one click away</h2>
+      <p>Free, no download, works in your browser.</p>
+      <button class="to-register">Create your account</button>
+    </div>
+    <footer class="landing-footer">Speak Up · a language exchange project</footer>
+  </section>
+
   <!-- ===== LOG IN ===== -->
   <section id="loginScreen" class="screen auth" hidden>
     <div class="card">
-      <h1 class="logo">Speak Up!! 🗣️</h1>
+      <a href="#" class="back-link to-landing">← Back</a>
+      <h1 class="logo">Speak Up!!</h1>
       <p class="tagline">Learn a language by talking to people who speak it.</p>
       <form id="loginForm">
         <label>Email <input id="loginEmail" type="email" required></label>
@@ -31,7 +165,8 @@
   <!-- ===== CREATE ACCOUNT (languages are chosen here, once) ===== -->
   <section id="registerScreen" class="screen auth" hidden>
     <div class="card">
-      <h1 class="logo">Speak Up!! 🗣️</h1>
+      <a href="#" class="back-link to-landing">← Back</a>
+      <h1 class="logo">Speak Up!!</h1>
       <p class="tagline">Create your account</p>
       <form id="registerForm">
         <label>Your name <input id="regName" maxlength="20" placeholder="e.g. Alex" required></label>
@@ -161,16 +296,26 @@
       <!-- STUDY: one flashcard at a time -->
       <div id="studyView" class="view" hidden>
         <div class="study-top">
+          <!-- Stop studying any time -->
+          <button id="studyExitBtn" class="ghost small">← Exit</button>
           <h2 id="studyTitle"></h2>
           <span id="studyProgress"></span>
         </div>
         <div id="studyCard" class="study-card">
-          <div id="studyWord" class="study-word"></div>
+          <!-- How well I know this card (filled in by JavaScript) -->
+          <div id="studyRing" class="ring big"><span></span></div>
+          <div class="study-word-row">
+            <div id="studyWord" class="study-word"></div>
+            <button id="studySpeakWord" class="speak-btn big" title="Listen"></button>
+          </div>
           <div id="studyAnswer" hidden>
             <div id="studyReading" class="study-reading"></div>
             <div id="studyTranslation" class="study-translation"></div>
             <div id="studyExplanation" class="study-explanation"></div>
-            <div id="studyExample" class="study-example"></div>
+            <div class="study-example-row">
+              <div id="studyExample" class="study-example"></div>
+              <button id="studySpeakExample" class="speak-btn" title="Listen"></button>
+            </div>
           </div>
         </div>
         <div class="study-buttons">
@@ -300,12 +445,16 @@
   <div id="wordPopup" class="word-popup" hidden>
     <div class="popup-head">
       <strong id="popupWord"></strong>
+      <button id="popupSpeakWord" class="speak-btn" title="Listen"></button>
       <span id="popupLang" class="popup-lang"></span>
     </div>
     <div id="popupTranslation" class="popup-translation"></div>
     <!-- The part of the sentence the word is in, and what it means -->
     <div id="popupPhraseBox" class="popup-phrase" hidden>
-      <div id="popupPhrase" class="popup-phrase-text"></div>
+      <div class="popup-phrase-row">
+        <div id="popupPhrase" class="popup-phrase-text"></div>
+        <button id="popupSpeakPhrase" class="speak-btn" title="Listen"></button>
+      </div>
       <div id="popupPhraseTranslation" class="popup-phrase-translation"></div>
     </div>
     <div class="popup-actions">
