@@ -1,5 +1,6 @@
 -- UPDATE: deck library, Anki import, pronunciation + proficiency.
--- Run this ONCE in Supabase: Dashboard -> SQL Editor -> New query -> paste -> Run.
+-- Run it in Supabase: Dashboard -> SQL Editor -> New query -> paste -> Run.
+-- It is SAFE TO RUN AGAIN: it skips what already exists and replaces the starter decks.
 -- If Supabase offers to "enable RLS" for you, choose to run it AS WRITTEN:
 -- this file already turns on Row Level Security for every new table.
 
@@ -40,10 +41,20 @@ alter table library_cards enable row level security;
 
 -- Logged-in users can READ the library. There are no insert/update/delete policies,
 -- so nobody can change it from the website, only the developers here in Supabase.
+-- ("drop ... if exists" first, so running this file twice doesn't fail)
+drop policy if exists "Logged-in users can read library decks" on library_decks;
 create policy "Logged-in users can read library decks" on library_decks
   for select to authenticated using (true);
+drop policy if exists "Logged-in users can read library cards" on library_cards;
 create policy "Logged-in users can read library cards" on library_cards
   for select to authenticated using (true);
+
+-- Remove the starter decks before adding them (again), so they never appear twice.
+-- Their cards go too ("on delete cascade"). Decks users copied are separate and stay.
+delete from library_decks where name in (
+  'Japanese Greetings', 'Spanish Basics', 'Everyday English',  -- the old, small starter decks
+  'Japanese for Beginners', 'Spanish for Beginners', 'English for Beginners'
+);
 
 
 -- =====================================================================
