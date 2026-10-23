@@ -731,11 +731,39 @@ el("roomMax").value = "6";
 function openRooms() {
   socket.emit("list_rooms");
   renderRoomList();
-  el("roomLanguage").value = profile.learning;
-  el("roomStatus").textContent = "";
   showView("roomsView");
 }
 el("navRooms").onclick = openRooms;
+
+// "+ Create room" opens a pop-up window
+el("openCreateRoomBtn").onclick = () => {
+  el("roomName").value = "";
+  el("roomLanguage").value = profile.learning;
+  el("roomStatus").textContent = "";
+  el("createRoomDialog").showModal();
+};
+
+// FILTERS: fill the language list, and redraw the rooms whenever a filter changes
+LANGUAGES.forEach(lang => el("roomFilterLanguage").add(new Option(lang, lang)));
+["roomSearch", "roomFilterLanguage", "roomFilterSize", "roomFilterFriends", "roomFilterHideFull"]
+  .forEach(id => el(id).addEventListener("input", renderRoomList));
+
+// Does a room pass all the filters?
+function roomMatchesFilters(room) {
+  const search = el("roomSearch").value.trim().toLowerCase();
+  const language = el("roomFilterLanguage").value;
+  const size = el("roomFilterSize").value;
+  const friendIds = new Set(social.friends.map(friend => friend.user_id));
+
+  if (search && !room.name.toLowerCase().includes(search)) return false;
+  if (language && room.language !== language) return false;
+  if (size === "small" && room.max_size > 4) return false;
+  if (size === "medium" && (room.max_size < 5 || room.max_size > 7)) return false;
+  if (size === "large" && room.max_size < 8) return false;
+  if (el("roomFilterFriends").checked && !room.member_ids.some(id => friendIds.has(id))) return false;
+  if (el("roomFilterHideFull").checked && room.count >= room.max_size) return false;
+  return true;
+}
 
 socket.on("rooms", list => {
   roomList = list;
@@ -749,7 +777,13 @@ socket.on("rooms", list => {
 function renderRoomList() {
   const box = el("roomList");
   box.innerHTML = "";
-  roomList.forEach(room => {
+  const shown = roomList.filter(roomMatchesFilters);
+  if (shown.length === 0) {
+    box.innerHTML = roomList.length
+      ? '<p class="empty-note">No rooms match your filters.</p>'
+      : '<p class="empty-note">No rooms open right now. Create one!</p>';
+  }
+  shown.forEach(room => {
     const card = document.createElement("div");
     card.className = "room-card";
     const name = document.createElement("h3");
@@ -792,6 +826,7 @@ socket.on("room_error", message => {
 
 // I'm in! The server sends the room, who's already there, and the recent side chat.
 socket.on("room_joined", data => {
+  if (el("createRoomDialog").open) el("createRoomDialog").close(); // I made this room
   closeRoomPeers();
   hangUp(); // just in case I was in a 1-on-1 call
   currentRoom = data.room;
@@ -1312,6 +1347,7 @@ function renderSocial() {
   el("requestBadge").textContent = social.incoming.length;
 
   updateAddPartnerButton();
+  renderRoomList(); // the "Friends only" room filter depends on my friends
   if (currentRoom) renderMembers();
 }
 

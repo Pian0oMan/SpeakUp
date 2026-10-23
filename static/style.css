@@ -529,6 +529,30 @@ option:disabled { color: #5d596e; }  /* the language already picked on the other
 .room-card .room-people { font-weight: 600; }
 .create-room h3 { margin: 0; }
 
+/* Room filters: one row of search + dropdowns + checkboxes */
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.filters input[type="search"] { flex: 1; min-width: 180px; }
+.filters select { min-width: 140px; }
+.toggle {
+  flex: 0;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  font-weight: 400;
+  white-space: nowrap;
+  background: var(--surface);
+  padding: 9px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.toggle input { accent-color: var(--brand); width: 16px; height: 16px; padding: 0; }
+
 /* ---------- Library + Anki import ---------- */
 .library-preview { color: var(--text); opacity: 0.8; font-size: 14px; }
 .anki-form { max-width: 560px; margin-top: 16px; }

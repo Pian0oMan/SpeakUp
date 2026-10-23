@@ -257,19 +257,29 @@
 
       <!-- VOICE ROOMS: browse and create -->
       <div id="roomsView" class="view" hidden>
-        <h2>Voice Rooms</h2>
+        <div class="page-head">
+          <h2>Voice Rooms</h2>
+          <button id="openCreateRoomBtn" class="primary">+ Create room</button>
+        </div>
         <p class="hint">Group conversations for 3 to 10 people. Talk, or just listen and use the side chat.</p>
+
+        <!-- FILTERS: they only change what's shown, instantly (no server needed) -->
+        <div class="filters">
+          <input id="roomSearch" type="search" placeholder="Search rooms...">
+          <select id="roomFilterLanguage">
+            <option value="">All languages</option>
+          </select>
+          <select id="roomFilterSize">
+            <option value="">Any size</option>
+            <option value="small">Small (up to 4)</option>
+            <option value="medium">Medium (5 to 7)</option>
+            <option value="large">Large (8 to 10)</option>
+          </select>
+          <label class="toggle"><input id="roomFilterFriends" type="checkbox"> Friends only</label>
+          <label class="toggle"><input id="roomFilterHideFull" type="checkbox"> Hide full rooms</label>
+        </div>
+
         <div id="roomList" class="room-list"></div>
-        <form id="createRoomForm" class="card create-room">
-          <h3>Create a room</h3>
-          <label>Room name <input id="roomName" maxlength="40" placeholder="e.g. Late night Japanese practice" required></label>
-          <div class="row">
-            <label>Language <select id="roomLanguage" class="lang-select"></select></label>
-            <label>Max people <select id="roomMax"></select></label>
-          </div>
-          <button type="submit" class="primary">Create and join</button>
-          <p id="roomStatus" class="status"></p>
-        </form>
       </div>
 
       <!-- MY DECKS -->
@@ -472,6 +482,23 @@
       <button id="popupReportBtn" class="link-btn">Wrong?</button>
     </div>
   </div>
+
+  <!-- CREATE A VOICE ROOM (pop-up window) -->
+  <dialog id="createRoomDialog" class="card">
+    <form id="createRoomForm">
+      <h3>Create a voice room</h3>
+      <label>Room name <input id="roomName" maxlength="40" placeholder="e.g. Late night Japanese practice" required></label>
+      <div class="row">
+        <label>Language <select id="roomLanguage" class="lang-select"></select></label>
+        <label>Max people <select id="roomMax"></select></label>
+      </div>
+      <p id="roomStatus" class="status"></p>
+      <div class="dialog-buttons">
+        <button type="button" class="ghost close-dialog">Cancel</button>
+        <button type="submit" class="primary">Create and join</button>
+      </div>
+    </form>
+  </dialog>
 
   <!-- NEW DECK (pop-up window) -->
   <dialog id="newDeckDialog" class="card">

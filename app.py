@@ -639,7 +639,9 @@ add_room("Anime & Manga Talk", "Japanese", 10, "Speak Up", permanent=True)
 def room_summary(room):
     """What the room list shows (not the members' private details)."""
     return {"id": room["id"], "name": room["name"], "language": room["language"],
-            "max_size": room["max_size"], "host": room["host"], "count": len(room["members"])}
+            "max_size": room["max_size"], "host": room["host"], "count": len(room["members"]),
+            # account ids of who's inside (for the "friends only" filter), nothing private
+            "member_ids": [member["user_id"] for member in room["members"].values()]}
 
 
 def broadcast_rooms():
