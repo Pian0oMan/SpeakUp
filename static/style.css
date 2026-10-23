@@ -177,8 +177,64 @@ input:focus, select:focus { outline: 2px solid var(--brand); border-color: trans
 }
 .stat strong { font-size: 26px; font-weight: 800; }
 .stat span { color: var(--muted); font-size: 14px; }
-.stat.soon { opacity: 0.6; }
-.stat.soon strong { font-size: 18px; }
+.stat.clickable { text-align: left; }
+.stat.clickable:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1); }
+
+/* ---------- Voice rooms: the list ---------- */
+.room-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.room-card {
+  background: var(--card);
+  border-radius: 20px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+.room-card h3 { margin: 0; font-size: 18px; }
+.room-card .room-meta { color: var(--muted); font-size: 14px; }
+.room-card .room-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+.room-card .room-people { font-weight: 600; }
+.create-room h3 { margin: 0; }
+
+/* ---------- Voice rooms: inside a room ---------- */
+.room-stage { overflow-y: auto; padding: 24px 24px 100px; }  /* room at the bottom for the mic button */
+.room-members {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 16px;
+}
+.member-tile {
+  background: rgba(255, 255, 255, 0.07);
+  color: white;
+  border-radius: 18px;
+  padding: 18px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+  border: 2px solid transparent;
+}
+.member-tile.talking { border-color: var(--send); }  /* mic is on */
+.member-tile .avatar { width: 72px; height: 72px; font-size: 30px; }
+.member-langs { font-size: 12px; color: #bbb; }
+.mic-state { font-size: 12px; color: #ff8a80; }
+.member-tile.talking .mic-state { color: #9be38a; }
+.member-caption {
+  font-size: 14px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 8px;
+  padding: 4px 8px;
+  margin-top: 4px;
+}
+.room-count { color: var(--muted); font-weight: 600; }
+.sender-name { font-size: 12px; font-weight: 600; color: var(--brand-dark); margin-bottom: 2px; }
 
 /* ---------- Searching ---------- */
 .center {
@@ -202,8 +258,9 @@ input:focus, select:focus { outline: 2px solid var(--brand); border-color: trans
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* ---------- Chat + video screen ---------- */
-/* A grid: top bar across the top, video on the left, chat on the right */
-#chatScreen {
+/* A grid: top bar across the top, video on the left, chat on the right.
+   Voice rooms use the same layout: people on the left, side chat on the right. */
+#chatScreen, #roomScreen {
   height: 100vh;
   display: grid;
   grid-template-columns: 1fr 380px;
@@ -332,7 +389,7 @@ input:focus, select:focus { outline: 2px solid var(--brand); border-color: trans
 .inline-label { flex-direction: row; align-items: center; gap: 6px; flex: 0; font-weight: 400; font-size: 13px; white-space: nowrap; }
 .inline-label select { padding: 4px 8px; font-size: 13px; max-width: 130px; }
 #colorPicker { padding: 0; width: 28px; height: 28px; border: none; background: none; }
-#messages { flex: 1; overflow-y: auto; min-height: 0; padding: 4px 0; }
+#messages, .message-list { flex: 1; overflow-y: auto; min-height: 0; padding: 4px 0; }
 
 .message {
   padding: 8px 12px;
@@ -384,9 +441,9 @@ input:focus, select:focus { outline: 2px solid var(--brand); border-color: trans
 .word { cursor: pointer; border-radius: 4px; padding: 0 2px; }
 .word:hover { outline: 1px dashed #494c55; }
 
-#chatForm { flex-direction: row; gap: 8px; }
-#chatInput { flex: 1; border-radius: 999px; padding: 10px 16px; }
-#chatForm button {
+#chatForm, .chat-form { flex-direction: row; gap: 8px; }
+#chatInput, .chat-form input { flex: 1; border-radius: 999px; padding: 10px 16px; }
+#chatForm button, .chat-form button {
   background: var(--send);
   color: white;
   padding: 8px 18px;
@@ -520,7 +577,9 @@ dialog h3 { margin: 0; }
   .hero { flex-direction: column; align-items: stretch; text-align: center; }
   .chips { justify-content: center; }
 
-  #chatScreen { grid-template-columns: 1fr; grid-template-rows: auto 40vh 1fr; }
+  #chatScreen, #roomScreen { grid-template-columns: 1fr; grid-template-rows: auto 40vh 1fr; }
+  .room-members { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+  .member-tile .avatar { width: 52px; height: 52px; font-size: 22px; }
   .side { border-left: none; }
   .row { flex-direction: column; }
   #localVideo { width: 30%; min-width: 90px; }

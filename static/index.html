@@ -57,7 +57,7 @@
     <nav class="sidebar">
       <div class="brand">Speak Up</div>
       <button id="navHome" class="nav-item" data-view="homeView">⚡ <span>Match</span></button>
-      <button class="nav-item" disabled title="Coming soon">🎙️ <span>Rooms</span></button>
+      <button id="navRooms" class="nav-item" data-view="roomsView">🎙️ <span>Rooms</span></button>
       <button id="navDeck" class="nav-item" data-view="deckView">🃏 <span>Deck</span></button>
       <button id="navProfile" class="nav-item" data-view="profileView">👤 <span>Profile</span></button>
       <button id="logoutBtn" class="nav-item logout">⏻ <span>Log out</span></button>
@@ -93,11 +93,28 @@
             <strong id="learningStat"></strong>
             <span>you're learning</span>
           </div>
-          <div class="stat soon">
-            <strong>🎙️ Voice Rooms</strong>
-            <span>coming soon</span>
-          </div>
+          <button id="roomsStat" class="stat clickable">
+            <strong id="roomsCount">0</strong>
+            <span>voice rooms open</span>
+          </button>
         </div>
+      </div>
+
+      <!-- VOICE ROOMS: browse and create -->
+      <div id="roomsView" class="view" hidden>
+        <h2>Voice Rooms</h2>
+        <p class="hint">Group conversations for 3 to 10 people. Talk, or just listen and use the side chat.</p>
+        <div id="roomList" class="room-list"></div>
+        <form id="createRoomForm" class="card create-room">
+          <h3>Create a room</h3>
+          <label>Room name <input id="roomName" maxlength="40" placeholder="e.g. Late night Japanese practice" required></label>
+          <div class="row">
+            <label>Language <select id="roomLanguage" class="lang-select"></select></label>
+            <label>Max people <select id="roomMax"></select></label>
+          </div>
+          <button type="submit" class="primary">Create and join</button>
+          <p id="roomStatus" class="status"></p>
+        </form>
       </div>
 
       <!-- MY DECKS -->
@@ -216,6 +233,36 @@
       <!-- A <form> lets the Enter key AND the button both send -->
       <form id="chatForm">
         <input id="chatInput" placeholder="Type a message... (click any word to save it)" autocomplete="off">
+        <button type="submit">Send</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ===== INSIDE A VOICE ROOM ===== -->
+  <section id="roomScreen" class="screen" hidden>
+    <div class="topbar">
+      <button id="leaveRoomBtn" class="ghost">Leave room</button>
+      <span id="roomInfo"></span>
+      <span id="roomCount" class="room-count"></span>
+    </div>
+
+    <!-- LEFT: everyone in the room. You join muted. -->
+    <div class="stage room-stage">
+      <div id="roomMembers" class="room-members"></div>
+      <div class="call-controls">
+        <button id="roomMicBtn" class="round off" title="Microphone">🎤</button>
+        <label class="speak-label" title="The language you're speaking, for live captions">
+          Speaking <select id="roomSpeakLang"></select>
+        </label>
+      </div>
+    </div>
+
+    <!-- RIGHT: the side chat, for people who'd rather type -->
+    <div class="side">
+      <div class="side-top"><span>Side chat · hover over words to translate</span></div>
+      <div id="roomMessages" class="message-list"></div>
+      <form id="roomChatForm" class="chat-form">
+        <input id="roomChatInput" placeholder="Type a message..." autocomplete="off">
         <button type="submit">Send</button>
       </form>
     </div>

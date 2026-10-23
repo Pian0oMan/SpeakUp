@@ -138,6 +138,7 @@ el("registerForm").onsubmit = async event => {
 };
 
 el("logoutBtn").onclick = () => {
+  if (currentRoom) leaveRoom();
   leaveChat();
   sb.auth.signOut();
 };
@@ -170,6 +171,7 @@ function openMenu() {
   blockSameLanguage(["matchNative", "matchLearning"]);
   el("learningStat").textContent = profile.learning;
   el("deckCount").textContent = Object.keys(deck).length;
+  socket.emit("list_rooms"); // for the "voice rooms open" number
   showView("homeView");
 }
 
@@ -449,7 +451,8 @@ function sendMediaState() {
   sendCall({ type: "media", mic: !!micTrack, cam: !!camTrack });
 }
 
-el("micBtn").onclick = async () => {
+// The mic button works the same in a 1-on-1 call and in a voice room
+async function toggleMic() {
   if (micTrack) {
     micTrack.stop();
     micTrack = null;
@@ -457,16 +460,30 @@ el("micBtn").onclick = async () => {
     try {
       micTrack = (await navigator.mediaDevices.getUserMedia({ audio: true })).getAudioTracks()[0];
     } catch {
-      addSystemMessage("Couldn't use your microphone. Check your browser permissions.");
+      notice("Couldn't use your microphone. Check your browser permissions.");
       return;
     }
   }
   if (micTrack) startCaptions(); // mic on = live captions on
   else stopCaptions();
-  attachMyMedia();
+  attachMyMedia();                               // 1-on-1 call
+  Object.values(roomPeers).forEach(attachRoomMic); // everyone in my voice room
   updateMyButtons();
-  sendMediaState();
-};
+  if (currentRoom) {
+    socket.emit("room_media", { mic: !!micTrack });
+    renderMembers();
+  } else {
+    sendMediaState();
+  }
+}
+el("micBtn").onclick = toggleMic;
+el("roomMicBtn").onclick = toggleMic;
+
+// A grey notice in whichever chat I'm in (the 1-on-1 chat or the room's side chat)
+function notice(text) {
+  if (currentRoom) roomNotice(text);
+  else addSystemMessage(text);
+}
 
 el("camBtn").onclick = async () => {
   if (camTrack) {
@@ -496,6 +513,7 @@ function stopMyMedia() {
 // Red buttons = off. Show my own camera in the corner when it's on.
 function updateMyButtons() {
   el("micBtn").classList.toggle("off", !micTrack);
+  el("roomMicBtn").classList.toggle("off", !micTrack);
   el("camBtn").classList.toggle("off", !camTrack);
   el("localVideo").srcObject = camTrack ? new MediaStream([camTrack]) : null;
   el("localVideo").hidden = !camTrack;
@@ -529,14 +547,15 @@ let warnedNoCaptions = false;
 
 function startCaptions() {
   if (!SpeechRecognition) {
-    if (!warnedNoCaptions) addSystemMessage("Live captions work in Chrome and Edge.");
+    if (!warnedNoCaptions) notice("Live captions work in Chrome and Edge.");
     warnedNoCaptions = true;
     return;
   }
   captionsWanted = true;
   if (recognizer) return; // already running
 
-  const language = el("speakLang").value;
+  // Which "Speaking" picker counts: the room's one, or the 1-on-1 call's one
+  const language = el(currentRoom ? "roomSpeakLang" : "speakLang").value;
   recognizer = new SpeechRecognition();
   recognizer.lang = SPEECH_LOCALES[language];
   recognizer.continuous = true;      // keep listening, don't stop after one sentence
@@ -560,19 +579,19 @@ function startCaptions() {
       lastCaptionSent = Date.now();
       socket.emit("caption", { text: unfinished, final: false, language });
     }
-    showCaption(el("myCaption"), unfinished, language); // so I can see it's working
+    showMyCaption(unfinished, language); // so I can see it's working
   };
 
   // Chrome stops listening after a few seconds of silence: just start again
   recognizer.onend = () => {
     recognizer = null;
-    showCaption(el("myCaption"), "", language);
+    showMyCaption("", language);
     if (captionsWanted) setTimeout(startCaptions, 300);
   };
   recognizer.onerror = event => {
     if (event.error === "not-allowed" || event.error === "service-not-allowed") {
       captionsWanted = false;
-      addSystemMessage("Live captions need microphone permission.");
+      notice("Live captions need microphone permission.");
     }
   };
   recognizer.start();
@@ -584,15 +603,21 @@ function stopCaptions() {
 }
 
 // Switching the "Speaking" language: restart the recognizer with the new language
-el("speakLang").onchange = () => {
+el("speakLang").onchange = el("roomSpeakLang").onchange = () => {
   if (recognizer) recognizer.stop(); // onend starts it again, with the new language
 };
 
 // Show a caption, word by word, so words can be hovered for a translation
 function showCaption(box, text, language) {
+  if (!box) return;
   box.innerHTML = "";
   box.hidden = !text;
   if (text) appendWords(box, text, language);
+}
+
+// What I'm saying: over the video in a 1-on-1 call, or on my own tile in a room
+function showMyCaption(text, language) {
+  showCaption(el(currentRoom ? "myRoomCaption" : "myCaption"), text, language);
 }
 
 // My partner is talking: show their words, then hide them after 4 seconds of quiet
@@ -602,6 +627,291 @@ socket.on("caption", caption => {
   clearTimeout(captionTimer);
   captionTimer = setTimeout(() => showCaption(el("partnerCaption"), "", null), 4000);
 });
+
+
+// ---------- VOICE ROOMS ----------
+let roomList = [];      // all open rooms, sent by the server whenever something changes
+let currentRoom = null; // the room I'm in (null = not in a room)
+let roomMembers = {};   // everyone ELSE in my room: sid -> { name, native, learning, mic, caption }
+let roomMessages = [];  // the side chat
+let roomPeers = {};     // sid -> RTCPeerConnection: one direct audio link to each person
+
+// "Max people" dropdown: 3 to 10
+for (let n = 3; n <= 10; n++) el("roomMax").add(new Option(n, n));
+el("roomMax").value = "6";
+
+function openRooms() {
+  socket.emit("list_rooms");
+  renderRoomList();
+  el("roomLanguage").value = profile.learning;
+  el("roomStatus").textContent = "";
+  showView("roomsView");
+}
+el("navRooms").onclick = openRooms;
+el("roomsStat").onclick = openRooms;
+
+socket.on("rooms", list => {
+  roomList = list;
+  el("roomsCount").textContent = list.length;
+  renderRoomList();
+  if (currentRoom) {
+    const mine = list.find(room => room.id === currentRoom.id);
+    if (mine) currentRoom = mine; // keeps the "4 / 10" count up to date
+  }
+});
+
+function renderRoomList() {
+  const box = el("roomList");
+  box.innerHTML = "";
+  roomList.forEach(room => {
+    const card = document.createElement("div");
+    card.className = "room-card";
+    const name = document.createElement("h3");
+    name.textContent = room.name;
+    const meta = document.createElement("div");
+    meta.className = "room-meta";
+    meta.textContent = `${room.language} · hosted by ${room.host}`;
+    const bottom = document.createElement("div");
+    bottom.className = "room-bottom";
+    const people = document.createElement("span");
+    people.className = "room-people";
+    people.textContent = `${room.count} / ${room.max_size} people`;
+    const join = document.createElement("button");
+    join.className = "primary small";
+    const full = room.count >= room.max_size;
+    join.textContent = full ? "Full" : "Join";
+    join.disabled = full;
+    join.onclick = () => socket.emit("join_room", { token, room_id: room.id });
+    bottom.append(people, join);
+    card.append(name, meta, bottom);
+    box.appendChild(card);
+  });
+}
+
+el("createRoomForm").onsubmit = event => {
+  event.preventDefault();
+  socket.emit("create_room", {
+    token,
+    name: el("roomName").value,
+    language: el("roomLanguage").value,
+    max_size: Number(el("roomMax").value),
+  });
+  el("roomName").value = "";
+};
+
+socket.on("room_error", message => {
+  el("roomStatus").textContent = message;
+  showToast(message);
+});
+
+// I'm in! The server sends the room, who's already there, and the recent side chat.
+socket.on("room_joined", data => {
+  closeRoomPeers();
+  hangUp(); // just in case I was in a 1-on-1 call
+  currentRoom = data.room;
+  roomMembers = {};
+  data.members.forEach(member => (roomMembers[member.sid] = { ...member, mic: false, caption: "" }));
+  roomMessages = data.history;
+
+  // "Speaking" choices for captions: the room's language, plus my two languages
+  const speak = el("roomSpeakLang");
+  speak.innerHTML = "";
+  [...new Set([currentRoom.language, profile.learning, profile.native])]
+    .forEach(lang => speak.add(new Option(lang, lang)));
+
+  el("roomInfo").textContent = `${currentRoom.name} · ${currentRoom.language}`;
+  showScreen("roomScreen");
+  renderMembers();
+  renderRoomMessages();
+
+  // I'm the new one, so I start an audio link with everyone already in the room
+  // (they answer). This way two people never start a link to each other at once.
+  data.members.forEach(member => connectToMember(member.sid, true));
+});
+
+socket.on("room_member_joined", member => {
+  roomMembers[member.sid] = { ...member, mic: false, caption: "" };
+  roomNotice(`${member.name} joined`);
+  renderMembers();
+  // They will start the audio link with me
+});
+
+socket.on("room_member_left", sid => {
+  const member = roomMembers[sid];
+  if (roomPeers[sid]) {
+    roomPeers[sid].close();
+    roomPeers[sid].audio.srcObject = null;
+    delete roomPeers[sid];
+  }
+  delete roomMembers[sid];
+  if (member) roomNotice(`${member.name} left`);
+  renderMembers();
+});
+
+socket.on("room_media", ({ sid, mic }) => {
+  if (roomMembers[sid]) roomMembers[sid].mic = mic;
+  renderMembers();
+});
+
+// Someone in the room is talking: show their words on their tile for a few seconds
+const roomCaptionTimers = {};
+socket.on("room_caption", ({ sid, text, language }) => {
+  showCaption(el("caption-" + sid), text, language);
+  clearTimeout(roomCaptionTimers[sid]);
+  roomCaptionTimers[sid] = setTimeout(() => showCaption(el("caption-" + sid), "", null), 4000);
+});
+
+function leaveRoom() {
+  socket.emit("leave_room");
+  closeRoomPeers();
+  stopMyMedia(); // mic off
+  currentRoom = null;
+  roomMembers = {};
+  openRooms();
+}
+el("leaveRoomBtn").onclick = leaveRoom;
+
+// --- Room audio: one direct WebRTC link to each person ("mesh") ---
+function connectToMember(sid, initiator) {
+  const connection = new RTCPeerConnection({ iceServers: ICE_SERVERS });
+  roomPeers[sid] = connection;
+
+  // Their voice plays through an invisible <audio> element
+  const stream = new MediaStream();
+  connection.audio = new Audio();
+  connection.audio.autoplay = true;
+  connection.audio.srcObject = stream;
+  connection.ontrack = event => {
+    stream.addTrack(event.track);
+    connection.audio.play().catch(() => {});
+  };
+  connection.onicecandidate = event => {
+    if (event.candidate) {
+      socket.emit("room_signal", { to: sid, data: { type: "candidate", candidate: event.candidate } });
+    }
+  };
+
+  if (initiator) {
+    connection.addTransceiver("audio", { direction: "sendrecv" }); // one audio "slot", like 1-on-1 calls
+    attachRoomMic(connection);
+    connection.createOffer()
+      .then(offer => connection.setLocalDescription(offer))
+      .then(() => socket.emit("room_signal", {
+        to: sid, data: { type: "offer", description: connection.localDescription },
+      }));
+  }
+  return connection;
+}
+
+// Put my microphone (or silence, if it's off) into a link
+function attachRoomMic(connection) {
+  const transceiver = connection.getTransceivers().find(t => t.receiver.track.kind === "audio");
+  if (transceiver) transceiver.sender.replaceTrack(micTrack).catch(() => {});
+}
+
+async function handleRoomSignal({ from, data }) {
+  let connection = roomPeers[from];
+  if (data.type === "offer") {
+    if (!connection) connection = connectToMember(from, false);
+    await connection.setRemoteDescription(data.description);
+    connection.getTransceivers().forEach(t => (t.direction = "sendrecv"));
+    attachRoomMic(connection);
+    await connection.setLocalDescription(await connection.createAnswer());
+    socket.emit("room_signal", { to: from, data: { type: "answer", description: connection.localDescription } });
+  } else if (!connection) {
+    return; // a message for a link that's already closed
+  } else if (data.type === "answer") {
+    await connection.setRemoteDescription(data.description);
+  } else if (data.type === "candidate") {
+    await connection.addIceCandidate(data.candidate);
+  }
+}
+
+// One at a time, in order (same reason as in 1-on-1 calls)
+let roomSignalQueue = Promise.resolve();
+socket.on("room_signal", message => {
+  roomSignalQueue = roomSignalQueue.then(() => handleRoomSignal(message))
+    .catch(error => console.error("Room audio error:", error));
+});
+
+function closeRoomPeers() {
+  Object.values(roomPeers).forEach(connection => {
+    connection.close();
+    connection.audio.srcObject = null;
+  });
+  roomPeers = {};
+}
+
+// --- Drawing the room ---
+function renderMembers() {
+  if (!currentRoom) return;
+  const box = el("roomMembers");
+  box.innerHTML = "";
+  const me = { sid: socket.id, name: `${profile.username} (you)`, native: profile.native,
+               learning: profile.learning, mic: !!micTrack, me: true };
+  const everyone = [me, ...Object.values(roomMembers)];
+  everyone.forEach(member => {
+    const tile = document.createElement("div");
+    tile.className = "member-tile" + (member.mic ? " talking" : "");
+    const avatar = document.createElement("div");
+    avatar.className = "avatar";
+    avatar.textContent = member.name[0].toUpperCase();
+    const name = document.createElement("strong");
+    name.textContent = member.name;
+    const langs = document.createElement("span");
+    langs.className = "member-langs";
+    langs.textContent = `speaks ${member.native} · learning ${member.learning}`;
+    const mic = document.createElement("span");
+    mic.className = "mic-state";
+    mic.textContent = member.mic ? "Mic on" : "Muted";
+    const caption = document.createElement("div"); // live captions while they talk
+    caption.className = "member-caption";
+    caption.id = member.me ? "myRoomCaption" : "caption-" + member.sid;
+    caption.hidden = true;
+    tile.append(avatar, name, langs, mic, caption);
+    box.appendChild(tile);
+  });
+  el("roomCount").textContent = `${everyone.length} / ${currentRoom.max_size}`;
+}
+
+// --- The side chat ---
+socket.on("room_message", msg => {
+  roomMessages.push(msg);
+  renderRoomMessages();
+});
+
+function roomNotice(text) {
+  roomMessages.push({ system: true, text });
+  renderRoomMessages();
+}
+
+el("roomChatForm").onsubmit = event => {
+  event.preventDefault();
+  const input = el("roomChatInput");
+  if (input.value.trim() === "") return;
+  socket.emit("room_message", input.value);
+  input.value = "";
+};
+
+function renderRoomMessages() {
+  const box = el("roomMessages");
+  box.innerHTML = "";
+  roomMessages.forEach(msg => {
+    const div = document.createElement("div");
+    if (msg.system) {
+      div.className = "message system";
+      div.textContent = msg.text;
+    } else {
+      const mine = msg.from === socket.id;
+      div.className = "message" + (mine ? " me" : "");
+      if (!mine) addLine(div, "sender-name", msg.name); // group chat: show who wrote it
+      if (msg.voice) addLine(div, "voice-label", "Spoken");
+      appendWords(div, msg.text, msg.language); // hover popup + deck highlights work here too
+    }
+    box.appendChild(div);
+  });
+  box.scrollTop = box.scrollHeight;
+}
 
 
 // ---------- FLASHCARDS + DECKS ----------
@@ -984,6 +1294,7 @@ function render() {
   el("deckCount").textContent = Object.keys(deck).length;
 
   renderDecks();
+  if (currentRoom) renderRoomMessages(); // so new deck words get highlighted in the room too
 }
 
 // Draw the "Save to" dropdown in the chat and one card per deck on the My Decks page
