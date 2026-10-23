@@ -15,6 +15,65 @@ const LANGUAGES = ["English", "Spanish", "French", "German", "Japanese", "Chines
 // Shortcut so we don't type document.getElementById a hundred times
 const el = id => document.getElementById(id);
 
+// ICONS: one set of simple line icons, all drawn the same way (like Discord's).
+// In the HTML, <span data-icon="mic"></span> gets the "mic" drawing put inside it.
+const ICONS = {
+  home: '<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>',
+  zap: '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>',
+  rooms: '<path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="2" y="14" width="5" height="7" rx="2"/><rect x="17" y="14" width="5" height="7" rx="2"/>',
+  friends: '<circle cx="9" cy="8" r="3"/><path d="M3 20c0-3 3-5 6-5s6 2 6 5"/><circle cx="17" cy="9" r="2.5"/><path d="M16 15c3 0 5 2 5 5"/>',
+  decks: '<path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/>',
+  library: '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2V5z"/><path d="M6 19h13"/>',
+  user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>',
+  logout: '<path d="M15 4h4v16h-4"/><path d="M10 8l-4 4 4 4"/><path d="M6 12h10"/>',
+  mic: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>',
+  micOff: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/><path d="M3 3l18 18"/>',
+  camera: '<rect x="3" y="7" width="12" height="10" rx="2"/><path d="M15 10l6-3v10l-6-3"/>',
+  cameraOff: '<rect x="3" y="7" width="12" height="10" rx="2"/><path d="M15 10l6-3v10l-6-3"/><path d="M3 3l18 18"/>',
+  next: '<path d="M5 5l10 7-10 7z"/><path d="M19 5v14"/>',
+  menu: '<path d="M4 6h16M4 12h16M4 18h16"/>',
+  chat: '<path d="M4 5h16v11H9l-5 4z"/>',
+  sparkle: '<path d="M12 3l2 7 7 2-7 2-2 7-2-7-7-2 7-2z"/>',
+  check: '<path d="M5 12l5 5 9-10"/>',
+  flag: '<path d="M5 21V4h11l-2 4 2 4H5"/>',
+  trophy: '<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  upload: '<path d="M12 16V4M7 9l5-5 5 5M4 20h16"/>',
+  close: '<path d="M6 6l12 12M18 6L6 18"/>',
+};
+
+function icon(name) {
+  return `<svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">${ICONS[name]}</svg>`;
+}
+
+// Draw every data-icon="..." in the page
+document.querySelectorAll("[data-icon]").forEach(spot => (spot.innerHTML = icon(spot.dataset.icon)));
+
+// Language tags like "EN → JA" (HelloTalk style)
+const LANGUAGE_CODES = { English: "EN", Spanish: "ES", French: "FR", German: "DE", Japanese: "JA", Chinese: "ZH", Russian: "RU" };
+
+function languageTag(native, learning) {
+  const tag = document.createElement("span");
+  tag.className = "lang-tag";
+  tag.textContent = learning
+    ? `${LANGUAGE_CODES[native] || native} → ${LANGUAGE_CODES[learning] || learning}`
+    : LANGUAGE_CODES[native] || native;
+  tag.title = learning ? `speaks ${native}, learning ${learning}` : native;
+  return tag;
+}
+
+// Colorful deck icons (Renshuu style): a rounded square with the deck's first letter.
+// The color comes from the deck's name, so each deck always gets the same color.
+function deckIcon(name) {
+  let hash = 0;
+  for (const letter of name) hash = (hash * 31 + letter.codePointAt(0)) % 360;
+  const box = document.createElement("div");
+  box.className = "deck-icon";
+  box.style.background = `hsl(${hash}, 65%, 55%)`;
+  box.textContent = [...name][0].toUpperCase();
+  return box;
+}
+
 // Fill every language dropdown from the list above (so we only write the list once)
 document.querySelectorAll(".lang-select").forEach(select => {
   LANGUAGES.forEach(lang => select.add(new Option(lang, lang)));
@@ -272,7 +331,7 @@ socket.on("matched", partner => {
   partnerName = partner.name;
   partnerUserId = partner.user_id;
   updateAddPartnerButton(); // "+ Add friend" (or "Friends" if we already are)
-  el("partnerInfo").textContent = `${partner.name} · speaks ${partner.native} · learning ${partner.learning}`;
+  el("partnerInfo").replaceChildren(partner.name + " ", languageTag(partner.native, partner.learning));
   el("partnerAvatar").textContent = partner.name[0].toUpperCase();
   // "Speaking" choices for live captions: the language I'm learning (default) or my own
   const speakLang = el("speakLang");
@@ -350,7 +409,7 @@ socket.on("icebreaker", icebreaker => {
   render();
 });
 
-// Someone answered: update the ✅ / ⏳ on the newest question card
+// Someone answered: update who-has-answered on the newest question card
 socket.on("icebreaker_answered", answered => {
   const card = messages.findLast(msg => msg.from === "icebreaker");
   if (card) card.answered = answered;
@@ -362,7 +421,7 @@ setInterval(() => {
   const seconds = Math.max(0, Math.round((nextIcebreakerAt - Date.now()) / 1000));
   const minutes = Math.floor(seconds / 60);
   const rest = String(seconds % 60).padStart(2, "0"); // 5 -> "05"
-  el("icebreakerTimer").textContent = nextIcebreakerAt ? `🧊 Next question in ${minutes}:${rest}` : "";
+  el("icebreakerTimer").textContent = nextIcebreakerAt ? `Next question in ${minutes}:${rest}` : "";
 }, 1000);
 
 
@@ -541,6 +600,9 @@ function updateMyButtons() {
   el("micBtn").classList.toggle("off", !micTrack);
   el("roomMicBtn").classList.toggle("off", !micTrack);
   el("camBtn").classList.toggle("off", !camTrack);
+  // Crossed-out icons when they're off
+  el("micBtn").innerHTML = el("roomMicBtn").innerHTML = icon(micTrack ? "mic" : "micOff");
+  el("camBtn").innerHTML = icon(camTrack ? "camera" : "cameraOff");
   el("localVideo").srcObject = camTrack ? new MediaStream([camTrack]) : null;
   el("localVideo").hidden = !camTrack;
 }
@@ -548,7 +610,7 @@ function updateMyButtons() {
 // Show my partner's video, or their avatar + a status line when their camera is off
 function updatePartnerUI() {
   el("partnerPlaceholder").hidden = callState === "connected" && partnerMedia.cam;
-  const mic = partnerMedia.mic ? "🎤 Mic on" : "🔇 Mic off";
+  const mic = partnerMedia.mic ? "Mic on" : "Muted";
   el("callStatus").textContent = {
     connecting: "Connecting...",
     connected: `Camera off · ${mic}`,
@@ -694,7 +756,7 @@ function renderRoomList() {
     name.textContent = room.name;
     const meta = document.createElement("div");
     meta.className = "room-meta";
-    meta.textContent = `${room.language} · hosted by ${room.host}`;
+    meta.replaceChildren(languageTag(room.language), ` hosted by ${room.host}`);
     const bottom = document.createElement("div");
     bottom.className = "room-bottom";
     const people = document.createElement("span");
@@ -882,9 +944,7 @@ function renderMembers() {
     avatar.textContent = member.name[0].toUpperCase();
     const name = document.createElement("strong");
     name.textContent = member.name;
-    const langs = document.createElement("span");
-    langs.className = "member-langs";
-    langs.textContent = `speaks ${member.native} · learning ${member.learning}`;
+    const langs = languageTag(member.native, member.learning); // e.g. "EN → JA"
     const mic = document.createElement("span");
     mic.className = "mic-state";
     mic.textContent = member.mic ? "Mic on" : "Muted";
@@ -1032,7 +1092,9 @@ async function openLibrary() {
     name.textContent = libraryDeck.name;
     const meta = document.createElement("div");
     meta.className = "room-meta";
-    meta.textContent = `${libraryDeck.language} → ${libraryDeck.translation_language} · ${libraryDeck.count} cards`;
+    // e.g. [JA → EN] 112 cards
+    meta.replaceChildren(languageTag(libraryDeck.language, libraryDeck.translation_language),
+                         ` ${libraryDeck.count} cards`);
     const description = document.createElement("p");
     description.className = "hint";
     description.textContent = libraryDeck.description || "";
@@ -1049,7 +1111,10 @@ async function openLibrary() {
       showToast(addedMessage(result));
       loadDeck();
     };
-    card.append(name, meta, description, preview, add);
+    const top = document.createElement("div");
+    top.className = "card-top";
+    top.append(deckIcon(libraryDeck.name), name);
+    card.append(top, meta, description, preview, add);
     box.appendChild(card);
   });
 }
@@ -1453,7 +1518,7 @@ async function openWordPopup(span, word, sentence, language, index) {
   el("popupPhraseBox").hidden = !showPhrase;
   el("popupPhrase").textContent = `"${phrase}"`;
   el("popupPhraseTranslation").textContent = "...";
-  el("popupAddBtn").textContent = saved ? "✓ In your deck" : "+ Add to deck";
+  el("popupAddBtn").innerHTML = saved ? icon("check") + " In your deck" : "+ Add to deck";
   el("popupAddBtn").disabled = !!saved;
   placePopup(span);
 
@@ -1491,7 +1556,7 @@ el("popupAddBtn").onclick = async () => {
   const { word, sentence, translation, language } = popupWord;
   el("popupAddBtn").disabled = true;
   await saveWord(word, sentence, translation, language);
-  el("popupAddBtn").textContent = "✓ In your deck";
+  el("popupAddBtn").innerHTML = icon("check") + " In your deck";
 };
 
 el("popupReportBtn").onclick = () => {
@@ -1628,6 +1693,7 @@ function addLine(parent, className, text) {
   line.className = className;
   line.textContent = text;
   parent.appendChild(line);
+  return line; // so we can add more to it, e.g. an icon
 }
 
 // Put text into the page word by word. Every word can be hovered (translation popup)
@@ -1639,7 +1705,7 @@ function appendWords(container, text, language) {
     if (part.isWordLike) { // a real word (not a space or punctuation)
       span.className = "word";
       const key = clean(part.segment);
-      // ⭐ the highlight! Only for words I saved myself from conversations
+      // The highlight! Only for words I saved myself from conversations
       // (imported decks can have thousands of words, that would color everything)
       if (deck[key] && (deck[key].source || "chat") === "chat") {
         span.style.background = deck[key].color;
@@ -1667,7 +1733,7 @@ function render() {
     }
     if (msg.from === "icebreaker") {
       div.className = "message icebreaker";
-      addLine(div, "icebreaker-label", "🧊 Icebreaker");
+      addLine(div, "icebreaker-label", "Icebreaker").insertAdjacentHTML("afterbegin", icon("sparkle"));
     } else {
       // socket.id is MY connection id. If it matches, I sent this message.
       div.className = "message" + (msg.from === socket.id ? " me" : "");
@@ -1678,12 +1744,12 @@ function render() {
     if (msg.translation) addLine(div, "translation", msg.translation);
     // Who has answered the question so far
     if (msg.from === "icebreaker") {
-      const meDone = msg.answered.includes(socket.id) ? "✅" : "⏳";
-      const partnerDone = msg.answered.some(id => id !== socket.id) ? "✅" : "⏳";
+      const meDone = msg.answered.includes(socket.id) ? "answered" : "not yet";
+      const partnerDone = msg.answered.some(id => id !== socket.id) ? "answered" : "not yet";
       addLine(div, "icebreaker-status", `You ${meDone} · ${partnerName} ${partnerDone}`);
     }
     // This message was someone's answer to an icebreaker
-    if (msg.answer) addLine(div, "answer-badge", "💬 Answer");
+    if (msg.answer) addLine(div, "answer-badge", "Answer");
     box.appendChild(div);
   });
   box.scrollTop = box.scrollHeight; // auto-scroll to the newest message
@@ -1720,7 +1786,7 @@ function renderHomeDecks() {
     study.textContent = "Study";
     study.disabled = cards.length === 0;
     study.onclick = () => startStudy(d);
-    tile.append(makeRing(average), info, study);
+    tile.append(deckIcon(d.name), info, makeRing(average), study);
     box.appendChild(tile);
   });
 }
@@ -1744,10 +1810,10 @@ function renderDecks() {
     const head = document.createElement("div");
     head.className = "deck-head";
     const title = document.createElement("h3");
-    title.textContent = d.name + " ";
+    title.className = "card-top";
     const count = document.createElement("span");
     count.textContent = `${cards.length} cards`;
-    title.appendChild(count);
+    title.append(deckIcon(d.name), d.name, count);
     const study = document.createElement("button");
     study.className = "primary small";
     study.textContent = "▶ Study";
@@ -1785,7 +1851,8 @@ function renderDecks() {
       translation.textContent = card.translation || "add translation";
       translation.onclick = () => editTranslation(card.word);
       const remove = document.createElement("button");
-      remove.textContent = "✕";
+      remove.className = "remove-btn";
+      remove.innerHTML = icon("close");
       remove.title = "Delete card";
       remove.onclick = () => deleteWord(card.word);
       li.append(ring, word, translation, makeSpeakButton(card.word, card.language), remove);
@@ -1803,4 +1870,5 @@ function renderDecks() {
   });
 }
 
+updateMyButtons(); // draw the (crossed-out) mic and camera icons
 start(); // run when the page opens

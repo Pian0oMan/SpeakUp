@@ -5,9 +5,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Speak Up</title>
-  <!-- Poppins: a bold, modern font from Google Fonts -->
+  <!-- Inter: a clean, modern font from Google Fonts (close to what Discord and Linear use) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
@@ -188,27 +188,17 @@
   <section id="appScreen" class="screen shell" hidden>
     <nav class="sidebar">
       <div class="brand">Speak Up</div>
-      <button id="navHome" class="nav-item" data-view="homeView">⚡ <span>Match</span></button>
-      <button id="navRooms" class="nav-item" data-view="roomsView">🎙️ <span>Rooms</span></button>
+      <!-- data-icon="..." = an icon drawn by JavaScript (see ICONS in script.js) -->
+      <button id="navHome" class="nav-item" data-view="homeView"><span data-icon="home"></span><span>Home</span></button>
+      <button id="navRooms" class="nav-item" data-view="roomsView"><span data-icon="rooms"></span><span>Rooms</span></button>
       <button id="navFriends" class="nav-item" data-view="friendsView">
-        <!-- two people, drawn with SVG -->
-        <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
-          <circle cx="9" cy="8" r="3" /><path d="M3 20c0-3 3-5 6-5s6 2 6 5" />
-          <circle cx="17" cy="9" r="2.5" /><path d="M16 15c3 0 5 2 5 5" />
-        </svg>
-        <span>Friends</span>
+        <span data-icon="friends"></span><span>Friends</span>
         <span id="requestBadge" class="badge" hidden></span>
       </button>
-      <button id="navDeck" class="nav-item" data-view="deckView">🃏 <span>Deck</span></button>
-      <button id="navLibrary" class="nav-item" data-view="libraryView">
-        <!-- a simple book icon, drawn with SVG -->
-        <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2V5z M6 19h13" />
-        </svg>
-        <span>Library</span>
-      </button>
-      <button id="navProfile" class="nav-item" data-view="profileView">👤 <span>Profile</span></button>
-      <button id="logoutBtn" class="nav-item logout">⏻ <span>Log out</span></button>
+      <button id="navDeck" class="nav-item" data-view="deckView"><span data-icon="decks"></span><span>Decks</span></button>
+      <button id="navLibrary" class="nav-item" data-view="libraryView"><span data-icon="library"></span><span>Library</span></button>
+      <button id="navProfile" class="nav-item" data-view="profileView"><span data-icon="user"></span><span>Profile</span></button>
+      <button id="logoutBtn" class="nav-item logout"><span data-icon="logout"></span><span>Log out</span></button>
     </nav>
 
     <main class="content">
@@ -217,7 +207,7 @@
         <h2 id="greeting"></h2>
         <div class="hero">
           <div>
-            <h3>⚡ Quick Match</h3>
+            <h3><span data-icon="zap"></span> Quick Match</h3>
             <p>Talk 1-on-1 with someone who speaks the language you're learning.</p>
             <!-- Pick the languages for this match. Changes are saved to your profile. -->
             <div class="chips">
@@ -333,13 +323,13 @@
         </div>
         <div class="study-buttons">
           <button id="showAnswerBtn" class="primary">Show answer</button>
-          <button id="stillLearningBtn" class="ghost" hidden>😅 Still learning</button>
-          <button id="knowItBtn" class="primary" hidden>✅ Know it</button>
+          <button id="stillLearningBtn" class="ghost" hidden>Still learning</button>
+          <button id="knowItBtn" class="primary" hidden><span data-icon="check"></span> Know it</button>
         </div>
-        <button id="studyReportBtn" class="link-btn" hidden>⚠️ This translation looks wrong</button>
+        <button id="studyReportBtn" class="link-btn" hidden><span data-icon="flag"></span> This translation looks wrong</button>
         <!-- Shown at the end -->
         <div id="studyDone" class="card" hidden>
-          <h3>🎉 Deck finished!</h3>
+          <h3><span data-icon="trophy"></span> Deck finished!</h3>
           <p id="studySummary"></p>
           <button id="studyAgainBtn" class="primary">Study again</button>
           <button id="studyBackBtn" class="ghost">Back to decks</button>
@@ -379,10 +369,10 @@
   <!-- ===== CHAT + VIDEO ===== -->
   <section id="chatScreen" class="screen" hidden>
     <div class="topbar">
-      <button id="menuBtn" class="ghost">☰ Menu</button>
+      <button id="menuBtn" class="ghost"><span data-icon="menu"></span> Menu</button>
       <span id="partnerInfo"></span>
       <button id="addPartnerBtn" class="ghost small">+ Add friend</button>
-      <button id="nextBtn" class="primary">Next ⏭</button>
+      <button id="nextBtn" class="primary">Next <span data-icon="next"></span></button>
     </div>
 
     <!-- LEFT: video. Joined automatically, with camera and mic OFF. -->
@@ -401,8 +391,8 @@
         <div id="myCaption" class="caption mine" hidden></div>
       </div>
       <div class="call-controls">
-        <button id="micBtn" class="round off" title="Microphone">🎤</button>
-        <button id="camBtn" class="round off" title="Camera">📷</button>
+        <button id="micBtn" class="round off" title="Microphone"></button>
+        <button id="camBtn" class="round off" title="Camera"></button>
         <!-- Live captions need to know which language you're speaking -->
         <label class="speak-label" title="The language you're speaking, for live captions">
           Speaking <select id="speakLang"></select>
@@ -443,7 +433,7 @@
     <div class="stage room-stage">
       <div id="roomMembers" class="room-members"></div>
       <div class="call-controls">
-        <button id="roomMicBtn" class="round off" title="Microphone">🎤</button>
+        <button id="roomMicBtn" class="round off" title="Microphone"></button>
         <label class="speak-label" title="The language you're speaking, for live captions">
           Speaking <select id="roomSpeakLang"></select>
         </label>

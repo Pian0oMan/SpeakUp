@@ -2,28 +2,35 @@
 
 /* COLORS: change them here and the whole site updates */
 :root {
-  --bg: #0d0c12;          /* the page behind everything */
-  --surface: #17151f;     /* cards, panels, sidebar */
-  --surface-2: #211e2c;   /* things inside cards: inputs, chat bubbles */
-  --border: #2c2839;
-  --text: #f1eff7;
-  --muted: #9b97ac;
-  --brand: #ff7a45;       /* warm orange */
-  --brand-2: #ff4f81;     /* pink, for gradients */
-  --brand-dark: #e8642f;
-  --gradient: linear-gradient(135deg, var(--brand) 0%, var(--brand-2) 100%);
-  --send: #ff7a45;
-  --accent: #ffc145;      /* yellow, for icebreakers */
-  --accent-light: rgba(255, 193, 69, 0.12);
-  --success: #3ddc97;
-  --danger: #ff5c6c;
+  /* Flat greys, like Discord: the darker the grey, the further "back" it is */
+  --bg: #313338;          /* the main content area */
+  --surface: #2b2d31;     /* sidebar, panels, cards */
+  --surface-2: #383a40;   /* things inside cards: inputs, chat bubbles, hover */
+  --rail: #1e1f22;        /* the darkest grey: page edges, video background */
+  --border: #3f4147;
+  --text: #f2f3f5;
+  --muted: #a3a8b1;
+
+  /* ONE accent color: teal. Only for main buttons, active items and highlights. */
+  --brand: #14b8a6;
+  --brand-dark: #0d9488;
+  --brand-soft: rgba(20, 184, 166, 0.14);  /* a light teal tint for backgrounds */
+  --on-brand: #04201d;    /* dark text on teal buttons (white text would be hard to read) */
+  --gradient: var(--brand);  /* flat, no more gradients on buttons */
+  --logo-gradient: linear-gradient(135deg, #2dd4bf 0%, #38bdf8 100%);  /* only the logo */
+  --send: var(--brand);
+
+  --accent: #f0b232;      /* yellow, for icebreakers */
+  --accent-light: rgba(240, 178, 50, 0.12);
+  --success: #23a55a;     /* online / mic on */
+  --danger: #f23f43;      /* offline / off / delete */
   --card: var(--surface); /* older name, still used in a few places */
 }
 
 * { box-sizing: border-box; }  /* padding doesn't make things wider than their width */
 
 body {
-  font-family: "Poppins", system-ui, sans-serif;
+  font-family: "Inter", system-ui, sans-serif;
   margin: 0;
   background: var(--bg);
   color: var(--text);
@@ -45,13 +52,13 @@ button {
 }
 button:active { transform: scale(0.95); }  /* "press" feedback on every button */
 button.primary {
-  background: var(--gradient);
-  color: white;
+  background: var(--brand);
+  color: var(--on-brand);
   padding: 10px 20px;
-  border-radius: 999px;
+  border-radius: 8px;  /* a bit squarer, like Discord */
   font-weight: 600;
 }
-button.primary:hover { opacity: 0.9; }
+button.primary:hover { background: #2dd4bf; }
 button.primary:disabled { background: var(--surface-2); color: var(--muted); cursor: default; }
 button.ghost {
   color: var(--text);
@@ -106,7 +113,7 @@ option:disabled { color: #5d596e; }  /* the language already picked on the other
   justify-content: space-between;
   align-items: center;
   padding: 16px 32px;
-  background: rgba(13, 12, 18, 0.8);
+  background: rgba(30, 31, 34, 0.85);
   backdrop-filter: blur(12px);  /* frosted glass */
   border-bottom: 1px solid var(--border);
 }
@@ -114,7 +121,7 @@ option:disabled { color: #5d596e; }  /* the language already picked on the other
 .wordmark {
   font-size: 24px;
   font-weight: 800;
-  background: var(--gradient);
+  background: var(--logo-gradient);
   -webkit-background-clip: text;  /* the gradient shows through the letters */
   background-clip: text;
   color: transparent;
@@ -138,7 +145,7 @@ option:disabled { color: #5d596e; }  /* the language already picked on the other
   height: 600px;
   right: -100px;
   top: -80px;
-  background: radial-gradient(circle, rgba(255, 79, 129, 0.22), transparent 65%);
+  background: radial-gradient(circle, rgba(20, 184, 166, 0.18), transparent 65%);
   z-index: -1;
 }
 .eyebrow {
@@ -153,7 +160,7 @@ option:disabled { color: #5d596e; }  /* the language already picked on the other
 }
 .landing-hero h1 { font-size: 60px; line-height: 1.05; font-weight: 800; margin: 0 0 20px; }
 .gradient-text {
-  background: var(--gradient);
+  background: var(--logo-gradient);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -233,7 +240,8 @@ option:disabled { color: #5d596e; }  /* the language already picked on the other
   width: 44px;
   height: 44px;
   border-radius: 14px;
-  background: var(--gradient);
+  background: var(--brand);
+  color: var(--on-brand);
   display: grid;
   place-items: center;
   font-weight: 800;
@@ -256,7 +264,7 @@ option:disabled { color: #5d596e; }  /* the language already picked on the other
   width: 44px;
   height: 44px;
   border-radius: 12px;
-  background: rgba(255, 122, 69, 0.14);
+  background: var(--brand-soft);
   color: var(--brand);
   display: grid;
   place-items: center;
@@ -273,7 +281,7 @@ option:disabled { color: #5d596e; }  /* the language already picked on the other
   border-radius: 24px;
   border: 1px dashed var(--border);
   background:
-    linear-gradient(135deg, rgba(255, 122, 69, 0.08), rgba(255, 79, 129, 0.08)),
+    linear-gradient(135deg, rgba(20, 184, 166, 0.07), rgba(56, 189, 248, 0.07)),
     var(--surface);
   display: grid;
   place-items: center;
@@ -287,12 +295,13 @@ option:disabled { color: #5d596e; }  /* the language already picked on the other
   text-align: center;
   margin: 0 32px 96px;
   padding: 72px 32px;
-  border-radius: 32px;
-  background: var(--gradient);
+  border-radius: 24px;
+  background: var(--brand);
+  color: var(--on-brand);
 }
 .final-cta h2 { font-size: 40px; margin: 0 0 12px; font-weight: 800; }
 .final-cta p { margin: 0 0 28px; font-size: 18px; opacity: 0.9; }
-.final-cta button { background: #0d0c12; color: white; font-size: 18px; font-weight: 700; padding: 16px 36px; border-radius: 999px; }
+.final-cta button { background: var(--rail); color: var(--text); font-size: 18px; font-weight: 700; padding: 16px 36px; border-radius: 999px; }
 .landing-footer { text-align: center; color: var(--muted); font-size: 14px; padding: 0 0 40px; }
 
 /* ---------- Login + Register (a simpler, focused layout) ---------- */
@@ -302,7 +311,7 @@ option:disabled { color: #5d596e; }  /* the language already picked on the other
   align-items: center;
   justify-content: center;
   padding: 16px;
-  background: radial-gradient(circle at 20% 10%, rgba(255, 122, 69, 0.15), transparent 45%), var(--bg);
+  background: radial-gradient(circle at 20% 10%, rgba(20, 184, 166, 0.12), transparent 45%), var(--rail);
 }
 .auth .card { width: 100%; max-width: 420px; }
 .back-link { color: var(--muted); font-size: 14px; text-decoration: none; display: inline-block; margin-bottom: 16px; }
@@ -311,7 +320,7 @@ option:disabled { color: #5d596e; }  /* the language already picked on the other
   font-size: 32px;
   font-weight: 800;
   margin: 0;
-  background: var(--gradient);
+  background: var(--logo-gradient);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -340,7 +349,7 @@ option:disabled { color: #5d596e; }  /* the language already picked on the other
   font-size: 22px;
   font-weight: 800;
   padding: 0 12px 20px;
-  background: var(--gradient);
+  background: var(--logo-gradient);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -361,7 +370,7 @@ option:disabled { color: #5d596e; }  /* the language already picked on the other
 .nav-item.logout { margin-top: auto; color: var(--danger); }  /* pushed to the bottom */
 .nav-icon { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linejoin: round; }
 
-.content { padding: 40px; max-width: 900px; width: 100%; }
+.content { padding: 36px 40px; max-width: 1100px; width: 100%; }
 .content h2 { margin: 0 0 24px; font-size: 30px; font-weight: 800; }
 .content .card { max-width: 560px; }
 
@@ -370,36 +379,36 @@ option:disabled { color: #5d596e; }  /* the language already picked on the other
   justify-content: space-between;
   align-items: center;
   gap: 24px;
-  padding: 32px;
-  border-radius: 24px;
-  color: white;
-  background: var(--gradient);
-  box-shadow: 0 20px 50px rgba(255, 79, 129, 0.2);
+  padding: 28px 32px;
+  border-radius: 16px;
+  background: var(--surface);
+  border-left: 4px solid var(--brand);  /* a teal stripe instead of a big gradient */
 }
-.hero h3 { margin: 0 0 6px; font-size: 24px; font-weight: 800; }
-.hero p { margin: 0 0 14px; opacity: 0.9; }
+.hero h3 { margin: 0 0 6px; font-size: 22px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+.hero h3 .icon-svg { color: var(--brand); }
+.hero p { margin: 0 0 14px; color: var(--muted); }
 .chips { display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap; }
-.chip-label { flex: 0; font-size: 12px; font-weight: 400; opacity: 0.9; }
+.chip-label { flex: 0; font-size: 12px; font-weight: 400; color: var(--muted); }
 .chip {
-  background: rgba(0, 0, 0, 0.2);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border);
   padding: 6px 12px;
-  border-radius: 999px;
+  border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
 }
-.arrow { font-size: 20px; font-weight: 800; padding-bottom: 6px; }
+.arrow { font-size: 20px; font-weight: 800; padding-bottom: 6px; color: var(--muted); }
 .start-btn {
-  background: #0d0c12;
-  color: white;
-  font-size: 20px;
+  background: var(--brand);
+  color: var(--on-brand);
+  font-size: 18px;
   font-weight: 800;
-  padding: 16px 36px;
-  border-radius: 999px;
+  padding: 14px 36px;
+  border-radius: 10px;
   white-space: nowrap;
 }
-.start-btn:hover { transform: scale(1.05); }
+.start-btn:hover { background: #2dd4bf; }
 
 /* A heading with buttons on the right, e.g. "Your decks   + New deck  All decks" */
 .section-head, .page-head {
@@ -485,7 +494,7 @@ option:disabled { color: #5d596e; }  /* the language already picked on the other
 .tag { font-size: 12px; color: var(--muted); }
 .badge {
   margin-left: auto;
-  background: var(--brand-2);
+  background: var(--danger);
   color: white;
   font-size: 11px;
   font-weight: 700;
@@ -603,7 +612,7 @@ option:disabled { color: #5d596e; }  /* the language already picked on the other
 
 .stage {
   position: relative;  /* lets the small video and buttons sit on top */
-  background: #08070c;
+  background: var(--rail);
   overflow: hidden;
 }
 #remoteVideo { width: 100%; height: 100%; object-fit: cover; }
@@ -614,20 +623,20 @@ option:disabled { color: #5d596e; }  /* the language already picked on the other
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: white;
-  background: #08070c;
+  color: var(--text);
+  background: var(--rail);
 }
 .avatar {
   width: 120px;
   height: 120px;
   border-radius: 50%;
-  background: var(--gradient);
+  background: var(--brand);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 52px;
   font-weight: 800;
-  color: white;
+  color: var(--on-brand);
 }
 #callStatus { color: var(--muted); font-size: 14px; }
 #localVideo {
@@ -725,7 +734,7 @@ option:disabled { color: #5d596e; }  /* the language already picked on the other
   width: fit-content;
   background: var(--surface-2);
 }
-.message.me { background: rgba(255, 122, 69, 0.18); margin-left: auto; }
+.message.me { background: var(--brand-soft); margin-left: auto; }
 .message.system {
   background: none;
   color: var(--muted);
@@ -770,8 +779,8 @@ option:disabled { color: #5d596e; }  /* the language already picked on the other
 #chatForm, .chat-form { flex-direction: row; gap: 8px; }
 #chatInput, .chat-form input { flex: 1; border-radius: 999px; padding: 10px 16px; }
 #chatForm button, .chat-form button {
-  background: var(--gradient);
-  color: white;
+  background: var(--brand);
+  color: var(--on-brand);
   padding: 8px 18px;
   border-radius: 999px;
   font-weight: 600;
@@ -929,6 +938,76 @@ dialog h3 { margin: 0; }
   z-index: 40;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
+
+/* ---------- Icons (drawn by JavaScript from the ICONS list) ---------- */
+.icon-svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;  /* the icon takes the color of the text around it */
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+[data-icon] { display: inline-flex; }
+button .icon-svg { width: 18px; height: 18px; }
+.round .icon-svg { width: 22px; height: 22px; }
+.round { display: inline-grid; place-items: center; color: var(--text); }
+.round.off { color: white; }
+.icebreaker-label .icon-svg { width: 14px; height: 14px; margin-right: 4px; }
+#studyDone h3 { display: flex; align-items: center; gap: 8px; }
+#studyDone h3 .icon-svg { color: var(--accent); }
+#studyReportBtn .icon-svg { width: 14px; height: 14px; }
+
+/* ---------- Language tags, like "EN → JA" ---------- */
+.lang-tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--brand);
+  background: var(--brand-soft);
+  padding: 2px 7px;
+  border-radius: 6px;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.member-tile .lang-tag { margin-top: 2px; }
+
+/* ---------- Colorful deck icons (Renshuu style) ---------- */
+.deck-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 18px;
+  color: rgba(0, 0, 0, 0.7);
+  flex-shrink: 0;
+}
+.card-top { display: flex; align-items: center; gap: 12px; }
+.deck-head .card-top span { color: var(--muted); font-weight: 400; font-size: 14px; margin-left: 4px; }
+.room-card .card-top h3 { margin: 0; }
+
+/* ---------- Less boxy: like Discord, panels are told apart by shade, not borders ---------- */
+.card, .room-card, .home-deck, .study-card, .member-tile, .step, .feature, .demo-chat {
+  border-color: transparent;
+}
+.home-deck:hover, .room-card:hover { background: #26282c; }
+.message { border-radius: 12px; }
+.nav-item { border-radius: 6px; padding: 10px 12px; }
+.nav-item.active { background: var(--surface-2); color: var(--text); box-shadow: none; }
+.nav-item.active .icon-svg { color: var(--brand); }
+button.ghost { border-radius: 8px; }
+.people-list li { border-bottom-color: transparent; padding: 8px; border-radius: 8px; }
+.people-list li:hover { background: var(--surface-2); }
+.deck-list li { border-bottom-color: var(--surface-2); }
+.remove-btn { color: var(--muted); display: inline-grid; place-items: center; padding: 4px; border-radius: 6px; }
+.remove-btn:hover { color: var(--danger); background: var(--surface-2); }
+.remove-btn .icon-svg { width: 16px; height: 16px; }
 
 /* ---------- Tablets and phones ---------- */
 /* Medium screens: no room for the Recent panel (it moves into the Friends page) */
