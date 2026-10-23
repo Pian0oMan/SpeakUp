@@ -209,14 +209,16 @@ option:disabled { color: #5d596e; }  /* the language already picked on the other
 }
 .marquee-track {
   display: flex;
-  gap: 48px;
   width: max-content;
-  animation: scroll-left 30s linear infinite;
+  animation: scroll-left 80s linear infinite;  /* longer list, so more time for one loop */
   font-size: 22px;
   font-weight: 600;
   color: var(--muted);
   white-space: nowrap;
 }
+/* Space around EVERY word (not "gap", which skips the ends), so both copies are exactly
+   the same width and the loop has no jump */
+.marquee-track span { padding: 0 24px; }
 .marquee-track span:nth-child(3n) { color: var(--brand); }
 @keyframes scroll-left { to { transform: translateX(-50%); } }
 

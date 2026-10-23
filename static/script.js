@@ -97,6 +97,21 @@ document.querySelectorAll(".to-landing").forEach(link => {
 });
 el("howItWorksBtn").onclick = () => el("howItWorks").scrollIntoView({ behavior: "smooth" });
 
+// The scrolling belt of "hello" in many languages.
+// It holds the list TWICE in a row and slides left by exactly one list, then starts
+// over: because the second copy is identical, the jump back is invisible. One copy
+// must be wider than the screen, or there's an empty gap: that's why the list is long.
+const GREETINGS = [
+  "Hello", "こんにちは", "Hola", "Bonjour", "Hallo", "你好", "Привет", "Ciao", "Olá", "안녕하세요",
+  "Merhaba", "Hej", "नमस्ते", "مرحبا", "שלום", "Γειά σου", "Xin chào", "สวัสดี", "Halo", "Jambo",
+  "Cześć", "Ahoj", "Szia", "Kia ora", "Aloha", "Sawubona", "Hei", "Dia dhuit", "Salut", "Mabuhay",
+];
+[...GREETINGS, ...GREETINGS].forEach(word => {
+  const span = document.createElement("span");
+  span.textContent = word;
+  el("marqueeTrack").appendChild(span);
+});
+
 el("toRegister").onclick = event => {
   event.preventDefault(); // it's a link: don't jump to "#"
   showScreen("registerScreen");
