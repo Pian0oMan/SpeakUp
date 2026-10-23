@@ -190,6 +190,15 @@
       <div class="brand">Speak Up</div>
       <button id="navHome" class="nav-item" data-view="homeView">⚡ <span>Match</span></button>
       <button id="navRooms" class="nav-item" data-view="roomsView">🎙️ <span>Rooms</span></button>
+      <button id="navFriends" class="nav-item" data-view="friendsView">
+        <!-- two people, drawn with SVG -->
+        <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="9" cy="8" r="3" /><path d="M3 20c0-3 3-5 6-5s6 2 6 5" />
+          <circle cx="17" cy="9" r="2.5" /><path d="M16 15c3 0 5 2 5 5" />
+        </svg>
+        <span>Friends</span>
+        <span id="requestBadge" class="badge" hidden></span>
+      </button>
       <button id="navDeck" class="nav-item" data-view="deckView">🃏 <span>Deck</span></button>
       <button id="navLibrary" class="nav-item" data-view="libraryView">
         <!-- a simple book icon, drawn with SVG -->
@@ -223,19 +232,36 @@
           </div>
           <button id="quickMatchBtn" class="start-btn">Start</button>
         </div>
-        <div class="stats">
-          <div class="stat">
-            <strong id="deckCount">0</strong>
-            <span>words saved</span>
+        <!-- My decks, right on the home page, so studying is one click away -->
+        <div class="section-head">
+          <h3>Your decks</h3>
+          <div class="head-buttons">
+            <button class="ghost small open-new-deck">+ New deck</button>
+            <button id="seeAllDecksBtn" class="ghost small">All decks</button>
           </div>
-          <div class="stat">
-            <strong id="learningStat"></strong>
-            <span>you're learning</span>
-          </div>
-          <button id="roomsStat" class="stat clickable">
-            <strong id="roomsCount">0</strong>
-            <span>voice rooms open</span>
-          </button>
+        </div>
+        <div id="homeDecks" class="home-decks"></div>
+      </div>
+
+      <!-- FRIENDS -->
+      <div id="friendsView" class="view" hidden>
+        <h2>Friends</h2>
+        <div id="incomingBox" class="card friends-card" hidden>
+          <h3>Friend requests</h3>
+          <ul id="incomingList" class="people-list"></ul>
+        </div>
+        <div class="card friends-card">
+          <h3>Your friends</h3>
+          <ul id="friendsList" class="people-list"></ul>
+        </div>
+        <div id="outgoingBox" class="card friends-card" hidden>
+          <h3>Requests you sent</h3>
+          <ul id="outgoingList" class="people-list"></ul>
+        </div>
+        <!-- Phones have no room for the Recent panel on the right, so it's shown here instead -->
+        <div class="card friends-card mobile-only">
+          <h3>Recent</h3>
+          <ul id="recentListMobile" class="people-list"></ul>
         </div>
       </div>
 
@@ -258,29 +284,19 @@
 
       <!-- MY DECKS -->
       <div id="deckView" class="view" hidden>
-        <h2>My Decks</h2>
+        <div class="page-head">
+          <h2>My Decks</h2>
+          <div class="head-buttons">
+            <button class="primary open-new-deck">+ New deck</button>
+            <button id="openAnkiBtn" class="ghost">Import Anki deck</button>
+          </div>
+        </div>
         <p class="hint">
-          Words you saved from chats. They stay highlighted in every conversation.
+          Words you saved from chats stay highlighted in every conversation.
           Click a translation to fix it.
         </p>
-        <form id="newDeckForm" class="new-deck">
-          <input id="newDeckName" maxlength="40" placeholder="New deck name, e.g. Food" required>
-          <button type="submit" class="primary">+ Create deck</button>
-        </form>
         <!-- JavaScript draws one card per deck in here -->
         <div id="deckGroups"></div>
-
-        <!-- Upload a deck downloaded from Anki -->
-        <form id="ankiForm" class="card anki-form">
-          <h3>Import an Anki deck</h3>
-          <p class="hint">
-            Download a shared deck (an <strong>.apkg</strong> file) from AnkiWeb, then upload it here.
-            Each card's first field becomes the word, and the second one the translation.
-          </p>
-          <input id="ankiFile" type="file" accept=".apkg" required>
-          <button type="submit" class="primary">Import</button>
-          <p id="ankiStatus" class="status"></p>
-        </form>
       </div>
 
       <!-- LIBRARY: ready-made decks for everyone -->
@@ -345,6 +361,12 @@
         </form>
       </div>
     </main>
+
+    <!-- RIGHT SIDE: people I chatted with recently (friends or not), and who's online -->
+    <aside class="recent-panel">
+      <h3>Recent</h3>
+      <ul id="recentList" class="people-list compact"></ul>
+    </aside>
   </section>
 
   <!-- ===== SEARCHING FOR A PARTNER ===== -->
@@ -359,6 +381,7 @@
     <div class="topbar">
       <button id="menuBtn" class="ghost">☰ Menu</button>
       <span id="partnerInfo"></span>
+      <button id="addPartnerBtn" class="ghost small">+ Add friend</button>
       <button id="nextBtn" class="primary">Next ⏭</button>
     </div>
 
@@ -459,6 +482,35 @@
       <button id="popupReportBtn" class="link-btn">Wrong?</button>
     </div>
   </div>
+
+  <!-- NEW DECK (pop-up window) -->
+  <dialog id="newDeckDialog" class="card">
+    <form id="newDeckForm">
+      <h3>New deck</h3>
+      <label>Deck name <input id="newDeckName" maxlength="40" placeholder="e.g. Food, Slang, Anime words" required></label>
+      <div class="dialog-buttons">
+        <button type="button" class="ghost close-dialog">Cancel</button>
+        <button type="submit" class="primary">Create deck</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- IMPORT AN ANKI DECK (pop-up window) -->
+  <dialog id="ankiDialog" class="card">
+    <form id="ankiForm">
+      <h3>Import an Anki deck</h3>
+      <p class="hint">
+        Download a shared deck (an <strong>.apkg</strong> file) from AnkiWeb, then upload it here.
+        Each card's first field becomes the word, and the second one the translation.
+      </p>
+      <input id="ankiFile" type="file" accept=".apkg" required>
+      <p id="ankiStatus" class="status"></p>
+      <div class="dialog-buttons">
+        <button type="button" class="ghost close-dialog">Close</button>
+        <button type="submit" class="primary">Import</button>
+      </div>
+    </form>
+  </dialog>
 
   <!-- REPORT A WRONG TRANSLATION (a <dialog> is a built-in pop-up window) -->
   <dialog id="reportDialog" class="card">

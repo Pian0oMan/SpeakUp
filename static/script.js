@@ -175,6 +175,8 @@ async function enterApp() {
   loggedIn = true;
   profile = await api("/api/profile");
   await loadDeck();
+  sayHello();   // so my friends see me online
+  loadSocial(); // friends + recent people
   if (profile) openMenu();
   else openProfile("Welcome! Pick your languages to get started."); // e.g. confirmed by email
 }
@@ -191,13 +193,10 @@ function showView(id) {
 
 function openMenu() {
   if (!profile) return openProfile("Save your profile first.");
-  el("greeting").textContent = `Hi, ${profile.username} 👋`;
+  el("greeting").textContent = `Hi, ${profile.username}`;
   el("matchNative").value = profile.native;
   el("matchLearning").value = profile.learning;
   blockSameLanguage(["matchNative", "matchLearning"]);
-  el("learningStat").textContent = profile.learning;
-  el("deckCount").textContent = Object.keys(deck).length;
-  socket.emit("list_rooms"); // for the "voice rooms open" number
   showView("homeView");
 }
 
@@ -218,7 +217,6 @@ function openProfile(message) {
 ["matchNative", "matchLearning"].forEach(id => {
   el(id).addEventListener("change", async () => {
     profile = { ...profile, native: el("matchNative").value, learning: el("matchLearning").value };
-    el("learningStat").textContent = profile.learning;
     await api("/api/profile", { method: "PUT", body: JSON.stringify(profile) });
     showToast(`Now practicing ${profile.learning}`);
   });
@@ -272,6 +270,8 @@ socket.on("matched", partner => {
   messages = [];
   nextIcebreakerAt = 0;
   partnerName = partner.name;
+  partnerUserId = partner.user_id;
+  updateAddPartnerButton(); // "+ Add friend" (or "Friends" if we already are)
   el("partnerInfo").textContent = `${partner.name} · speaks ${partner.native} · learning ${partner.learning}`;
   el("partnerAvatar").textContent = partner.name[0].toUpperCase();
   // "Speaking" choices for live captions: the language I'm learning (default) or my own
@@ -674,11 +674,9 @@ function openRooms() {
   showView("roomsView");
 }
 el("navRooms").onclick = openRooms;
-el("roomsStat").onclick = openRooms;
 
 socket.on("rooms", list => {
   roomList = list;
-  el("roomsCount").textContent = list.length;
   renderRoomList();
   if (currentRoom) {
     const mine = list.find(room => room.id === currentRoom.id);
@@ -895,6 +893,7 @@ function renderMembers() {
     caption.id = member.me ? "myRoomCaption" : "caption-" + member.sid;
     caption.hidden = true;
     tile.append(avatar, name, langs, mic, caption);
+    if (!member.me && member.user_id) tile.appendChild(makeFriendButton(member.user_id, member.name));
     box.appendChild(tile);
   });
   el("roomCount").textContent = `${everyone.length} / ${currentRoom.max_size}`;
@@ -1084,6 +1083,192 @@ el("ankiForm").onsubmit = async event => {
 };
 
 
+// ---------- FRIENDS + RECENT + ONLINE ----------
+let social = { friends: [], incoming: [], outgoing: [], recent: [] };
+let onlineIds = new Set(); // account ids of people who are online right now
+
+// Tell the server who I am, so friends can see I'm online
+function sayHello() {
+  if (token) socket.emit("hello", { token });
+}
+socket.on("connect", () => {
+  if (loggedIn) sayHello(); // e.g. the connection dropped and came back
+});
+
+async function loadSocial() {
+  try {
+    social = await api("/api/social");
+  } catch {
+    return; // e.g. the friends SQL hasn't been run yet
+  }
+  if (!social.friends) return;
+  renderSocial();
+  askWhoIsOnline();
+}
+socket.on("social_changed", loadSocial); // someone sent me a request, accepted mine, chatted...
+
+// Every 20 seconds: who of my friends / recent people is online?
+function askWhoIsOnline() {
+  const ids = [...social.friends, ...social.recent].map(person => person.user_id);
+  if (ids.length) socket.emit("who_is_online", ids);
+}
+setInterval(() => {
+  if (loggedIn) askWhoIsOnline();
+}, 20000);
+socket.on("online", ids => {
+  onlineIds = new Set(ids);
+  renderSocial();
+});
+
+// What am I to this person? "friend", "requested" (I asked), "incoming" (they asked), or null
+function relationTo(userId) {
+  if (social.friends.some(p => p.user_id === userId)) return "friend";
+  if (social.outgoing.some(p => p.user_id === userId)) return "requested";
+  if (social.incoming.some(p => p.user_id === userId)) return "incoming";
+  return null;
+}
+
+async function addFriend(userId, name) {
+  await api("/api/friends", { method: "POST", body: JSON.stringify({ user_id: userId, name }) });
+  showToast(relationTo(userId) === "incoming" ? `You and ${name} are now friends` : `Friend request sent to ${name}`);
+  loadSocial();
+}
+
+async function acceptFriend(person) {
+  await api(`/api/friends/${person.id}/accept`, { method: "POST" });
+  showToast(`You and ${person.name} are now friends`);
+  loadSocial();
+}
+
+async function removeFriendship(person, question) {
+  if (question && !confirm(question)) return;
+  await api(`/api/friends/${person.id}`, { method: "DELETE" });
+  loadSocial();
+}
+
+// A button that fits my relation to someone: "+ Add friend", "Accept", "Requested", "Friends"
+function makeFriendButton(userId, name) {
+  const relation = relationTo(userId);
+  const button = document.createElement("button");
+  button.className = "ghost small";
+  if (relation === "friend") {
+    button.textContent = "Friends";
+    button.disabled = true;
+  } else if (relation === "requested") {
+    button.textContent = "Requested";
+    button.disabled = true;
+  } else if (relation === "incoming") {
+    button.textContent = "Accept";
+    button.onclick = () => acceptFriend(social.incoming.find(p => p.user_id === userId));
+  } else {
+    button.textContent = "+ Add friend";
+    button.onclick = () => addFriend(userId, name);
+  }
+  return button;
+}
+
+// One person in a list: avatar with online dot, name, a short line, and buttons
+function makePersonRow(userId, name, subtitle, buttons) {
+  const li = document.createElement("li");
+  const avatar = document.createElement("div");
+  avatar.className = "person-avatar";
+  avatar.textContent = name[0].toUpperCase();
+  const dot = document.createElement("span");
+  dot.className = "online-dot" + (onlineIds.has(userId) ? " on" : "");
+  dot.title = onlineIds.has(userId) ? "Online" : "Offline";
+  avatar.appendChild(dot);
+  const info = document.createElement("div");
+  info.className = "person-info";
+  const strong = document.createElement("strong");
+  strong.textContent = name;
+  const line = document.createElement("span");
+  line.textContent = subtitle;
+  info.append(strong, line);
+  const buttonBox = document.createElement("div");
+  buttonBox.className = "person-buttons";
+  buttonBox.append(...buttons);
+  li.append(avatar, info, buttonBox);
+  return li;
+}
+
+function smallButton(text, onclick, className = "ghost small") {
+  const button = document.createElement("button");
+  button.className = className;
+  button.textContent = text;
+  button.onclick = onclick;
+  return button;
+}
+
+// e.g. "5 min ago", "yesterday"
+function timeAgo(isoTime) {
+  const minutes = Math.round((Date.now() - new Date(isoTime)) / 60000);
+  if (minutes < 1) return "just now";
+  if (minutes < 60) return `${minutes} min ago`;
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return `${hours} h ago`;
+  const days = Math.round(hours / 24);
+  return days === 1 ? "yesterday" : `${days} days ago`;
+}
+
+function fillList(list, people, makeRow, emptyText) {
+  list.innerHTML = "";
+  if (people.length === 0) list.innerHTML = `<li class="empty-note">${emptyText}</li>`;
+  people.forEach(person => list.appendChild(makeRow(person)));
+}
+
+function renderSocial() {
+  const online = id => (onlineIds.has(id) ? "Online" : "Offline");
+
+  // RECENT (right panel + the phone version on the Friends page)
+  [el("recentList"), el("recentListMobile")].forEach(list => fillList(list, social.recent,
+    person => makePersonRow(person.user_id, person.name,
+      `${onlineIds.has(person.user_id) ? "Online · " : ""}${timeAgo(person.last_at)}`,
+      [makeFriendButton(person.user_id, person.name)]),
+    "People you chat with show up here."));
+
+  // FRIENDS PAGE
+  fillList(el("friendsList"), social.friends,
+    person => makePersonRow(person.user_id, person.name, online(person.user_id),
+      [smallButton("Remove", () => removeFriendship(person, `Remove ${person.name} from your friends?`))]),
+    "No friends yet. Add people you meet from your Recent list.");
+  fillList(el("incomingList"), social.incoming,
+    person => makePersonRow(person.user_id, person.name, "wants to be friends", [
+      smallButton("Accept", () => acceptFriend(person), "primary small"),
+      smallButton("Decline", () => removeFriendship(person)),
+    ]), "");
+  fillList(el("outgoingList"), social.outgoing,
+    person => makePersonRow(person.user_id, person.name, "waiting for an answer",
+      [smallButton("Cancel", () => removeFriendship(person))]), "");
+  el("incomingBox").hidden = social.incoming.length === 0;
+  el("outgoingBox").hidden = social.outgoing.length === 0;
+
+  // A little number on "Friends" in the sidebar when requests are waiting
+  el("requestBadge").hidden = social.incoming.length === 0;
+  el("requestBadge").textContent = social.incoming.length;
+
+  updateAddPartnerButton();
+  if (currentRoom) renderMembers();
+}
+
+el("navFriends").onclick = () => {
+  showView("friendsView");
+  loadSocial();
+};
+
+// "+ Add friend" in the 1-on-1 chat bar
+let partnerUserId = null;
+function updateAddPartnerButton() {
+  const spot = el("addPartnerBtn");
+  if (!partnerUserId) {
+    spot.hidden = true;
+    return;
+  }
+  const fresh = makeFriendButton(partnerUserId, partnerName);
+  fresh.id = "addPartnerBtn";
+  spot.replaceWith(fresh);
+}
+
+
 // ---------- FLASHCARDS + DECKS ----------
 // 1. Ask the backend for MY decks and flashcards (both at once), then draw everything
 async function loadDeck() {
@@ -1130,10 +1315,28 @@ async function editTranslation(word) {
   loadDeck();
 }
 
+// POP-UP WINDOWS: "+ New deck" and "Import Anki deck" open their own little window
+document.querySelectorAll(".open-new-deck").forEach(button => {
+  button.onclick = () => {
+    el("newDeckName").value = "";
+    el("newDeckDialog").showModal();
+  };
+});
+el("openAnkiBtn").onclick = () => {
+  el("ankiStatus").textContent = "";
+  el("ankiDialog").showModal();
+};
+// Any "Cancel" / "Close" button closes the window it's in
+document.querySelectorAll(".close-dialog").forEach(button => {
+  button.onclick = () => button.closest("dialog").close();
+});
+
 el("newDeckForm").onsubmit = async event => {
   event.preventDefault();
-  await api("/api/decks", { method: "POST", body: JSON.stringify({ name: el("newDeckName").value }) });
-  el("newDeckName").value = "";
+  const name = el("newDeckName").value.trim();
+  await api("/api/decks", { method: "POST", body: JSON.stringify({ name }) });
+  el("newDeckDialog").close();
+  showToast(`Created "${name}"`);
   loadDeck();
 };
 
@@ -1485,11 +1688,43 @@ function render() {
   });
   box.scrollTop = box.scrollHeight; // auto-scroll to the newest message
 
-  el("deckCount").textContent = Object.keys(deck).length;
 
   renderDecks();
+  renderHomeDecks();
   if (currentRoom) renderRoomMessages(); // so new deck words get highlighted in the room too
 }
+
+// My decks on the home page: name, number of cards, overall progress ring, Study button
+function renderHomeDecks() {
+  const box = el("homeDecks");
+  box.innerHTML = "";
+  if (decks.length === 0) {
+    box.innerHTML = '<p class="empty-note">No decks yet.</p>';
+    return;
+  }
+  decks.forEach(d => {
+    const cards = Object.values(deck).filter(card => card.deck_id === d.id);
+    // The deck's ring = the average proficiency of its cards
+    const average = cards.length ? cards.reduce((sum, card) => sum + (card.proficiency || 0), 0) / cards.length : 0;
+    const tile = document.createElement("div");
+    tile.className = "home-deck";
+    const info = document.createElement("div");
+    info.className = "home-deck-info";
+    const name = document.createElement("strong");
+    name.textContent = d.name;
+    const count = document.createElement("span");
+    count.textContent = `${cards.length} cards`;
+    info.append(name, count);
+    const study = document.createElement("button");
+    study.className = "primary small";
+    study.textContent = "Study";
+    study.disabled = cards.length === 0;
+    study.onclick = () => startStudy(d);
+    tile.append(makeRing(average), info, study);
+    box.appendChild(tile);
+  });
+}
+el("seeAllDecksBtn").onclick = () => showView("deckView");
 
 // Draw the "Save to" dropdown in the chat and one card per deck on the My Decks page
 function renderDecks() {

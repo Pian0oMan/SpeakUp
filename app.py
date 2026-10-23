@@ -3,6 +3,7 @@
 import os
 import random
 import re
+from datetime import datetime, timezone
 from functools import lru_cache
 import requests
 from dotenv import load_dotenv
@@ -473,17 +474,9 @@ def icebreaker_timer(chat):
 @socketio.on("find_partner")
 def find_partner(data):
     # Look up WHO this is from their login token (we don't just trust the browser)
-    rows = db_for(data["token"]).table("profiles").select("*").execute().data
-    if not rows:
+    me = person_from_token(data["token"])
+    if not me:
         return
-    profile = rows[0]
-    me = {
-        "sid": request.sid,  # unique id for this browser's connection
-        "name": profile["username"],
-        "native": profile["native"],
-        "learning": profile["learning"],
-        "translate_to": profile["translate_to"],
-    }
     leave_current_chat(request.sid)  # in case they clicked "Next"
     exit_room(request.sid)           # or they were in a voice room
 
@@ -501,12 +494,14 @@ def find_partner(data):
                 "question": None,
                 "answered": set(),
                 "active": True,
+                "contact_saved": False,  # added to each other's "Recent" list yet?
             }
             chats[me["sid"]] = chats[other["sid"]] = chat  # one shared chat for both
-            # Tell each person who they got. ONE of them ("initiator") starts the
-            # video connection, otherwise both browsers would try at the same time.
-            socketio.emit("matched", {**other, "initiator": True}, to=me["sid"])
-            socketio.emit("matched", {**me, "initiator": False}, to=other["sid"])
+            # Tell each person who they got (only PUBLIC info, never the login token).
+            # ONE of them ("initiator") starts the video connection, otherwise both
+            # browsers would try at the same time.
+            socketio.emit("matched", {**public_info(other), "initiator": True}, to=me["sid"])
+            socketio.emit("matched", {**public_info(me), "initiator": False}, to=other["sid"])
             socketio.start_background_task(icebreaker_timer, chat)
             return
 
@@ -533,6 +528,11 @@ def send_chat_message(sid, text, voice=False, language=None):
     me = partners[partner["sid"]]  # my partner's partner is me!
 
     chat = chats[sid]
+
+    # The first message in a chat puts both people in each other's "Recent" list
+    if not chat["contact_saved"]:
+        chat["contact_saved"] = True
+        save_recent_contact(me, partner)
 
     # The last 6 lines of this conversation help DeepL understand slang and tone
     history = chat["history"]
@@ -647,17 +647,27 @@ def broadcast_rooms():
 
 
 def public_info(person):
-    return {key: person[key] for key in ("sid", "name", "native", "learning")}
+    """What OTHER people may see about someone (never their login token)."""
+    return {key: person[key] for key in ("sid", "user_id", "name", "native", "learning")}
 
 
 def person_from_token(token):
-    """Who is this? Looked up from their login token, like in find_partner."""
+    """Who is this? Looked up from their login token (we don't just trust the browser)."""
+    if not token:
+        return None
     rows = db_for(token).table("profiles").select("*").execute().data
     if not rows:
         return None
     profile = rows[0]
-    return {"sid": request.sid, "name": profile["username"], "native": profile["native"],
-            "learning": profile["learning"], "translate_to": profile["translate_to"]}
+    return {
+        "sid": request.sid,         # unique id for this browser's connection
+        "user_id": profile["id"],   # their account id (for friends + recent contacts)
+        "name": profile["username"],
+        "native": profile["native"],
+        "learning": profile["learning"],
+        "translate_to": profile["translate_to"],
+        "token": token,             # stays on the server, used to save things as them
+    }
 
 
 @socketio.on("list_rooms")
@@ -760,11 +770,152 @@ def relay_room_media(data):
                       to=f"room:{room_id}", skip_sid=request.sid)
 
 
+# ---------- ONLINE STATUS ----------
+# Right after logging in, the browser says "hello" with its login token,
+# so the server knows which account is behind each connection.
+online = {}   # user id -> set of their open connections (one per browser tab)
+user_of = {}  # sid -> user id
+
+
+@socketio.on("hello")
+def hello(data):
+    person = person_from_token(data.get("token"))
+    if not person:
+        return
+    go_offline(request.sid)  # in case this connection said hello before (e.g. new login)
+    user_of[request.sid] = person["user_id"]
+    online.setdefault(person["user_id"], set()).add(request.sid)
+
+
+def go_offline(sid):
+    user_id = user_of.pop(sid, None)
+    if user_id in online:
+        online[user_id].discard(sid)
+        if not online[user_id]:
+            del online[user_id]  # no tabs left open: they're offline
+
+
+@socketio.on("who_is_online")
+def who_is_online(user_ids):
+    """The browser asks about a list of people (friends, recent contacts)."""
+    socketio.emit("online", [user_id for user_id in user_ids if user_id in online], to=request.sid)
+
+
+def notify_user(user_id):
+    """Tell someone (in every tab they have open) that their friends/recent list changed."""
+    for sid in online.get(user_id, ()):
+        socketio.emit("social_changed", to=sid)
+
+
+# ---------- RECENT CONTACTS + FRIENDS ----------
+def save_recent_contact(me, other):
+    """Two people started chatting: put them in each other's "Recent" list."""
+    a, b = sorted([me, other], key=lambda person: person["user_id"])  # the database wants user_a < user_b
+    if a["user_id"] == b["user_id"]:
+        return  # the same account in two tabs
+    try:
+        db_for(me["token"]).table("recent_contacts").upsert({
+            "user_a": a["user_id"], "user_b": b["user_id"],
+            "name_a": a["name"], "name_b": b["name"],
+            "last_at": datetime.now(timezone.utc).isoformat(),
+        }, on_conflict="user_a,user_b").execute()
+    except Exception as error:  # e.g. the friends SQL hasn't been run yet: chatting still works
+        print("Couldn't save recent contact:", error)
+        return
+    notify_user(me["user_id"])
+    notify_user(other["user_id"])
+
+
+@app.route("/api/social")
+def social():
+    """Everything for the Friends page and the Recent panel, in one request."""
+    db = db_for(token_from_request())
+    my_id = my_profile(db)["id"]
+    friends, incoming, outgoing, relation = [], [], [], {}
+    for row in db.table("friendships").select("*").execute().data:
+        sent_by_me = row["requester"] == my_id
+        person = {
+            "id": row["id"],  # the friendship's id (to accept / remove it)
+            "user_id": row["addressee"] if sent_by_me else row["requester"],
+            "name": row["addressee_name"] if sent_by_me else row["requester_name"],
+        }
+        if row["status"] == "accepted":
+            friends.append(person)
+            relation[person["user_id"]] = "friend"
+        elif sent_by_me:
+            outgoing.append(person)
+            relation[person["user_id"]] = "requested"
+        else:
+            incoming.append(person)
+            relation[person["user_id"]] = "incoming"
+
+    recent = []
+    rows = db.table("recent_contacts").select("*").order("last_at", desc=True).limit(20).execute().data
+    for row in rows:
+        mine_is_a = row["user_a"] == my_id
+        user_id = row["user_b"] if mine_is_a else row["user_a"]
+        recent.append({
+            "user_id": user_id,
+            "name": row["name_b"] if mine_is_a else row["name_a"],
+            "last_at": row["last_at"],
+            "relation": relation.get(user_id),  # friend / requested / incoming / None
+        })
+    return jsonify({"friends": friends, "incoming": incoming, "outgoing": outgoing, "recent": recent})
+
+
+@app.route("/api/friends", methods=["POST"])
+def add_friend():
+    data = request.get_json()  # {"user_id": "...", "name": "Yuki"}
+    db = db_for(token_from_request())
+    me = my_profile(db)
+    other = data.get("user_id")
+    if not other or other == me["id"]:
+        return jsonify({"error": "You can't add yourself."}), 400
+    for row in db.table("friendships").select("*").execute().data:
+        if {row["requester"], row["addressee"]} == {me["id"], other}:
+            # They already asked me? Then my request just means "yes!"
+            if row["addressee"] == me["id"] and row["status"] == "pending":
+                db.table("friendships").update({"status": "accepted"}).eq("id", row["id"]).execute()
+                notify_user(other)
+            return jsonify({"ok": True})
+    db.table("friendships").insert({
+        "addressee": other,
+        "requester_name": me["username"],
+        "addressee_name": str(data.get("name", ""))[:20] or "Someone",
+    }).execute()
+    notify_user(other)  # their Friends page updates right away if they're online
+    return jsonify({"ok": True})
+
+
+@app.route("/api/friends/<int:friendship_id>/accept", methods=["POST"])
+def accept_friend(friendship_id):
+    db = db_for(token_from_request())
+    rows = db.table("friendships").select("requester").eq("id", friendship_id).execute().data
+    # The security rules make sure only the person who RECEIVED the request can do this
+    db.table("friendships").update({"status": "accepted"}).eq("id", friendship_id).execute()
+    if rows:
+        notify_user(rows[0]["requester"])
+    return jsonify({"ok": True})
+
+
+@app.route("/api/friends/<int:friendship_id>", methods=["DELETE"])
+def remove_friend(friendship_id):
+    """Remove a friend, decline a request, or cancel one I sent."""
+    db = db_for(token_from_request())
+    rows = db.table("friendships").select("requester, addressee").eq("id", friendship_id).execute().data
+    db.table("friendships").delete().eq("id", friendship_id).execute()
+    for row in rows:
+        notify_user(row["requester"])
+        notify_user(row["addressee"])
+    return jsonify({"ok": True})
+
+
 # Closing the tab counts as leaving
 @socketio.on("disconnect")
 def handle_disconnect(reason=None):
     leave_current_chat(request.sid)
     exit_room(request.sid)
+    go_offline(request.sid)
 
 
 if __name__ == "__main__":
