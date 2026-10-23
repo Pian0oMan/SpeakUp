@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 from flask import Flask, request, jsonify, send_from_directory
 from flask_socketio import SocketIO, join_room, leave_room
 from supabase import create_client
+from anki_import import read_apkg, AnkiError
 
 # SETTINGS: read the secret keys from the .env file
 load_dotenv()
@@ -19,6 +20,7 @@ if not SUPABASE_URL or not SUPABASE_ANON_KEY:
     raise SystemExit("Fill in SUPABASE_URL and SUPABASE_ANON_KEY in the .env file first!")
 
 app = Flask(__name__, static_folder="static")
+app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024  # uploads (Anki decks) up to 50 MB
 socketio = SocketIO(app)  # adds real-time "always open" connections
 
 
@@ -34,6 +36,18 @@ def db_for(token):
 def token_from_request():
     # The browser sends:  Authorization: Bearer <token>
     return request.headers.get("Authorization", "").removeprefix("Bearer ")
+
+
+def fetch_all(make_query):
+    """Supabase returns at most 1000 rows at a time. This asks page by page until
+    it has everything (an imported Anki deck can have thousands of cards)."""
+    rows, start = [], 0
+    while True:
+        page = make_query().range(start, start + 999).execute().data
+        rows += page
+        if len(page) < 1000:
+            return rows
+        start += 1000
 
 
 # Visiting http://localhost:5000/ sends the HTML page
@@ -114,8 +128,10 @@ def translate_word():
 
 @app.route("/api/flashcards", methods=["GET"])
 def list_flashcards():
-    rows = (db_for(token_from_request()).table("flashcards")
-            .select("word, color, translation, deck_id, example, status").order("created_at").execute().data)
+    db = db_for(token_from_request())
+    rows = fetch_all(lambda: db.table("flashcards")
+                     .select("word, color, translation, deck_id, example, status, reading, explanation, source")
+                     .order("created_at"))
     return jsonify(rows)
 
 
@@ -164,6 +180,81 @@ def edit_flashcard(word):
 def delete_flashcard(word):
     db_for(token_from_request()).table("flashcards").delete().eq("word", word.lower()).execute()
     return jsonify({"ok": True})
+
+
+# ---------- LIBRARY + ANKI IMPORT ----------
+def add_cards(db, deck_id, cards, source):
+    """Put many cards into one of my decks at once. Words that are already in one
+    of my decks are skipped (each word lives in one deck). Returns (added, skipped)."""
+    have = {row["word"] for row in fetch_all(lambda: db.table("flashcards").select("word"))}
+    new_rows = []
+    for card in cards:
+        word = card["word"].strip().lower()
+        if not word or word in have:
+            continue
+        have.add(word)
+        new_rows.append({
+            "word": word,
+            "deck_id": deck_id,
+            "color": "#d9d2e9",  # imported words aren't highlighted in chat, so any color is fine
+            "translation": card.get("translation"),
+            "reading": card.get("reading"),
+            "explanation": card.get("explanation"),
+            "example": card.get("example"),
+            "source": source,
+        })
+    for start in range(0, len(new_rows), 500):  # send them in batches of 500
+        db.table("flashcards").insert(new_rows[start:start + 500]).execute()
+    return len(new_rows), len(cards) - len(new_rows)
+
+
+@app.route("/api/library", methods=["GET"])
+def list_library():
+    db = db_for(token_from_request())
+    decks = db.table("library_decks").select("*").order("id").execute().data
+    cards = fetch_all(lambda: db.table("library_cards").select("deck_id, word").order("id"))
+    for deck in decks:
+        words = [card["word"] for card in cards if card["deck_id"] == deck["id"]]
+        deck["count"] = len(words)
+        deck["preview"] = words[:4]  # a few example words to show on the shelf
+    return jsonify(decks)
+
+
+@app.route("/api/library/<int:library_id>/add", methods=["POST"])
+def add_library_deck(library_id):
+    """Copy a library deck into MY decks, so I can study it and track my progress."""
+    db = db_for(token_from_request())
+    found = db.table("library_decks").select("name").eq("id", library_id).execute().data
+    if not found:
+        return jsonify({"error": "That deck isn't in the library anymore."}), 404
+    cards = fetch_all(lambda: db.table("library_cards")
+                      .select("word, reading, translation, explanation, example")
+                      .eq("deck_id", library_id).order("id"))
+    new_deck = db.table("decks").insert({"name": found[0]["name"]}).execute().data[0]
+    added, skipped = add_cards(db, new_deck["id"], cards, "library")
+    return jsonify({"deck": new_deck, "added": added, "skipped": skipped})
+
+
+@app.route("/api/import-anki", methods=["POST"])
+def import_anki():
+    """Upload an Anki deck (.apkg) and turn it into one of my decks."""
+    file = request.files.get("file")
+    if not file:
+        return jsonify({"error": "Choose an .apkg file first."}), 400
+    try:
+        cards = read_apkg(file.stream)
+    except AnkiError as error:
+        return jsonify({"error": str(error)}), 400
+    name = os.path.splitext(file.filename or "")[0].strip()[:40] or "Anki deck"  # deck name = file name
+    db = db_for(token_from_request())
+    new_deck = db.table("decks").insert({"name": name}).execute().data[0]
+    added, skipped = add_cards(db, new_deck["id"], cards, "anki")
+    return jsonify({"deck": new_deck, "added": added, "skipped": skipped})
+
+
+@app.errorhandler(413)
+def file_too_big(error):
+    return jsonify({"error": "That file is too big (the limit is 50 MB)."}), 413
 
 
 # ---------- TRANSLATION REPORTS ----------

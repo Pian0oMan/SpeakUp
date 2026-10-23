@@ -914,6 +914,72 @@ function renderRoomMessages() {
 }
 
 
+// ---------- LIBRARY ----------
+// Ready-made decks for everyone. "Add to my decks" copies one into my own decks.
+async function openLibrary() {
+  showView("libraryView");
+  const box = el("libraryList");
+  box.textContent = "Loading...";
+  const libraryDecks = await api("/api/library");
+  box.innerHTML = "";
+  libraryDecks.forEach(libraryDeck => {
+    const card = document.createElement("div");
+    card.className = "room-card"; // same look as the room cards
+    const name = document.createElement("h3");
+    name.textContent = libraryDeck.name;
+    const meta = document.createElement("div");
+    meta.className = "room-meta";
+    meta.textContent = `${libraryDeck.language} → ${libraryDeck.translation_language} · ${libraryDeck.count} cards`;
+    const description = document.createElement("p");
+    description.className = "hint";
+    description.textContent = libraryDeck.description || "";
+    const preview = document.createElement("div");
+    preview.className = "library-preview";
+    preview.textContent = libraryDeck.preview.join(" · ") + (libraryDeck.count > 4 ? " ..." : "");
+    const add = document.createElement("button");
+    add.className = "primary small";
+    add.textContent = "Add to my decks";
+    add.onclick = async () => {
+      add.disabled = true;
+      const result = await api(`/api/library/${libraryDeck.id}/add`, { method: "POST" });
+      add.textContent = "Added";
+      showToast(addedMessage(result));
+      loadDeck();
+    };
+    card.append(name, meta, description, preview, add);
+    box.appendChild(card);
+  });
+}
+el("navLibrary").onclick = openLibrary;
+
+// e.g. "Added 15 cards to "Japanese Greetings" (2 were already in your decks)"
+function addedMessage(result) {
+  if (result.error) return result.error;
+  const skipped = result.skipped ? ` (${result.skipped} were already in your decks)` : "";
+  return `Added ${result.added} cards to "${result.deck.name}"${skipped}`;
+}
+
+// ---------- ANKI IMPORT ----------
+el("ankiForm").onsubmit = async event => {
+  event.preventDefault();
+  const file = el("ankiFile").files[0];
+  if (!file) return;
+  el("ankiStatus").textContent = "Importing... (big decks can take a little while)";
+  // A file upload is sent as "form data", not JSON
+  const form = new FormData();
+  form.append("file", file);
+  const response = await fetch("/api/import-anki", {
+    method: "POST",
+    headers: { Authorization: "Bearer " + token },
+    body: form,
+  });
+  const result = await response.json();
+  el("ankiStatus").textContent = addedMessage(result);
+  el("ankiFile").value = "";
+  loadDeck();
+};
+
+
 // ---------- FLASHCARDS + DECKS ----------
 // 1. Ask the backend for MY decks and flashcards (both at once), then draw everything
 async function loadDeck() {
@@ -1194,7 +1260,9 @@ function showStudyCard() {
   const card = studyCards[studyIndex];
   el("studyProgress").textContent = `${studyIndex + 1} / ${studyCards.length}`;
   el("studyWord").textContent = card.word;
+  el("studyReading").textContent = card.reading || "";        // e.g. げんき for 元気
   el("studyTranslation").textContent = card.translation || "(no translation yet)";
+  el("studyExplanation").textContent = card.explanation || ""; // notes from the library / Anki deck
   el("studyExample").textContent = card.example ? `"${card.example}"` : "";
   el("studyAnswer").hidden = true;
 }
@@ -1247,7 +1315,9 @@ function appendWords(container, text, language) {
     if (part.isWordLike) { // a real word (not a space or punctuation)
       span.className = "word";
       const key = clean(part.segment);
-      if (deck[key]) span.style.background = deck[key].color; // ⭐ the highlight!
+      // ⭐ the highlight! Only for words I saved myself from conversations
+      // (imported decks can have thousands of words, that would color everything)
+      if (deck[key] && (deck[key].source || "chat") === "chat") span.style.background = deck[key].color;
       // hover or tap: see what it means. part.index = where the word starts in the text
       attachWordPopup(span, key, text, language, part.index);
     }
@@ -1341,7 +1411,10 @@ function renderDecks() {
       li.textContent = "No words yet. Click words in a chat to save them here!";
       list.appendChild(li);
     }
-    cards.forEach(card => {
+    // Big imported decks can have thousands of cards: only list the first 50 here
+    // (study mode still uses all of them)
+    const SHOWN = 50;
+    cards.slice(0, SHOWN).forEach(card => {
       const li = document.createElement("li");
       const word = document.createElement("span");
       word.className = "swatch";
@@ -1360,6 +1433,12 @@ function renderDecks() {
       li.append(word, translation, remove);
       list.appendChild(li);
     });
+    if (cards.length > SHOWN) {
+      const more = document.createElement("li");
+      more.className = "more-cards";
+      more.textContent = `+ ${cards.length - SHOWN} more cards (press Study to see them all)`;
+      list.appendChild(more);
+    }
 
     box.append(head, list);
     groups.appendChild(box);

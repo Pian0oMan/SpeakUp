@@ -5,3 +5,4 @@ python-dotenv==1.2.4
 supabase==2.33.0
 requests==2.34.2
 gunicorn==23.0.0
+zstandard==0.25.0

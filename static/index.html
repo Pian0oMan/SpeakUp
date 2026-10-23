@@ -59,6 +59,13 @@
       <button id="navHome" class="nav-item" data-view="homeView">⚡ <span>Match</span></button>
       <button id="navRooms" class="nav-item" data-view="roomsView">🎙️ <span>Rooms</span></button>
       <button id="navDeck" class="nav-item" data-view="deckView">🃏 <span>Deck</span></button>
+      <button id="navLibrary" class="nav-item" data-view="libraryView">
+        <!-- a simple book icon, drawn with SVG -->
+        <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2V5z M6 19h13" />
+        </svg>
+        <span>Library</span>
+      </button>
       <button id="navProfile" class="nav-item" data-view="profileView">👤 <span>Profile</span></button>
       <button id="logoutBtn" class="nav-item logout">⏻ <span>Log out</span></button>
     </nav>
@@ -130,6 +137,25 @@
         </form>
         <!-- JavaScript draws one card per deck in here -->
         <div id="deckGroups"></div>
+
+        <!-- Upload a deck downloaded from Anki -->
+        <form id="ankiForm" class="card anki-form">
+          <h3>Import an Anki deck</h3>
+          <p class="hint">
+            Download a shared deck (an <strong>.apkg</strong> file) from AnkiWeb, then upload it here.
+            Each card's first field becomes the word, and the second one the translation.
+          </p>
+          <input id="ankiFile" type="file" accept=".apkg" required>
+          <button type="submit" class="primary">Import</button>
+          <p id="ankiStatus" class="status"></p>
+        </form>
+      </div>
+
+      <!-- LIBRARY: ready-made decks for everyone -->
+      <div id="libraryView" class="view" hidden>
+        <h2>Library</h2>
+        <p class="hint">Ready-made decks. Add one to your decks to study it.</p>
+        <div id="libraryList" class="room-list"></div>
       </div>
 
       <!-- STUDY: one flashcard at a time -->
@@ -141,7 +167,9 @@
         <div id="studyCard" class="study-card">
           <div id="studyWord" class="study-word"></div>
           <div id="studyAnswer" hidden>
+            <div id="studyReading" class="study-reading"></div>
             <div id="studyTranslation" class="study-translation"></div>
+            <div id="studyExplanation" class="study-explanation"></div>
             <div id="studyExample" class="study-example"></div>
           </div>
         </div>

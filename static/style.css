@@ -202,6 +202,15 @@ input:focus, select:focus { outline: 2px solid var(--brand); border-color: trans
 .room-card .room-people { font-weight: 600; }
 .create-room h3 { margin: 0; }
 
+/* ---------- Library + Anki import ---------- */
+.nav-icon { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linejoin: round; }
+.library-preview { color: #555; font-size: 14px; }
+.anki-form { max-width: 560px; margin-top: 16px; }
+.anki-form h3 { margin: 0; }
+.more-cards { color: var(--muted); font-size: 13px; padding-top: 8px; }
+.study-reading { color: var(--muted); font-size: 18px; }
+.study-explanation { color: #555; font-size: 15px; max-width: 440px; }
+
 /* ---------- Voice rooms: inside a room ---------- */
 .room-stage { overflow-y: auto; padding: 24px 24px 100px; }  /* room at the bottom for the mic button */
 .room-members {
