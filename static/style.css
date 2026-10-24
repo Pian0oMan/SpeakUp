@@ -485,22 +485,25 @@ option:disabled { color: #5d596e; }  /* the language already picked on the other
 /* My decks on the home page */
 .home-decks {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 14px;
 }
 .home-deck {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 18px;
+  border-radius: 16px;
+  padding: 16px;
   display: flex;
-  align-items: center;
+  flex-direction: column;  /* two rows: name on top, progress + Study below */
+  justify-content: space-between;
   gap: 14px;
 }
-.home-deck:hover { border-color: var(--brand); }
-.home-deck-info { flex: 1; min-width: 0; }
-.home-deck-info strong { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.home-deck-info span { color: var(--muted); font-size: 13px; }
+.home-deck-top { display: flex; align-items: center; gap: 12px; }
+.home-deck-top strong { line-height: 1.3; overflow-wrap: anywhere; }  /* the full name, wrapping if long */
+.home-deck-top .deck-icon { cursor: pointer; }
+.home-deck-top .deck-icon:hover { outline: 2px solid var(--brand); outline-offset: 2px; }
+.home-deck-bottom { display: flex; align-items: center; gap: 10px; }
+.home-deck-bottom span { color: var(--muted); font-size: 13px; flex: 1; }
 .empty-note { color: var(--muted); font-size: 14px; }
 
 /* ---------- Friends + Recent ---------- */
@@ -1070,7 +1073,46 @@ button .icon-svg { width: 18px; height: 18px; }
   color: rgba(0, 0, 0, 0.7);
   flex-shrink: 0;
 }
+.deck-icon img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
+.deck-icon.big { width: 64px; height: 64px; font-size: 28px; border-radius: 16px; }
 .card-top { display: flex; align-items: center; gap: 12px; }
+
+/* ---------- Customize deck pop-up ---------- */
+.customize-top { display: flex; align-items: center; gap: 14px; }
+.field-label { font-weight: 600; font-size: 14px; margin-bottom: -6px; }
+.field-label small { font-weight: 400; color: var(--muted); }
+.color-choices { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.color-choice {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+}
+.color-choice.selected { border-color: var(--text); }  /* a white ring around the chosen color */
+.color-custom {
+  flex: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: conic-gradient(red, yellow, lime, cyan, blue, magenta, red);  /* rainbow = "any color" */
+  cursor: pointer;
+}
+.color-custom input { opacity: 0; width: 100%; height: 100%; cursor: pointer; padding: 0; }
+.picture-row { display: flex; align-items: center; gap: 12px; }
+.file-btn {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  flex: 0;
+  white-space: nowrap;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+.file-btn:hover { background: var(--surface-2); }
 .deck-head .card-top span { color: var(--muted); font-weight: 400; font-size: 14px; margin-left: 4px; }
 .room-card .card-top h3 { margin: 0; }
 

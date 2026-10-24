@@ -64,16 +64,28 @@ function languageTag(native, learning) {
   return tag;
 }
 
-// Colorful deck icons (Renshuu style): a rounded square with the deck's first letter.
-// The color comes from the deck's name, so each deck always gets the same color.
-function deckIcon(name) {
-  let hash = 0;
-  for (const letter of name) hash = (hash * 31 + letter.codePointAt(0)) % 360;
+// Colorful deck icons (Renshuu style): the deck's picture if it has one, otherwise a
+// rounded square with its first letter, in the color the user picked. With no color
+// picked, the color comes from the deck's name, so each deck always gets the same one.
+function deckIcon(someDeck) {
   const box = document.createElement("div");
   box.className = "deck-icon";
-  box.style.background = `hsl(${hash}, 65%, 55%)`;
-  box.textContent = [...name][0].toUpperCase();
+  if (someDeck.image) {
+    const picture = document.createElement("img");
+    picture.src = someDeck.image;
+    picture.alt = "";
+    box.appendChild(picture);
+    return box;
+  }
+  box.style.background = someDeck.color || autoColor(someDeck.name);
+  box.textContent = [...someDeck.name][0].toUpperCase();
   return box;
+}
+
+function autoColor(name) {
+  let hash = 0;
+  for (const letter of name) hash = (hash * 31 + letter.codePointAt(0)) % 360;
+  return `hsl(${hash}, 65%, 55%)`;
 }
 
 // Fill every language dropdown from the list above (so we only write the list once)
@@ -1155,7 +1167,7 @@ async function openLibrary() {
     };
     const top = document.createElement("div");
     top.className = "card-top";
-    top.append(deckIcon(libraryDeck.name), name);
+    top.append(deckIcon(libraryDeck), name);
     card.append(top, meta, description, preview, add);
     box.appendChild(card);
   });
@@ -1528,6 +1540,104 @@ function clean(word) {
 }
 
 
+// ---------- CUSTOMIZE A DECK: name, color, picture ----------
+const DECK_COLORS = ["#14b8a6", "#38bdf8", "#818cf8", "#c084fc", "#f472b6", "#fb7185", "#fb923c", "#facc15"];
+let customizing = null; // { deck, color, image }: what the pop-up is editing right now
+
+// The preset color buttons
+DECK_COLORS.forEach(color => {
+  const swatch = document.createElement("button");
+  swatch.type = "button";
+  swatch.className = "color-choice";
+  swatch.style.background = color;
+  swatch.dataset.color = color;
+  swatch.onclick = () => pickColor(color);
+  el("colorChoices").insertBefore(swatch, el("colorChoices").lastElementChild);
+});
+el("customColor").oninput = () => pickColor(el("customColor").value);
+
+function openCustomize(d) {
+  customizing = { deck: d, color: d.color || null, image: d.image || null };
+  el("customizeName").value = d.name;
+  el("customColor").value = d.color || "#14b8a6";
+  el("customizeStatus").textContent = "";
+  updateCustomizePreview();
+  el("customizeDialog").showModal();
+}
+
+function pickColor(color) {
+  customizing.color = color;
+  updateCustomizePreview();
+}
+
+// Show what the deck icon will look like, and which color is selected
+function updateCustomizePreview() {
+  const preview = deckIcon({ name: el("customizeName").value || "?", color: customizing.color, image: customizing.image });
+  preview.classList.add("big");
+  el("customizePreview").replaceChildren(preview);
+  document.querySelectorAll(".color-choice").forEach(swatch => {
+    swatch.classList.toggle("selected", swatch.dataset.color === customizing.color);
+  });
+  el("removePictureBtn").hidden = !customizing.image;
+}
+el("customizeName").oninput = updateCustomizePreview;
+
+// A picture: shrink it to a 160x160 square in the browser, so it's tiny to store
+el("pictureFile").onchange = async () => {
+  const file = el("pictureFile").files[0];
+  el("pictureFile").value = ""; // so picking the same file again still works
+  if (!file) return;
+  try {
+    customizing.image = await shrinkPicture(file, 160);
+    updateCustomizePreview();
+  } catch {
+    el("customizeStatus").textContent = "That picture couldn't be opened.";
+  }
+};
+
+function shrinkPicture(file, size) {
+  return new Promise((resolve, reject) => {
+    const picture = new Image();
+    picture.onload = () => {
+      // Cut the biggest square out of the middle, then draw it at size x size
+      const side = Math.min(picture.width, picture.height);
+      const canvas = document.createElement("canvas");
+      canvas.width = canvas.height = size;
+      canvas.getContext("2d").drawImage(picture,
+        (picture.width - side) / 2, (picture.height - side) / 2, side, side, // from: middle square
+        0, 0, size, size);                                                   // to: the whole canvas
+      URL.revokeObjectURL(picture.src);
+      resolve(canvas.toDataURL("image/jpeg", 0.85)); // the picture as text: "data:image/jpeg;base64,..."
+    };
+    picture.onerror = reject;
+    picture.src = URL.createObjectURL(file);
+  });
+}
+
+el("removePictureBtn").onclick = () => {
+  customizing.image = null;
+  updateCustomizePreview();
+};
+
+el("customizeForm").onsubmit = async event => {
+  event.preventDefault();
+  const result = await api(`/api/decks/${customizing.deck.id}`, {
+    method: "PATCH",
+    body: JSON.stringify({
+      name: el("customizeName").value.trim(),
+      color: customizing.color,
+      image: customizing.image,
+    }),
+  });
+  if (result.error) {
+    el("customizeStatus").textContent = result.error;
+    return;
+  }
+  el("customizeDialog").close();
+  loadDeck();
+};
+
+
 // ---------- WORD POPUP ----------
 // Hover over a word (or tap it on a phone) to see a short translation,
 // the language it's in, and buttons to save it or report a bad translation.
@@ -1856,21 +1966,30 @@ function renderHomeDecks() {
     const cards = Object.values(deck).filter(card => card.deck_id === d.id);
     // The deck's ring = the average proficiency of its cards
     const average = cards.length ? cards.reduce((sum, card) => sum + (card.proficiency || 0), 0) / cards.length : 0;
+    // Two rows: [icon + full name] on top, [ring + card count + Study] at the bottom
     const tile = document.createElement("div");
     tile.className = "home-deck";
-    const info = document.createElement("div");
-    info.className = "home-deck-info";
+    const top = document.createElement("div");
+    top.className = "home-deck-top";
+    const icon = deckIcon(d);
+    icon.title = "Customize";
+    icon.onclick = () => openCustomize(d); // click the icon to change color / picture
     const name = document.createElement("strong");
-    name.textContent = d.name;
+    name.textContent = d.name; // the whole name, it wraps onto a second line if needed
+    top.append(icon, name);
+
+    const bottom = document.createElement("div");
+    bottom.className = "home-deck-bottom";
     const count = document.createElement("span");
     count.textContent = `${cards.length} cards`;
-    info.append(name, count);
     const study = document.createElement("button");
     study.className = "primary small";
     study.textContent = "Study";
     study.disabled = cards.length === 0;
     study.onclick = () => startStudy(d);
-    tile.append(deckIcon(d.name), info, makeRing(average), study);
+    bottom.append(makeRing(average), count, study);
+
+    tile.append(top, bottom);
     box.appendChild(tile);
   });
 }
@@ -1897,19 +2016,23 @@ function renderDecks() {
     title.className = "card-top";
     const count = document.createElement("span");
     count.textContent = `${cards.length} cards`;
-    title.append(deckIcon(d.name), d.name, count);
+    title.append(deckIcon(d), d.name, count);
     const study = document.createElement("button");
     study.className = "primary small";
-    study.textContent = "▶ Study";
+    study.textContent = "Study";
     study.disabled = cards.length === 0;
     study.onclick = () => startStudy(d);
+    const customize = document.createElement("button");
+    customize.className = "ghost small";
+    customize.textContent = "Customize";
+    customize.onclick = () => openCustomize(d);
     const del = document.createElement("button");
     del.className = "danger-text";
     del.textContent = "Delete deck";
     del.onclick = () => deleteDeck(d);
     const buttons = document.createElement("div");
     buttons.className = "deck-head-buttons";
-    buttons.append(study, del);
+    buttons.append(study, customize, del);
     head.append(title, buttons);
 
     const list = document.createElement("ul");

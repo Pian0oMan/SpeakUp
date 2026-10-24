@@ -86,7 +86,10 @@ def save_profile():
 # ---------- DECKS ----------
 def get_decks(db):
     """This user's decks, oldest first. Everyone gets a "My Words" deck to start."""
-    rows = db.table("decks").select("id, name").order("id").execute().data
+    try:
+        rows = db.table("decks").select("id, name, color, image").order("id").execute().data
+    except Exception:  # the deck-style SQL hasn't been run yet: still works, just without colors
+        rows = db.table("decks").select("id, name").order("id").execute().data
     if not rows:
         rows = db.table("decks").insert({"name": "My Words"}).execute().data
     return rows
@@ -102,6 +105,31 @@ def create_deck():
     name = request.get_json()["name"].strip()[:40]
     rows = db_for(token_from_request()).table("decks").insert({"name": name}).execute().data
     return jsonify(rows[0])
+
+
+@app.route("/api/decks/<int:deck_id>", methods=["PATCH"])
+def customize_deck(deck_id):
+    """Rename a deck, or change its color or picture. e.g. {"color": "#14b8a6"}
+    Sending null for color or image removes it (back to the automatic color)."""
+    data = request.get_json()
+    changes = {}
+    if "name" in data and str(data["name"]).strip():
+        changes["name"] = str(data["name"]).strip()[:40]
+    if "color" in data:
+        color = data["color"]
+        if color is not None and not re.fullmatch(r"#[0-9a-fA-F]{6}", str(color)):
+            return jsonify({"error": "That's not a color."}), 400
+        changes["color"] = color
+    if "image" in data:
+        image = data["image"]
+        # Only small pictures that the browser already shrank (a "data URL" of a JPEG/PNG/WebP)
+        if image is not None and (not re.match(r"data:image/(jpeg|png|webp);base64,", str(image))
+                                  or len(image) > 300_000):
+            return jsonify({"error": "That picture can't be used."}), 400
+        changes["image"] = image
+    if changes:
+        db_for(token_from_request()).table("decks").update(changes).eq("id", deck_id).execute()
+    return jsonify({"ok": True})
 
 
 @app.route("/api/decks/<int:deck_id>", methods=["DELETE"])

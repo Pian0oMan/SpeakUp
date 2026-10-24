@@ -546,6 +546,41 @@
     </form>
   </dialog>
 
+  <!-- CUSTOMIZE A DECK (pop-up window): name, color, picture -->
+  <dialog id="customizeDialog" class="card">
+    <form id="customizeForm">
+      <div class="customize-top">
+        <!-- A live preview of the deck icon -->
+        <div id="customizePreview"></div>
+        <h3>Customize deck</h3>
+      </div>
+      <label>Name <input id="customizeName" maxlength="40" required></label>
+
+      <div class="field-label">Color</div>
+      <div id="colorChoices" class="color-choices">
+        <!-- JavaScript adds the preset colors here -->
+        <label class="color-custom" title="Any color">
+          <input id="customColor" type="color">
+        </label>
+      </div>
+
+      <div class="field-label">Picture <small>(replaces the letter)</small></div>
+      <div class="picture-row">
+        <label class="ghost small file-btn">
+          <span data-icon="upload"></span> Upload picture
+          <input id="pictureFile" type="file" accept="image/*" hidden>
+        </label>
+        <button type="button" id="removePictureBtn" class="link-btn">Remove picture</button>
+      </div>
+
+      <p id="customizeStatus" class="status"></p>
+      <div class="dialog-buttons">
+        <button type="button" class="ghost close-dialog">Cancel</button>
+        <button type="submit" class="primary">Save</button>
+      </div>
+    </form>
+  </dialog>
+
   <!-- IMPORT AN ANKI DECK (pop-up window) -->
   <dialog id="ankiDialog" class="card">
     <form id="ankiForm">
