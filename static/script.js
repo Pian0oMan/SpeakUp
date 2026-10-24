@@ -1125,22 +1125,83 @@ function guessLanguage(text) {
   return profile.learning;
 }
 
-function speak(text, language) {
+// 1. A single word: try a REAL PERSON's recording first (from Wiktionary)
+// 2. Otherwise (sentences, rare words): the best computer voice on this device
+const recordingCache = {}; // "hola|Spanish" -> audio link, or null if there's no recording
+let nowPlaying = null;
+
+async function speak(text, language) {
   if (!text) return;
+  language = language || guessLanguage(text);
+  stopSpeaking();
+
+  if (!/\s/.test(text.trim())) {  // a single word (no spaces)
+    const key = text + "|" + language;
+    if (!(key in recordingCache)) {
+      try {
+        const params = new URLSearchParams({ word: text, language });
+        recordingCache[key] = (await api("/api/pronounce?" + params)).url;
+      } catch {
+        recordingCache[key] = null;
+      }
+    }
+    if (recordingCache[key]) {
+      nowPlaying = new Audio(recordingCache[key]);
+      try {
+        await nowPlaying.play();
+        return; // a real person said it!
+      } catch {
+        // the recording didn't play: use the computer voice below instead
+      }
+    }
+  }
+  speakWithVoice(text, language);
+}
+
+function stopSpeaking() {
+  if (nowPlaying) nowPlaying.pause();
+  if (window.speechSynthesis) speechSynthesis.cancel();
+}
+
+function speakWithVoice(text, language) {
   if (!window.speechSynthesis) {
     showToast("Your browser can't read words out loud.");
     return;
   }
-  const lang = SPEECH_LOCALES[language || guessLanguage(text)];
+  const lang = SPEECH_LOCALES[language];
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.lang = lang;
-  // Pick a voice for that language if the computer has one
-  const voice = speechSynthesis.getVoices().find(v => v.lang.replace("_", "-").startsWith(lang.slice(0, 2)));
+  const voice = bestVoice(lang);
   if (voice) utterance.voice = voice;
   utterance.rate = 0.9; // a little slower than normal, easier for learners
-  speechSynthesis.cancel(); // stop anything that's still playing
   speechSynthesis.speak(utterance);
 }
+
+// Computers have many voices, and the first one is often old and robotic.
+// Give each voice for this language points, and pick the winner:
+//   "Natural" / "Neural" voices (Edge) sound almost human, "Google" voices (Chrome) are good,
+//   online voices beat offline ones, and the exact accent (es-ES) beats a close one (es-MX).
+function bestVoice(lang) {
+  const base = lang.slice(0, 2);
+  let best = null;
+  let bestScore = -1;
+  speechSynthesis.getVoices().forEach(voice => {
+    const voiceLang = voice.lang.replace("_", "-");
+    if (!voiceLang.startsWith(base)) return; // wrong language
+    let score = 0;
+    if (/natural|neural/i.test(voice.name)) score += 10;
+    if (/google/i.test(voice.name)) score += 6;
+    if (/online/i.test(voice.name) || voice.localService === false) score += 3;
+    if (voiceLang === lang) score += 2;
+    if (score > bestScore) {
+      best = voice;
+      bestScore = score;
+    }
+  });
+  return best;
+}
+// The voice list loads a moment after the page opens: ask for it early
+if (window.speechSynthesis) speechSynthesis.getVoices();
 
 el("popupSpeakWord").onclick = () => speak(popupWord.word, popupWord.language);
 el("popupSpeakPhrase").onclick = () => speak(popupWord.phrase, popupWord.language);
@@ -1956,7 +2017,7 @@ el("studyAgainBtn").onclick = () => startStudy(studyDeck);
 
 // Leave study mode: at the end, or halfway through. Cards I already answered are saved.
 function exitStudy() {
-  if (window.speechSynthesis) speechSynthesis.cancel(); // stop any pronunciation still playing
+  stopSpeaking(); // stop any pronunciation still playing
   renderDecks(); // so the rings show my new progress
   showView("deckView");
 }

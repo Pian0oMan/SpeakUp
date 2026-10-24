@@ -15,7 +15,9 @@ from urllib.parse import quote
 import requests
 
 API = "https://en.wiktionary.org/api/rest_v1/page/definition/{}"
-HEADERS = {"User-Agent": "SpeakUp language-learning school project"}  # Wiktionary asks apps to say who they are
+# Wikimedia asks every app to say who it is: a name, a version, and where to find it.
+# Apps that don't are slowed down or blocked.
+HEADERS = {"User-Agent": "SpeakUp/1.0 (language-learning school project; https://github.com/Pian0oMan/SpeakUp)"}
 LANGUAGE_CODES = {"English": "en", "Spanish": "es", "French": "fr", "German": "de",
                   "Japanese": "ja", "Chinese": "zh", "Russian": "ru"}
 # "first-person singular present indicative of llamar" -> the word after " of " is the base word
@@ -39,6 +41,38 @@ def fetch_entries(word, code):
             return None
         if response.ok and response.json().get(code):
             return response.json()[code]
+    return None
+
+
+PARSE_API = "https://en.wiktionary.org/w/api.php"
+SECTION_NAMES = {"English": "English", "Spanish": "Spanish", "French": "French", "German": "German",
+                 "Japanese": "Japanese", "Chinese": "Chinese", "Russian": "Russian"}
+
+
+@lru_cache(maxsize=5000)
+def recording(word, language):
+    """A REAL PERSON saying this word, from Wiktionary / Wikimedia Commons (free).
+    Returns a link to the audio file, or None if nobody has recorded it."""
+    section_name = SECTION_NAMES.get(language)
+    if not section_name or not word or " " in word.strip() or len(word) > 30:
+        return None
+    word = word.strip()
+    # Deck words are saved in lowercase, but German nouns are capitalized ("Hund"): try both
+    for spelling in dict.fromkeys([word, word.capitalize()]):
+        try:
+            response = requests.get(PARSE_API, headers=HEADERS, timeout=5, params={
+                "action": "parse", "page": spelling, "prop": "text", "format": "json", "formatversion": 2})
+            page = response.json().get("parse", {}).get("text", "")
+        except (requests.RequestException, ValueError):
+            return None
+        # The page has one section per language, each starting with <h2 id="Spanish"> etc.
+        # Only use recordings from the RIGHT language's section.
+        section = next((part for part in page.split('<h2 id="') if part.startswith(section_name + '"')), "")
+        files = re.findall(r'src="(//upload\.wikimedia\.org/[^"]+\.(?:mp3|ogg|oga|opus|wav))"', section)
+        if files:
+            # MP3 plays in every browser (Safari doesn't play .ogg), so prefer it
+            best = next((f for f in files if f.endswith(".mp3")), files[0])
+            return "https:" + best
     return None
 
 

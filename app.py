@@ -169,6 +169,13 @@ def translate_word():
     return jsonify({"translation": translation, "language": language, "dictionary": entry})
 
 
+@app.route("/api/pronounce")
+def pronounce():
+    """A real person saying a word (if Wiktionary has a recording), e.g. ?word=hola&language=Spanish"""
+    url = dictionary.recording(request.args.get("word", ""), request.args.get("language", ""))
+    return jsonify({"url": url})
+
+
 @app.route("/api/flashcards", methods=["GET"])
 def list_flashcards():
     db = db_for(token_from_request())
