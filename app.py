@@ -11,6 +11,7 @@ from flask import Flask, request, jsonify, send_from_directory
 from flask_socketio import SocketIO, join_room, leave_room
 from supabase import create_client
 from anki_import import read_apkg, AnkiError
+import dictionary
 
 # SETTINGS: read the secret keys from the .env file
 load_dotenv()
@@ -152,7 +153,20 @@ def translate_word():
     person = my_profile(db_for(token_from_request()))
     translation, detected = translate_for(person, data["word"], data.get("sentence", ""),
                                           source=data.get("language"))
-    return jsonify({"translation": translation, "language": data.get("language") or detected})
+    language = data.get("language") or detected
+
+    # Single words: also look them up in a real dictionary (meanings, part of speech,
+    # and the base word of conjugated forms). Its definitions are in English.
+    entry = None
+    if person["translate_to"] == "English" and language != "English":
+        # If we don't know the language for sure, try the one I'm learning, then the one I speak
+        for guess in dict.fromkeys([language, person["learning"], person["native"]]):
+            if guess and guess != "English":
+                entry = dictionary.lookup(data["word"], guess)
+                if entry:
+                    language = guess
+                    break
+    return jsonify({"translation": translation, "language": language, "dictionary": entry})
 
 
 @app.route("/api/flashcards", methods=["GET"])
@@ -193,6 +207,7 @@ def save_flashcard():
         "deck_id": deck_id,
         "translation": translation,
         "example": sentence or None,
+        "explanation": (data.get("explanation") or "")[:300] or None,  # grammar from the dictionary
         "language": data.get("language") if data.get("language") in DEEPL_CODES else None,  # for pronunciation
     }).execute()
     award_xp(db, my_profile(db)["id"], "save_word", tz_from_request())
@@ -372,7 +387,11 @@ def translate_detail(text, language, context="", source=None):
     # guesses wrong on short messages, e.g. it thinks "I love ramen" is Swedish.)
     if result["text"].strip().lower() == text.strip().lower():
         return None, language
-    return result["text"], detected
+    translated = result["text"]
+    if " " not in text.strip():
+        # A single word sometimes comes back doubled ("nada" -> "nothing nothing"): fix that
+        translated = re.sub(r"\b(\w+)(?: \1\b)+", r"\1", translated, flags=re.I)
+    return translated, detected
 
 
 LATIN_SCRIPT = {"English", "Spanish", "French", "German"}  # languages written with a, b, c...

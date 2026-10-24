@@ -1507,7 +1507,7 @@ async function loadDeck() {
 
 // 2. Save a word into the chosen deck, with the translation the popup showed.
 //    The sentence is saved too, as an example for studying.
-async function saveWord(word, sentence, translation, language) {
+async function saveWord(word, sentence, translation, language, explanation) {
   if (!word) return;
   const card = await api("/api/flashcards", {
     method: "POST",
@@ -1516,6 +1516,7 @@ async function saveWord(word, sentence, translation, language) {
       sentence,
       translation,
       language,
+      explanation, // e.g. "verb · first-person singular present indicative of llamar"
       color: el("colorPicker").value,
       deck_id: Number(el("deckSelect").value),
     }),
@@ -1737,6 +1738,20 @@ function clauseAround(text, index) {
   return text.slice(start, end).trim();
 }
 
+// Turn a dictionary entry into what the popup shows:
+//   main:    "to summon, to call"
+//   grammar: "verb · first-person singular present indicative of llamar"
+function dictionaryMeaning(entry) {
+  if (!entry) return null;
+  const part = (entry.part || "").toLowerCase();
+  if (entry.base) {
+    // A conjugated / plural form: show what the BASE word means, and which form this is
+    return { main: entry.base_meanings[0], grammar: [part, entry.form_of].filter(Boolean).join(" · ") };
+  }
+  const also = entry.meanings[1] ? `also: ${entry.meanings[1]}` : "";
+  return { main: entry.meanings[0], grammar: [part, also].filter(Boolean).join(" · ") };
+}
+
 // Ask the server to translate a word or phrase (each one only once)
 function translateText(text, sentence, language) {
   const key = text + "|" + sentence;
@@ -1774,6 +1789,8 @@ async function openWordPopup(span, word, sentence, language, index) {
   el("popupWord").textContent = word;
   el("popupLang").textContent = language || "";
   el("popupTranslation").textContent = saved ? saved.translation || "(no translation)" : "Translating...";
+  el("popupGrammar").textContent = saved && saved.explanation ? saved.explanation : "";
+  el("popupGrammar").hidden = !(saved && saved.explanation);
   el("popupPhraseBox").hidden = !showPhrase;
   el("popupPhrase").textContent = `"${phrase}"`;
   el("popupPhraseTranslation").textContent = "...";
@@ -1789,8 +1806,14 @@ async function openWordPopup(span, word, sentence, language, index) {
   if (popupWord !== showing) return; // the mouse already moved to another word
 
   if (wordResult) {
-    showing.translation = wordResult.translation;
-    el("popupTranslation").textContent = wordResult.translation || "(no translation found)";
+    const meaning = dictionaryMeaning(wordResult.dictionary);
+    // The dictionary's meaning if it has one (better for single words), otherwise DeepL's
+    showing.translation = meaning ? meaning.main : wordResult.translation;
+    showing.explanation = meaning ? meaning.grammar : null; // saved on the card, shown when studying
+    showing.language = wordResult.language || language;
+    el("popupTranslation").textContent = showing.translation || "(no translation found)";
+    el("popupGrammar").textContent = meaning ? meaning.grammar : "";
+    el("popupGrammar").hidden = !meaning;
     el("popupLang").textContent = wordResult.language || "";
   }
   if (phraseResult) {
@@ -1812,9 +1835,9 @@ function placePopup(span) {
 }
 
 el("popupAddBtn").onclick = async () => {
-  const { word, sentence, translation, language } = popupWord;
+  const { word, sentence, translation, language, explanation } = popupWord;
   el("popupAddBtn").disabled = true;
-  await saveWord(word, sentence, translation, language);
+  await saveWord(word, sentence, translation, language, explanation);
   el("popupAddBtn").innerHTML = icon("check") + " In your deck";
 };
 
