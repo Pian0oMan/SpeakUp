@@ -7,10 +7,11 @@
 #
 # Wiktionary writes its definitions in English, so this is used when the
 # user wants translations in English.
+import hashlib
 import html
 import re
 from functools import lru_cache
-from urllib.parse import quote
+from urllib.parse import quote, urlencode
 
 import requests
 
@@ -51,8 +52,17 @@ SECTION_NAMES = {"English": "English", "Spanish": "Spanish", "French": "French",
 
 @lru_cache(maxsize=5000)
 def recording(word, language):
-    """A REAL PERSON saying this word, from Wiktionary / Wikimedia Commons (free).
-    Returns a link to the audio file, or None if nobody has recorded it."""
+    """A REAL PERSON saying this word. Returns a link to an audio file, or None.
+    1. Wiktionary / Lingua Libre: openly licensed, every language
+    2. Japanese only: Jisho, then JapanesePod101 (the same sources the Yomitan
+       dictionary uses; unofficial, so they could stop working one day)"""
+    url = wiktionary_recording(word, language)
+    if not url and language == "Japanese":
+        url = jisho_recording(word) or japanesepod_recording(word)
+    return url
+
+
+def wiktionary_recording(word, language):
     section_name = SECTION_NAMES.get(language)
     if not section_name or not word or " " in word.strip() or len(word) > 30:
         return None
@@ -74,6 +84,57 @@ def recording(word, language):
             best = next((f for f in files if f.endswith(".mp3")), files[0])
             return "https:" + best
     return None
+
+
+# ---------- Japanese-only audio sources ----------
+KANA_ONLY = re.compile(r"^[぀-ヿー]+$")  # hiragana / katakana, nothing else
+# JapanesePod101 sends this exact "audio not available" clip for words it doesn't have.
+# Its fingerprint (SHA-256) lets us recognize it and skip it.
+JAPANESEPOD_MISSING = "ae6398b5a27bc8c0a771df6c907ade794be15518174773c58c7c7ddd17098906"
+
+
+def jisho_recording(word):
+    """Jisho's search page has a hidden <audio id="audio_猫:ねこ"> for words it has audio for."""
+    try:
+        page = requests.get(f"https://jisho.org/search/{quote(word)}", headers=HEADERS, timeout=5).text
+    except requests.RequestException:
+        return None
+    for term, reading, src in re.findall(r'<audio id="audio_([^":]*):([^"]*)"[^>]*>\s*<source src="([^"]+)"', page):
+        if word in (term, reading):  # the exact word, not just a similar search result
+            return "https:" + src if src.startswith("//") else src
+    return None
+
+
+def japanese_reading(word):
+    """猫 -> ねこ (JapanesePod101 needs the kana reading). Kana words are their own reading."""
+    if KANA_ONLY.match(word):
+        return word
+    try:
+        data = requests.get("https://jisho.org/api/v1/search/words", params={"keyword": word},
+                            headers=HEADERS, timeout=5).json()
+    except (requests.RequestException, ValueError):
+        return None
+    for result in data.get("data", []):
+        for form in result.get("japanese", []):
+            if form.get("word") == word and form.get("reading"):
+                return form["reading"]
+    return None
+
+
+def japanesepod_recording(word):
+    """JapanesePod101's professional recordings, looked up by kanji + kana."""
+    reading = japanese_reading(word)
+    if not reading:
+        return None
+    url = ("https://assets.languagepod101.com/dictionary/japanese/audiomp3.php?"
+           + urlencode({"kanji": word, "kana": reading}))
+    try:
+        response = requests.get(url, headers=HEADERS, timeout=6)
+    except requests.RequestException:
+        return None
+    if not response.ok or hashlib.sha256(response.content).hexdigest() == JAPANESEPOD_MISSING:
+        return None  # they don't have this word
+    return url
 
 
 def lookup(word, language, follow_base=True):
