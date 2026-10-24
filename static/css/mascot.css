@@ -1,0 +1,52 @@
+/* THE MASCOT: his animations and the places he appears. */
+
+/* ---------- THE MASCOT (drawn by mascot.js) ---------- */
+.mascot { overflow: visible; animation: mascot-bob 3s ease-in-out infinite; }
+.mascot .line { fill: none; stroke: #16131c; stroke-width: 2.8; stroke-linecap: round; }  /* eye arcs */
+/* The flame gently flickers: a tiny stretch from the bottom */
+.mascot .mascot-body { transform-origin: 60px 121px; animation: mascot-flicker 2.4s ease-in-out infinite; }
+.mascot .waving-arm { transform-origin: 92px 88px; animation: mascot-wave 1s ease-in-out infinite; }
+.mascot.mood-excited { animation: mascot-hop 0.9s ease-in-out infinite; }
+.mascot .zzz { font: 700 14px "Inter", sans-serif; fill: var(--muted, #a3a8b1); animation: mascot-zzz 2.4s ease-in-out infinite; }
+.mascot .zzz.small { font-size: 10px; animation-delay: 0.6s; }
+
+@keyframes mascot-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+@keyframes mascot-flicker { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.03, 0.97); } }
+@keyframes mascot-wave { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(-20deg); } }
+@keyframes mascot-hop { 0%, 100% { transform: translateY(0); } 40% { transform: translateY(-10px); } }
+@keyframes mascot-zzz { 0%, 100% { opacity: 0.2; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-4px); } }
+
+/* People who turned on "reduce motion" on their computer get a still mascot */
+@media (prefers-reduced-motion: reduce) {
+  .mascot, .mascot *,
+  .demo-chat .message, .demo-popup, .marquee-track { animation: none !important; }
+}
+
+/* Where he appears */
+.hero-mascot { position: absolute; top: -96px; right: 28px; z-index: 2; }  /* peeking over the chat card */
+.auth-mascot { display: flex; justify-content: center; margin-bottom: 4px; }
+.final-cta-mascot { display: flex; justify-content: center; margin-bottom: 8px; }
+.today-mascot { width: 64px; display: flex; justify-content: center; flex-shrink: 0; }
+#studyDone .done-mascot { margin-bottom: 4px; }
+.empty-state { display: flex; align-items: center; gap: 14px; color: var(--muted); font-size: 14px; padding: 6px 0; }
+
+/* LEVEL UP: a big celebration in the middle of the screen for a few seconds */
+.level-up {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.55);
+  animation: fade-in 0.3s both;
+}
+.level-up-box {
+  background: var(--surface);
+  border-radius: 24px;
+  padding: 28px 40px;
+  text-align: center;
+  animation: pop-in 0.5s both;
+}
+.level-up-box h2 { margin: 6px 0 4px; font-size: 30px; font-weight: 800; }
+.level-up-box p { margin: 0; color: var(--muted); }
+@keyframes fade-in { from { opacity: 0; } }

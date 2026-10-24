@@ -8,7 +8,15 @@
   <!-- Inter: a clean, modern font from Google Fonts (close to what Discord and Linear use) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css">
+  <!-- STYLES: one file per part of the app. ORDER MATTERS: later files can override earlier ones. -->
+  <link rel="stylesheet" href="/static/css/base.css">     <!-- colors, buttons, forms, icons -->
+  <link rel="stylesheet" href="/static/css/landing.css">  <!-- landing page, log in, sign up -->
+  <link rel="stylesheet" href="/static/css/app.css">      <!-- sidebar, home, friends, room list -->
+  <link rel="stylesheet" href="/static/css/chat.css">     <!-- voice rooms, video calls, chat -->
+  <link rel="stylesheet" href="/static/css/decks.css">    <!-- decks, word popup, study mode -->
+  <link rel="stylesheet" href="/static/css/flat.css">     <!-- the flat Discord-like finishing touches -->
+  <link rel="stylesheet" href="/static/css/mascot.css">   <!-- the mascot -->
+  <link rel="stylesheet" href="/static/css/phones.css">   <!-- smaller screens: LAST, so it wins -->
 </head>
 <body>
   <!-- Every screen is a <section class="screen">. JavaScript shows one at a time. -->
@@ -643,7 +651,22 @@
   <!-- Libraries: Socket.IO (real-time chat) and Supabase (login) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-  <script src="/static/mascot.js"></script>
-  <script src="/static/script.js"></script>
+  <!-- OUR JAVASCRIPT: one file per feature. ORDER MATTERS: core.js first (everything uses it),
+       main.js last (it starts the app once everything else is loaded). -->
+  <script src="/static/js/mascot.js"></script>   <!-- draws the mascot -->
+  <script src="/static/js/core.js"></script>     <!-- shared state, icons, api() -->
+  <script src="/static/js/auth.js"></script>     <!-- landing page, log in, sign up -->
+  <script src="/static/js/menu.js"></script>     <!-- home page, profile, sidebar -->
+  <script src="/static/js/chat.js"></script>     <!-- Quick Match, 1-on-1 chat, icebreakers -->
+  <script src="/static/js/call.js"></script>     <!-- video/voice calls, live captions -->
+  <script src="/static/js/rooms.js"></script>    <!-- voice rooms -->
+  <script src="/static/js/audio.js"></script>    <!-- pronunciation -->
+  <script src="/static/js/progress.js"></script> <!-- XP, levels, streaks -->
+  <script src="/static/js/social.js"></script>   <!-- friends, recent, online -->
+  <script src="/static/js/decks.js"></script>    <!-- decks, library, Anki import -->
+  <script src="/static/js/popup.js"></script>    <!-- the word popup, reports -->
+  <script src="/static/js/study.js"></script>    <!-- study mode -->
+  <script src="/static/js/drawing.js"></script>  <!-- drawing messages and decks -->
+  <script src="/static/js/main.js"></script>     <!-- starts everything -->
 </body>
 </html>

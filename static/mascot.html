@@ -6,7 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Speak Up mascot</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/css/base.css">
+  <link rel="stylesheet" href="/static/css/mascot.css">
   <style>
     body { padding: 40px; }
     h1 { margin: 0 0 8px; }
@@ -18,12 +19,12 @@
 </head>
 <body>
   <h1>The mascot</h1>
-  <p class="hint">Every mood, at the size used on the home page. Edit static/mascot.js and refresh to see changes.</p>
+  <p class="hint">Every mood, at the size used on the home page. Edit static/js/mascot.js and refresh to see changes.</p>
   <div id="moods" class="moods"></div>
   <h2 style="margin-top: 48px">Sizes</h2>
   <div id="sizes" class="sizes"></div>
 
-  <script src="/static/mascot.js"></script>
+  <script src="/static/js/mascot.js"></script>
   <script>
     ["idle", "happy", "excited", "sad", "sleepy", "surprised", "determined", "wave"].forEach(mood => {
       const box = document.createElement("div");

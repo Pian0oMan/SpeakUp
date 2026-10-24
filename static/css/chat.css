@@ -1,0 +1,279 @@
+/* CONVERSATIONS: voice rooms, searching, video calls, captions, chat messages. */
+
+/* ---------- Voice rooms: inside a room ---------- */
+/* The tiles FILL the stage: JavaScript sets --cols (how many columns) and
+   --avatar (how big the circles are) from the number of people in the room. */
+.room-stage {
+  display: flex;
+  flex-direction: column;
+  padding: 20px 20px 90px;  /* room at the bottom for the mic button */
+}
+.room-members {
+  --cols: 1;
+  --avatar: 180px;
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(var(--cols), 1fr);
+  grid-auto-rows: 1fr;  /* every row the same height, sharing the space */
+  gap: 14px;
+}
+.member-tile {
+  background: var(--surface);
+  border-radius: 18px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;  /* the person sits in the middle of their tile */
+  gap: calc(var(--avatar) * 0.06);
+  text-align: center;
+  border: 2px solid var(--border);
+  min-height: 0;
+  overflow: hidden;
+  transition: border-color 0.2s;
+  container-type: size;  /* lets the avatar measure THIS tile (the "cq" units below) */
+}
+.member-tile.talking { border-color: var(--success); }  /* mic is on */
+/* The avatar: the size for this many people (--avatar), but never taller than
+   about 40% of its tile (40cqh) or wider than 70% (70cqw), and always a circle */
+.member-tile .avatar {
+  width: min(var(--avatar), 40cqh, 70cqw);
+  height: auto;
+  aspect-ratio: 1;  /* width = height: a perfect circle, never an oval */
+  font-size: min(calc(var(--avatar) * 0.42), 17cqh);
+  flex-shrink: 0;
+  transition: width 0.3s;  /* grows / shrinks smoothly when people join or leave */
+}
+.member-tile strong { font-size: clamp(13px, calc(var(--avatar) * 0.13), 22px); }
+.member-langs { font-size: 12px; color: var(--muted); }
+.mic-state { font-size: 12px; color: var(--danger); }
+.member-tile.talking .mic-state { color: var(--success); }
+.member-caption {
+  font-size: clamp(13px, calc(var(--avatar) * 0.1), 18px);
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 8px;
+  padding: 4px 8px;
+  margin-top: 4px;
+  max-width: 100%;
+}
+.room-count { color: var(--muted); font-weight: 600; }
+.sender-name { font-size: 12px; font-weight: 600; color: var(--brand); margin-bottom: 2px; }
+
+/* ---------- Searching ---------- */
+.center {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 16px;
+  text-align: center;
+}
+.spinner {
+  width: 56px;
+  height: 56px;
+  border: 6px solid var(--surface-2);
+  border-top-color: var(--brand);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---------- Chat + video screen ---------- */
+/* A grid: top bar across the top, video on the left, chat on the right.
+   Voice rooms use the same layout: people on the left, side chat on the right. */
+#chatScreen, #roomScreen {
+  height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  grid-template-rows: auto 1fr;
+}
+.topbar {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+#partnerInfo { font-weight: 600; text-align: center; }
+
+.stage {
+  position: relative;  /* lets the small video and buttons sit on top */
+  background: var(--rail);
+  overflow: hidden;
+}
+#remoteVideo { width: 100%; height: 100%; object-fit: cover; }
+.placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+  background: var(--rail);
+}
+.avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: var(--brand);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 52px;
+  font-weight: 800;
+  color: var(--on-brand);
+}
+#callStatus { color: var(--muted); font-size: 14px; }
+#localVideo {
+  position: absolute;
+  right: 16px;
+  top: 16px;  /* top corner, so it never covers the captions */
+  width: 22%;
+  min-width: 120px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  transform: scaleX(-1);  /* mirror, like looking in a mirror */
+}
+.call-controls {
+  position: absolute;
+  bottom: 16px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+}
+.round {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  font-size: 22px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+.round.off { background: var(--danger); border-color: transparent; }  /* red = switched off */
+.speak-label {
+  flex-direction: row;
+  align-items: center;
+  flex: 0;
+  gap: 6px;
+  color: white;
+  font-size: 13px;
+  font-weight: 400;
+  background: rgba(0, 0, 0, 0.55);
+  padding: 6px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.speak-label select { padding: 2px 6px; font-size: 13px; }
+
+/* ---------- Live captions ---------- */
+.captions {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 84px;  /* just above the mic/camera buttons */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  pointer-events: none;  /* clicks go through to the video... */
+}
+.caption {
+  pointer-events: auto;  /* ...except on the caption itself, so words can be hovered */
+  max-width: 80%;
+  background: rgba(0, 0, 0, 0.75);
+  color: white;
+  font-size: 20px;
+  padding: 6px 14px;
+  border-radius: 10px;
+  text-align: center;
+}
+.caption.mine { font-size: 14px; opacity: 0.75; }  /* what I'm saying: smaller */
+.caption .word:hover { outline-color: white; }
+
+/* A spoken message in the chat history */
+.voice-label { font-size: 11px; font-weight: 600; color: var(--brand); text-transform: uppercase; margin-bottom: 2px; }
+
+.side {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  min-height: 0;  /* lets the messages area scroll instead of stretching the page */
+  padding: 12px;
+}
+.side-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); flex-wrap: wrap; }
+.save-options { display: flex; align-items: center; gap: 6px; }
+.inline-label { flex-direction: row; align-items: center; gap: 6px; flex: 0; font-weight: 400; font-size: 13px; white-space: nowrap; }
+.inline-label select { padding: 4px 8px; font-size: 13px; max-width: 130px; }
+#colorPicker { padding: 0; width: 28px; height: 28px; border: none; background: none; }
+#messages, .message-list { flex: 1; overflow-y: auto; min-height: 0; padding: 4px 0; }
+
+.message {
+  padding: 8px 12px;
+  border-radius: 16px;
+  margin: 8px 0;
+  max-width: 85%;
+  width: fit-content;
+  background: var(--surface-2);
+}
+.message.me { background: var(--brand-soft); margin-left: auto; }
+.message.system {
+  background: none;
+  color: var(--muted);
+  font-style: italic;
+  font-size: 13px;
+  text-align: center;
+  max-width: 100%;
+  width: auto;
+}
+.translation {
+  font-size: 13px;
+  color: var(--muted);
+  font-style: italic;
+  border-top: 1px solid var(--border);
+  margin-top: 6px;
+  padding-top: 4px;
+}
+/* Icebreaker question cards */
+.message.icebreaker {
+  max-width: 100%;
+  width: auto;
+  background: var(--accent-light);
+  border: 1px solid rgba(255, 193, 69, 0.5);
+}
+.icebreaker-label {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.icebreaker-status { font-size: 13px; color: var(--muted); margin-top: 6px; }
+.answer-badge { font-size: 11px; font-weight: 600; color: var(--accent); margin-top: 4px; }
+
+#typing { color: var(--muted); font-size: 13px; font-style: italic; height: 18px; margin: 0; }
+
+/* Each word is a <span class="word"> so it can be clicked */
+.word { cursor: pointer; border-radius: 4px; padding: 0 2px; }
+.word:hover { outline: 1px dashed var(--muted); }
+.word.saved { color: #16131c; }  /* dark text on a highlight color stays readable */
+
+#chatForm, .chat-form { flex-direction: row; gap: 8px; }
+#chatInput, .chat-form input { flex: 1; border-radius: 999px; padding: 10px 16px; }
+#chatForm button, .chat-form button {
+  background: var(--brand);
+  color: var(--on-brand);
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-weight: 600;
+}

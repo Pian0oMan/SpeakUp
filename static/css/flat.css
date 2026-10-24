@@ -1,0 +1,19 @@
+/* FINISHING TOUCHES: the flat, Discord-like look. Loaded after the others,
+   because it changes some of their borders and corners. */
+
+/* ---------- Less boxy: like Discord, panels are told apart by shade, not borders ---------- */
+.card, .room-card, .home-deck, .study-card, .member-tile, .step, .feature, .demo-chat {
+  border-color: transparent;
+}
+.home-deck:hover, .room-card:hover { background: #26282c; }
+.message { border-radius: 12px; }
+.nav-item { border-radius: 6px; padding: 10px 12px; }
+.nav-item.active { background: var(--surface-2); color: var(--text); box-shadow: none; }
+.nav-item.active .icon-svg { color: var(--brand); }
+button.ghost { border-radius: 8px; }
+.people-list li { border-bottom-color: transparent; padding: 8px; border-radius: 8px; }
+.people-list li:hover { background: var(--surface-2); }
+.deck-list li { border-bottom-color: var(--surface-2); }
+.remove-btn { color: var(--muted); display: inline-grid; place-items: center; padding: 4px; border-radius: 6px; }
+.remove-btn:hover { color: var(--danger); background: var(--surface-2); }
+.remove-btn .icon-svg { width: 16px; height: 16px; }

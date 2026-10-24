@@ -1,0 +1,356 @@
+/* THE APP: sidebar, home page, progress, friends + recent, room list, library. */
+
+/* =====================================================================
+   THE APP: sidebar + content
+   ===================================================================== */
+.shell {
+  display: grid;
+  grid-template-columns: 220px 1fr 280px;  /* sidebar | content | recent people */
+  min-height: 100vh;
+}
+.sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 24px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.brand {
+  font-size: 22px;
+  font-weight: 800;
+  padding: 0 12px 20px;
+  background: var(--logo-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 12px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--muted);
+}
+.nav-item:hover:not(:disabled) { background: var(--surface-2); color: var(--text); }
+.nav-item.active { background: var(--surface-2); color: var(--text); box-shadow: inset 3px 0 0 var(--brand); }
+.nav-item:disabled { opacity: 0.45; cursor: default; }
+.nav-item.logout { margin-top: auto; color: var(--danger); }  /* pushed to the bottom */
+.nav-icon { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linejoin: round; }
+
+.content { padding: 36px 40px; max-width: 1100px; width: 100%; }
+.content h2 { margin: 0 0 24px; font-size: 30px; font-weight: 800; }
+.content .card { max-width: 560px; }
+
+.hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  padding: 28px 32px;
+  border-radius: 16px;
+  background: var(--surface);
+  border-left: 4px solid var(--brand);  /* a teal stripe instead of a big gradient */
+}
+.hero h3 { margin: 0 0 6px; font-size: 22px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+.hero h3 .icon-svg { color: var(--brand); }
+.hero p { margin: 0 0 14px; color: var(--muted); }
+.chips { display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap; }
+.chip-label { flex: 0; font-size: 12px; font-weight: 400; color: var(--muted); }
+.chip {
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.arrow { font-size: 20px; font-weight: 800; padding-bottom: 6px; color: var(--muted); }
+.start-btn {
+  background: var(--brand);
+  color: var(--on-brand);
+  font-size: 18px;
+  font-weight: 800;
+  padding: 14px 36px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+.start-btn:hover { background: #2dd4bf; }
+
+/* ---------- Home: the TWO MAIN ACTIONS (Quick Match + Random Voice Room) ----------
+   The only big, colorful things on the page, so the eye goes here first. */
+.main-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+.action-card {
+  position: relative;  /* so the mascot can sit in the corner */
+  overflow: hidden;
+  border-radius: 20px;
+  padding: 26px 26px 24px;
+  min-height: 250px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  color: white;
+}
+.action-card.match { background: #0f766e; }  /* deep teal */
+.action-card.room { background: #4338ca; }   /* deep indigo */
+.action-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.85;
+}
+.action-kicker .icon-svg { width: 15px; height: 15px; }
+.action-card h3 { margin: 0; font-size: 28px; font-weight: 800; }
+.action-card p { margin: 0; max-width: 300px; opacity: 0.85; line-height: 1.5; }
+.action-card .chip-label { color: rgba(255, 255, 255, 0.8); }
+.action-card .chip { background: rgba(0, 0, 0, 0.22); border-color: rgba(255, 255, 255, 0.25); color: white; }
+.action-card .arrow { color: rgba(255, 255, 255, 0.7); }
+.live-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.live-count::before {  /* a little green "live" dot */
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 0 4px rgba(74, 222, 128, 0.25);
+}
+.action-btn {
+  margin-top: auto;  /* pushes the button to the bottom of the card */
+  background: white;
+  color: #111;
+  font-size: 17px;
+  font-weight: 800;
+  padding: 13px 34px;
+  border-radius: 12px;
+}
+.action-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25); }
+.action-mascot { position: absolute; right: 16px; bottom: 10px; opacity: 0.95; }
+
+/* ---------- Progress: level, XP bar, streak (sidebar) ---------- */
+.progress-box {
+  background: var(--rail);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin: 0 0 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.progress-row { display: flex; justify-content: space-between; align-items: center; }
+.level-badge {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--on-brand);
+  background: var(--brand);
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+.streak-badge { display: inline-flex; align-items: center; gap: 3px; font-weight: 800; color: var(--muted); }
+.streak-badge .icon-svg { width: 18px; height: 18px; }
+.streak-badge.lit { color: #ff8c32; }  /* an orange flame while the streak is alive */
+.streak-badge.lit .icon-svg { fill: #ff8c32; }
+.xp-bar { height: 8px; border-radius: 999px; background: var(--surface-2); overflow: hidden; }
+.xp-fill { height: 100%; width: 0; background: var(--brand); border-radius: 999px; transition: width 0.6s ease; }
+.xp-text { font-size: 11px; color: var(--muted); }
+
+/* ---------- Home: "Today" card ---------- */
+.today {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-top: 20px;
+}
+.today-item {
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.today-item strong { display: block; font-size: 17px; }
+.today-item span { color: var(--muted); font-size: 13px; }
+.today-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.today-icon .icon-svg { width: 30px; height: 30px; }
+.today-icon.flame { background: rgba(255, 140, 50, 0.14); color: #ff8c32; }
+.today-icon.flame .icon-svg { fill: #ff8c32; }
+.today-icon.level { background: var(--brand-soft); color: var(--brand); }
+.today-icon.level .icon-svg { fill: var(--brand); }
+
+/* A heading with buttons on the right, e.g. "Your decks   + New deck  All decks" */
+.section-head, .page-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.section-head { margin: 32px 0 14px; }
+.section-head h3 { margin: 0; font-size: 20px; }
+.page-head { margin-bottom: 8px; }
+.page-head h2 { margin: 0 !important; }
+.head-buttons { display: flex; gap: 8px; }
+
+/* My decks on the home page */
+.home-decks {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+.home-deck {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;  /* two rows: name on top, progress + Study below */
+  justify-content: space-between;
+  gap: 14px;
+}
+.home-deck-top { display: flex; align-items: center; gap: 12px; }
+.home-deck-top strong { line-height: 1.3; overflow-wrap: anywhere; }  /* the full name, wrapping if long */
+.home-deck-top .deck-icon { cursor: pointer; }
+.home-deck-top .deck-icon:hover { outline: 2px solid var(--brand); outline-offset: 2px; }
+.home-deck-bottom { display: flex; align-items: center; gap: 10px; }
+.home-deck-bottom span { color: var(--muted); font-size: 13px; flex: 1; }
+.empty-note { color: var(--muted); font-size: 14px; }
+
+/* ---------- Friends + Recent ---------- */
+.recent-panel {
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  padding: 24px 16px;
+}
+.recent-panel h3 { margin: 0 0 12px; font-size: 16px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+.friends-card { max-width: 560px; margin-bottom: 16px; }
+.friends-card h3 { margin: 0 0 8px; }
+.people-list { list-style: none; padding: 0; margin: 0; }
+.people-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.people-list li:last-child { border-bottom: none; }
+.people-list.compact li { padding: 8px 0; }
+.people-list .empty-note { display: block; border: none; }
+.person-avatar {
+  position: relative;  /* so the online dot can sit on its corner */
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.online-dot {
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #5d596e;           /* grey = offline */
+  border: 2px solid var(--surface);
+}
+.online-dot.on { background: var(--success); }  /* green = online */
+.person-info { flex: 1; min-width: 0; }
+.person-info strong { display: block; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.person-info span { color: var(--muted); font-size: 12px; }
+.person-buttons { display: flex; gap: 6px; }
+.tag { font-size: 12px; color: var(--muted); }
+.badge {
+  margin-left: auto;
+  background: var(--danger);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  padding: 0 5px;
+}
+.mobile-only { display: none; }
+
+/* ---------- Voice rooms: the list (the library uses the same cards) ---------- */
+.room-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.room-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.room-card h3 { margin: 0; font-size: 18px; }
+.room-card .room-meta { color: var(--muted); font-size: 14px; }
+.room-card .room-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+.room-card .room-people { font-weight: 600; }
+.create-room h3 { margin: 0; }
+
+/* Room filters: one row of search + dropdowns + checkboxes */
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.filters input[type="search"] { flex: 1; min-width: 180px; }
+.filters select { min-width: 140px; }
+.toggle {
+  flex: 0;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  font-weight: 400;
+  white-space: nowrap;
+  background: var(--surface);
+  padding: 9px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.toggle input { accent-color: var(--brand); width: 16px; height: 16px; padding: 0; }
+
+/* ---------- Library + Anki import ---------- */
+.library-preview { color: var(--text); opacity: 0.8; font-size: 14px; }
+.anki-form { max-width: 560px; margin-top: 16px; }
+.anki-form h3 { margin: 0; }
+.more-cards { color: var(--muted); font-size: 13px; padding-top: 8px; }
