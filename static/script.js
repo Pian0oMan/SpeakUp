@@ -40,6 +40,8 @@ const ICONS = {
   plus: '<path d="M12 5v14M5 12h14"/>',
   upload: '<path d="M12 16V4M7 9l5-5 5 5M4 20h16"/>',
   close: '<path d="M6 6l12 12M18 6L6 18"/>',
+  flame: '<path d="M12 3c1 3 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3.5 2-5 .5 1.5 1.5 2.5 2.5 3 .5-2.5-.5-5.5.5-8z"/>',
+  star: '<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>',
 };
 
 function icon(name) {
@@ -112,7 +114,11 @@ function showScreen(id) {
 
 // Talk to OUR server (Flask), always including the login token
 async function api(path, options = {}) {
-  options.headers = { "Content-Type": "application/json", Authorization: "Bearer " + token };
+  options.headers = {
+    "Content-Type": "application/json",
+    Authorization: "Bearer " + token,
+    "X-TZ-Offset": new Date().getTimezoneOffset(), // my time zone, so streaks reset at MY midnight
+  };
   const response = await fetch(path, options);
   return response.json();
 }
@@ -234,8 +240,9 @@ async function enterApp() {
   loggedIn = true;
   profile = await api("/api/profile");
   await loadDeck();
-  sayHello();   // so my friends see me online
-  loadSocial(); // friends + recent people
+  sayHello();     // so my friends see me online
+  loadSocial();   // friends + recent people
+  loadProgress(); // level, XP, streak
   if (profile) openMenu();
   else openProfile("Welcome! Pick your languages to get started."); // e.g. confirmed by email
 }
@@ -1183,13 +1190,54 @@ el("ankiForm").onsubmit = async event => {
 };
 
 
+// ---------- XP, LEVELS, STREAKS ----------
+async function loadProgress() {
+  try {
+    showProgress(await api("/api/progress"));
+  } catch {
+    // e.g. the progress SQL hasn't been run yet
+  }
+}
+
+// Draw the sidebar box and the home page "Today" card
+function showProgress(p) {
+  if (p.xp === undefined) return;
+  const intoLevel = p.xp - p.level_start;
+  const levelSize = p.level_end - p.level_start;
+  el("levelBadge").textContent = `Lv ${p.level}`;
+  el("streakCount").textContent = p.streak;
+  el("streakBadge").classList.toggle("lit", p.streak > 0); // grey flame when there's no streak
+  el("xpFill").style.width = `${(intoLevel / levelSize) * 100}%`;
+  el("xpText").textContent = `${intoLevel} / ${levelSize} XP`;
+
+  setRing(el("goalRing"), Math.min(100, (p.xp_today / p.daily_goal) * 100));
+  el("goalText").textContent = `${p.xp_today} / ${p.daily_goal} XP`;
+  el("todayStreak").textContent = `${p.streak} ${p.streak === 1 ? "day" : "days"} streak`;
+  el("bestStreak").textContent = `Best: ${p.best_streak}`;
+  el("todayLevel").textContent = `Level ${p.level}`;
+  el("toNextLevel").textContent = `${p.level_end - p.xp} XP to level ${p.level + 1}`;
+}
+
+// The server gave me XP (for a message, a saved word, a studied card...)
+socket.on("xp", p => {
+  showProgress(p);
+  if (p.level_up) {
+    showToast(`Level up! You're now level ${p.level}`);
+  } else if (p.reason !== "message" && p.reason !== "save_word") {
+    // Messages happen a lot, and saving a word already shows "Saved ... → ...",
+    // so those two only update the bar
+    showToast(`+${p.gained} XP`);
+  }
+});
+
+
 // ---------- FRIENDS + RECENT + ONLINE ----------
 let social = { friends: [], incoming: [], outgoing: [], recent: [] };
 let onlineIds = new Set(); // account ids of people who are online right now
 
 // Tell the server who I am, so friends can see I'm online
 function sayHello() {
-  if (token) socket.emit("hello", { token });
+  if (token) socket.emit("hello", { token, tz: new Date().getTimezoneOffset() });
 }
 socket.on("connect", () => {
   if (loggedIn) sayHello(); // e.g. the connection dropped and came back

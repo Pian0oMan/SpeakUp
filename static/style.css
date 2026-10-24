@@ -410,6 +410,64 @@ option:disabled { color: #5d596e; }  /* the language already picked on the other
 }
 .start-btn:hover { background: #2dd4bf; }
 
+/* ---------- Progress: level, XP bar, streak (sidebar) ---------- */
+.progress-box {
+  background: var(--rail);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin: 0 0 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.progress-row { display: flex; justify-content: space-between; align-items: center; }
+.level-badge {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--on-brand);
+  background: var(--brand);
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+.streak-badge { display: inline-flex; align-items: center; gap: 3px; font-weight: 800; color: var(--muted); }
+.streak-badge .icon-svg { width: 18px; height: 18px; }
+.streak-badge.lit { color: #ff8c32; }  /* an orange flame while the streak is alive */
+.streak-badge.lit .icon-svg { fill: #ff8c32; }
+.xp-bar { height: 8px; border-radius: 999px; background: var(--surface-2); overflow: hidden; }
+.xp-fill { height: 100%; width: 0; background: var(--brand); border-radius: 999px; transition: width 0.6s ease; }
+.xp-text { font-size: 11px; color: var(--muted); }
+
+/* ---------- Home: "Today" card ---------- */
+.today {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-top: 20px;
+}
+.today-item {
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.today-item strong { display: block; font-size: 17px; }
+.today-item span { color: var(--muted); font-size: 13px; }
+.today-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.today-icon .icon-svg { width: 30px; height: 30px; }
+.today-icon.flame { background: rgba(255, 140, 50, 0.14); color: #ff8c32; }
+.today-icon.flame .icon-svg { fill: #ff8c32; }
+.today-icon.level { background: var(--brand-soft); color: var(--brand); }
+.today-icon.level .icon-svg { fill: var(--brand); }
+
 /* A heading with buttons on the right, e.g. "Your decks   + New deck  All decks" */
 .section-head, .page-head {
   display: flex;
@@ -1065,6 +1123,8 @@ button.ghost { border-radius: 8px; }
     border-top: 1px solid var(--border);
   }
   .brand { display: none; }
+  .progress-box { display: none; }  /* the home page "Today" card shows it on phones */
+  .today { grid-template-columns: 1fr; }
   .nav-item { flex-direction: column; gap: 2px; padding: 8px; font-size: 12px; }
   .nav-item.active { box-shadow: inset 0 3px 0 var(--brand); }
   .nav-item.logout { margin-top: 0; }

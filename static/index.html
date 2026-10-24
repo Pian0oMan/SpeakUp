@@ -188,6 +188,15 @@
   <section id="appScreen" class="screen shell" hidden>
     <nav class="sidebar">
       <div class="brand">Speak Up</div>
+      <!-- MY PROGRESS: level, XP bar and streak, always visible -->
+      <div class="progress-box" title="Earn XP by chatting, answering icebreakers, saving words and studying">
+        <div class="progress-row">
+          <span id="levelBadge" class="level-badge">Lv 1</span>
+          <span id="streakBadge" class="streak-badge"><span data-icon="flame"></span><span id="streakCount">0</span></span>
+        </div>
+        <div class="xp-bar"><div id="xpFill" class="xp-fill"></div></div>
+        <span id="xpText" class="xp-text"></span>
+      </div>
       <!-- data-icon="..." = an icon drawn by JavaScript (see ICONS in script.js) -->
       <button id="navHome" class="nav-item" data-view="homeView"><span data-icon="home"></span><span>Home</span></button>
       <button id="navRooms" class="nav-item" data-view="roomsView"><span data-icon="rooms"></span><span>Rooms</span></button>
@@ -222,6 +231,31 @@
           </div>
           <button id="quickMatchBtn" class="start-btn">Start</button>
         </div>
+        <!-- TODAY: daily goal, streak, level -->
+        <div class="today">
+          <div class="today-item">
+            <div id="goalRing" class="ring big"><span></span></div>
+            <div>
+              <strong id="goalText">0 / 50 XP</strong>
+              <span>Daily goal</span>
+            </div>
+          </div>
+          <div class="today-item">
+            <div class="today-icon flame"><span data-icon="flame"></span></div>
+            <div>
+              <strong id="todayStreak">0 days</strong>
+              <span id="bestStreak">Best: 0</span>
+            </div>
+          </div>
+          <div class="today-item">
+            <div class="today-icon level"><span data-icon="star"></span></div>
+            <div>
+              <strong id="todayLevel">Level 1</strong>
+              <span id="toNextLevel">100 XP to level 2</span>
+            </div>
+          </div>
+        </div>
+
         <!-- My decks, right on the home page, so studying is one click away -->
         <div class="section-head">
           <h3>Your decks</h3>
