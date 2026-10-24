@@ -1044,6 +1044,19 @@ function renderMembers() {
     box.appendChild(tile);
   });
   el("roomCount").textContent = `${everyone.length} / ${currentRoom.max_size}`;
+  sizeTiles(box, everyone.length);
+}
+
+// The people fill the space: few people = big tiles, more people = smaller tiles.
+// (Like Discord or Zoom.) CSS reads these two numbers: --cols and --avatar.
+const TILE_LAYOUT = {
+  1: [1, 180], 2: [2, 150], 3: [2, 120], 4: [2, 120], 5: [3, 100],
+  6: [3, 100], 7: [3, 84], 8: [3, 84], 9: [3, 84], 10: [4, 72],
+};
+function sizeTiles(box, count) {
+  const [columns, avatar] = TILE_LAYOUT[Math.min(count, 10)] || TILE_LAYOUT[1];
+  box.style.setProperty("--cols", columns);
+  box.style.setProperty("--avatar", avatar + "px");
 }
 
 // --- The side chat ---

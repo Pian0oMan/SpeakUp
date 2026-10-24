@@ -685,34 +685,61 @@ option:disabled { color: #5d596e; }  /* the language already picked on the other
 .more-cards { color: var(--muted); font-size: 13px; padding-top: 8px; }
 
 /* ---------- Voice rooms: inside a room ---------- */
-.room-stage { overflow-y: auto; padding: 24px 24px 100px; }  /* room at the bottom for the mic button */
+/* The tiles FILL the stage: JavaScript sets --cols (how many columns) and
+   --avatar (how big the circles are) from the number of people in the room. */
+.room-stage {
+  display: flex;
+  flex-direction: column;
+  padding: 20px 20px 90px;  /* room at the bottom for the mic button */
+}
 .room-members {
+  --cols: 1;
+  --avatar: 180px;
+  flex: 1;
+  min-height: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(var(--cols), 1fr);
+  grid-auto-rows: 1fr;  /* every row the same height, sharing the space */
+  gap: 14px;
 }
 .member-tile {
   background: var(--surface);
   border-radius: 18px;
-  padding: 18px 12px;
+  padding: 12px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  justify-content: center;  /* the person sits in the middle of their tile */
+  gap: calc(var(--avatar) * 0.06);
   text-align: center;
   border: 2px solid var(--border);
+  min-height: 0;
+  overflow: hidden;
+  transition: border-color 0.2s;
+  container-type: size;  /* lets the avatar measure THIS tile (the "cq" units below) */
 }
 .member-tile.talking { border-color: var(--success); }  /* mic is on */
-.member-tile .avatar { width: 72px; height: 72px; font-size: 30px; }
+/* The avatar: the size for this many people (--avatar), but never taller than
+   about 40% of its tile (40cqh) or wider than 70% (70cqw), and always a circle */
+.member-tile .avatar {
+  width: min(var(--avatar), 40cqh, 70cqw);
+  height: auto;
+  aspect-ratio: 1;  /* width = height: a perfect circle, never an oval */
+  font-size: min(calc(var(--avatar) * 0.42), 17cqh);
+  flex-shrink: 0;
+  transition: width 0.3s;  /* grows / shrinks smoothly when people join or leave */
+}
+.member-tile strong { font-size: clamp(13px, calc(var(--avatar) * 0.13), 22px); }
 .member-langs { font-size: 12px; color: var(--muted); }
 .mic-state { font-size: 12px; color: var(--danger); }
 .member-tile.talking .mic-state { color: var(--success); }
 .member-caption {
-  font-size: 14px;
+  font-size: clamp(13px, calc(var(--avatar) * 0.1), 18px);
   background: rgba(0, 0, 0, 0.5);
   border-radius: 8px;
   padding: 4px 8px;
   margin-top: 4px;
+  max-width: 100%;
 }
 .room-count { color: var(--muted); font-weight: 600; }
 .sender-name { font-size: 12px; font-weight: 600; color: var(--brand); margin-bottom: 2px; }
@@ -1301,8 +1328,10 @@ button.ghost { border-radius: 8px; }
   .final-cta h2 { font-size: 28px; }
 
   #chatScreen, #roomScreen { grid-template-columns: 1fr; grid-template-rows: auto 40vh 1fr; }
-  .room-members { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
-  .member-tile .avatar { width: 52px; height: 52px; font-size: 22px; }
+  /* Phones: the stage is short, so the circles are capped smaller */
+  .room-members { gap: 8px; }
+  .member-tile .avatar { width: min(var(--avatar), 64px, 40cqh, 70cqw); font-size: min(24px, 17cqh); }
+  .member-tile .lang-tag, .member-tile .mic-state { display: none; }
   .side { border-left: none; }
   .row { flex-direction: column; }
   #localVideo { width: 30%; min-width: 90px; }
