@@ -51,6 +51,16 @@ function icon(name) {
 // Draw every data-icon="..." in the page
 document.querySelectorAll("[data-icon]").forEach(spot => (spot.innerHTML = icon(spot.dataset.icon)));
 
+// Draw the mascot everywhere the HTML says data-mascot="mood" (see mascot.js)
+document.querySelectorAll("[data-mascot]").forEach(spot => {
+  spot.innerHTML = mascot(spot.dataset.mascot, Number(spot.dataset.size) || 80);
+});
+
+// An "empty" message with the mascot next to it, e.g. when there are no decks yet
+function emptyState(mood, text) {
+  return `<div class="empty-state">${mascot(mood, 48)}<span>${text}</span></div>`;
+}
+
 // Language tags like "EN → JA" (HelloTalk style)
 const LANGUAGE_CODES = { English: "EN", Spanish: "ES", French: "FR", German: "DE", Japanese: "JA", Chinese: "ZH", Russian: "RU" };
 
@@ -1225,16 +1235,35 @@ function showProgress(p) {
   setRing(el("goalRing"), Math.min(100, (p.xp_today / p.daily_goal) * 100));
   el("goalText").textContent = `${p.xp_today} / ${p.daily_goal} XP`;
   el("todayStreak").textContent = `${p.streak} ${p.streak === 1 ? "day" : "days"} streak`;
+  // The mascot's mood follows my streak: sleepy with no streak, happy while it's
+  // alive, excited once I've reached today's goal
+  const mood = p.xp_today >= p.daily_goal ? "excited" : p.streak > 0 ? "happy" : "sleepy";
+  el("streakMascot").innerHTML = mascot(mood, 52);
   el("bestStreak").textContent = `Best: ${p.best_streak}`;
   el("todayLevel").textContent = `Level ${p.level}`;
   el("toNextLevel").textContent = `${p.level_end - p.xp} XP to level ${p.level + 1}`;
+}
+
+// LEVEL UP: the mascot jumps up in the middle of the screen for a few seconds
+function celebrateLevelUp(level) {
+  const overlay = document.createElement("div");
+  overlay.className = "level-up";
+  overlay.innerHTML = `
+    <div class="level-up-box">
+      ${mascot("excited", 120)}
+      <h2>Level ${level}!</h2>
+      <p>Keep talking, you're getting better every day.</p>
+    </div>`;
+  overlay.onclick = () => overlay.remove(); // click to close early
+  document.body.appendChild(overlay);
+  setTimeout(() => overlay.remove(), 3000);
 }
 
 // The server gave me XP (for a message, a saved word, a studied card...)
 socket.on("xp", p => {
   showProgress(p);
   if (p.level_up) {
-    showToast(`Level up! You're now level ${p.level}`);
+    celebrateLevelUp(p.level);
   } else if (p.reason !== "message" && p.reason !== "save_word") {
     // Messages happen a lot, and saving a word already shows "Saved ... → ...",
     // so those two only update the bar
@@ -1372,7 +1401,7 @@ function timeAgo(isoTime) {
 
 function fillList(list, people, makeRow, emptyText) {
   list.innerHTML = "";
-  if (people.length === 0) list.innerHTML = `<li class="empty-note">${emptyText}</li>`;
+  if (people.length === 0 && emptyText) list.innerHTML = `<li>${emptyState("sad", emptyText)}</li>`;
   people.forEach(person => list.appendChild(makeRow(person)));
 }
 
@@ -1959,7 +1988,7 @@ function renderHomeDecks() {
   const box = el("homeDecks");
   box.innerHTML = "";
   if (decks.length === 0) {
-    box.innerHTML = '<p class="empty-note">No decks yet.</p>';
+    box.innerHTML = emptyState("idle", "No decks yet. Save words from your chats, or add one from the Library.");
     return;
   }
   decks.forEach(d => {

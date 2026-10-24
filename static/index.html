@@ -40,6 +40,8 @@
 
       <!-- A pretend conversation, to show what it feels like -->
       <div class="demo-chat" aria-hidden="true">
+        <!-- the mascot, waving hello from the corner -->
+        <div class="hero-mascot" data-mascot="wave" data-size="110"></div>
         <div class="demo-top"><span class="demo-dot"></span> Yuki · speaks Japanese · learning English</div>
         <div class="message">こんにちは！週末は何をしているの？</div>
         <div class="message me">I usually go to the <span class="demo-highlight">park</span> and read!</div>
@@ -136,6 +138,7 @@
     </section>
 
     <div class="final-cta">
+      <div class="final-cta-mascot" data-mascot="excited" data-size="90"></div>
       <h2>Your first conversation is one click away</h2>
       <p>Free, no download, works in your browser.</p>
       <button class="to-register">Create your account</button>
@@ -147,6 +150,7 @@
   <section id="loginScreen" class="screen auth" hidden>
     <div class="card">
       <a href="#" class="back-link to-landing">← Back</a>
+      <div class="auth-mascot" data-mascot="wave" data-size="64"></div>
       <h1 class="logo">Speak Up!!</h1>
       <p class="tagline">Learn a language by talking to people who speak it.</p>
       <form id="loginForm">
@@ -163,6 +167,7 @@
   <section id="registerScreen" class="screen auth" hidden>
     <div class="card">
       <a href="#" class="back-link to-landing">← Back</a>
+      <div class="auth-mascot" data-mascot="excited" data-size="64"></div>
       <h1 class="logo">Speak Up!!</h1>
       <p class="tagline">Create your account</p>
       <form id="registerForm">
@@ -241,7 +246,8 @@
             </div>
           </div>
           <div class="today-item">
-            <div class="today-icon flame"><span data-icon="flame"></span></div>
+            <!-- the mascot's mood shows how my streak is doing (JavaScript draws him) -->
+            <div id="streakMascot" class="today-mascot"></div>
             <div>
               <strong id="todayStreak">0 days</strong>
               <span id="bestStreak">Best: 0</span>
@@ -373,7 +379,8 @@
         <button id="studyReportBtn" class="link-btn" hidden><span data-icon="flag"></span> This translation looks wrong</button>
         <!-- Shown at the end -->
         <div id="studyDone" class="card" hidden>
-          <h3><span data-icon="trophy"></span> Deck finished!</h3>
+          <div class="done-mascot" data-mascot="excited" data-size="90"></div>
+          <h3>Deck finished!</h3>
           <p id="studySummary"></p>
           <button id="studyAgainBtn" class="primary">Study again</button>
           <button id="studyBackBtn" class="ghost">Back to decks</button>
@@ -405,7 +412,8 @@
 
   <!-- ===== SEARCHING FOR A PARTNER ===== -->
   <section id="searchScreen" class="screen center" hidden>
-    <div class="spinner"></div>
+    <!-- the mascot, determined to find you someone -->
+    <div data-mascot="determined" data-size="110"></div>
     <p id="searchStatus"></p>
     <button id="cancelSearchBtn" class="ghost">Cancel</button>
   </section>
@@ -621,6 +629,7 @@
   <!-- Libraries: Socket.IO (real-time chat) and Supabase (login) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+  <script src="/static/mascot.js"></script>
   <script src="/static/script.js"></script>
 </body>
 </html>
