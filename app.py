@@ -745,6 +745,26 @@ def handle_join_room(data):
         enter_room(room, person)
 
 
+@socketio.on("join_random_room")
+def join_random_room(data):
+    """Drop me into a random open room in my language, preferring rooms where people
+    are already talking (an empty room isn't much of a conversation)."""
+    person = person_from_token(data.get("token"))
+    if not person:
+        return
+    language = data.get("language") or person["learning"]
+    open_rooms = [room for room in rooms.values()
+                  if room["language"] == language
+                  and len(room["members"]) < room["max_size"]
+                  and person["sid"] not in room["members"]]
+    with_people = [room for room in open_rooms if room["members"]]
+    choices = with_people or open_rooms
+    if not choices:
+        socketio.emit("room_error", f"No open {language} rooms right now. Try creating one!", to=request.sid)
+        return
+    enter_room(random.choice(choices), person)
+
+
 def enter_room(room, person):
     sid = person["sid"]
     if room_of.get(sid) == room["id"]:

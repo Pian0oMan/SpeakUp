@@ -410,6 +410,70 @@ option:disabled { color: #5d596e; }  /* the language already picked on the other
 }
 .start-btn:hover { background: #2dd4bf; }
 
+/* ---------- Home: the TWO MAIN ACTIONS (Quick Match + Random Voice Room) ----------
+   The only big, colorful things on the page, so the eye goes here first. */
+.main-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+.action-card {
+  position: relative;  /* so the mascot can sit in the corner */
+  overflow: hidden;
+  border-radius: 20px;
+  padding: 26px 26px 24px;
+  min-height: 250px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  color: white;
+}
+.action-card.match { background: #0f766e; }  /* deep teal */
+.action-card.room { background: #4338ca; }   /* deep indigo */
+.action-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.85;
+}
+.action-kicker .icon-svg { width: 15px; height: 15px; }
+.action-card h3 { margin: 0; font-size: 28px; font-weight: 800; }
+.action-card p { margin: 0; max-width: 300px; opacity: 0.85; line-height: 1.5; }
+.action-card .chip-label { color: rgba(255, 255, 255, 0.8); }
+.action-card .chip { background: rgba(0, 0, 0, 0.22); border-color: rgba(255, 255, 255, 0.25); color: white; }
+.action-card .arrow { color: rgba(255, 255, 255, 0.7); }
+.live-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.live-count::before {  /* a little green "live" dot */
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 0 4px rgba(74, 222, 128, 0.25);
+}
+.action-btn {
+  margin-top: auto;  /* pushes the button to the bottom of the card */
+  background: white;
+  color: #111;
+  font-size: 17px;
+  font-weight: 800;
+  padding: 13px 34px;
+  border-radius: 12px;
+}
+.action-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25); }
+.action-mascot { position: absolute; right: 16px; bottom: 10px; opacity: 0.95; }
+
 /* ---------- Progress: level, XP bar, streak (sidebar) ---------- */
 .progress-box {
   background: var(--rail);
@@ -1217,6 +1281,8 @@ button.ghost { border-radius: 8px; }
   }
   .brand { display: none; }
   .progress-box { display: none; }  /* the home page "Today" card shows it on phones */
+  .main-actions { grid-template-columns: 1fr; }
+  .action-mascot { display: none; }  /* not enough room next to the text on a phone */
   .today { grid-template-columns: 1fr; }
   .nav-item { flex-direction: column; gap: 2px; padding: 8px; font-size: 12px; }
   .nav-item.active { box-shadow: inset 0 3px 0 var(--brand); }

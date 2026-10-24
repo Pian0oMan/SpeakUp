@@ -285,6 +285,8 @@ function openMenu() {
   el("matchNative").value = profile.native;
   el("matchLearning").value = profile.learning;
   blockSameLanguage(["matchNative", "matchLearning"]);
+  socket.emit("list_rooms"); // for "3 people talking in Japanese" on the voice room card
+  updateRoomsLive();
   showView("homeView");
 }
 
@@ -305,6 +307,7 @@ function openProfile(message) {
 ["matchNative", "matchLearning"].forEach(id => {
   el(id).addEventListener("change", async () => {
     profile = { ...profile, native: el("matchNative").value, learning: el("matchLearning").value };
+    updateRoomsLive(); // the voice room card follows the language I'm practicing
     await api("/api/profile", { method: "PUT", body: JSON.stringify(profile) });
     showToast(`Now practicing ${profile.learning}`);
   });
@@ -794,8 +797,28 @@ function roomMatchesFilters(room) {
   return true;
 }
 
+// RANDOM VOICE ROOM (home page): the server picks an open room in my language,
+// preferring rooms where people are already talking
+el("randomRoomBtn").onclick = () => {
+  socket.emit("join_random_room", { token, language: profile.learning });
+};
+
+// "3 people talking in Japanese right now" on the home page card
+function updateRoomsLive() {
+  if (!profile) return;
+  const mine = roomList.filter(room => room.language === profile.learning);
+  const people = mine.reduce((sum, room) => sum + room.count, 0);
+  el("randomRoomText").textContent = `Jump into a group conversation in ${profile.learning} right now.`;
+  el("roomsLive").textContent = people > 0
+    ? `${people} ${people === 1 ? "person" : "people"} talking in ${profile.learning} now`
+    : mine.length > 0
+      ? `${mine.length} ${profile.learning} ${mine.length === 1 ? "room" : "rooms"} open, be the first to talk`
+      : `No ${profile.learning} rooms yet`;
+}
+
 socket.on("rooms", list => {
   roomList = list;
+  updateRoomsLive();
   renderRoomList();
   if (currentRoom) {
     const mine = list.find(room => room.id === currentRoom.id);

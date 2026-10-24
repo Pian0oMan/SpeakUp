@@ -219,10 +219,13 @@
       <!-- HOME -->
       <div id="homeView" class="view">
         <h2 id="greeting"></h2>
-        <div class="hero">
-          <div>
-            <h3><span data-icon="zap"></span> Quick Match</h3>
-            <p>Talk 1-on-1 with someone who speaks the language you're learning.</p>
+        <!-- THE TWO MAIN THINGS: big, bold, and first. Everything below is quieter. -->
+        <div class="main-actions">
+          <div class="action-card match">
+            <div class="action-mascot" data-mascot="wave" data-size="96"></div>
+            <span class="action-kicker"><span data-icon="zap"></span> 1-on-1</span>
+            <h3>Quick Match</h3>
+            <p>Video or voice chat with someone who speaks the language you're learning.</p>
             <!-- Pick the languages for this match. Changes are saved to your profile. -->
             <div class="chips">
               <label class="chip-label">I speak
@@ -233,8 +236,17 @@
                 <select id="matchLearning" class="lang-select chip"></select>
               </label>
             </div>
+            <button id="quickMatchBtn" class="action-btn">Start</button>
           </div>
-          <button id="quickMatchBtn" class="start-btn">Start</button>
+
+          <div class="action-card room">
+            <div class="action-mascot" data-mascot="excited" data-size="96"></div>
+            <span class="action-kicker"><span data-icon="rooms"></span> Group</span>
+            <h3>Random Voice Room</h3>
+            <p id="randomRoomText">Jump into a group conversation right now.</p>
+            <span id="roomsLive" class="live-count"></span>
+            <button id="randomRoomBtn" class="action-btn">Join a room</button>
+          </div>
         </div>
         <!-- TODAY: daily goal, streak, level -->
         <div class="today">
