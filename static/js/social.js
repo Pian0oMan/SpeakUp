@@ -140,13 +140,18 @@ function renderSocial() {
   [el("recentList"), el("recentListMobile")].forEach(list => fillList(list, social.recent,
     person => makePersonRow(person.user_id, person.name,
       `${onlineIds.has(person.user_id) ? "Online · " : ""}${timeAgo(person.last_at)}`,
-      [makeFriendButton(person.user_id, person.name)]),
+      // An online friend gets a "Call" button, everyone else the friend button
+      [relationTo(person.user_id) === "friend" && onlineIds.has(person.user_id)
+        ? callButton(person.user_id, person.name)
+        : makeFriendButton(person.user_id, person.name)]),
     "People you chat with show up here."));
 
   // FRIENDS PAGE
   fillList(el("friendsList"), social.friends,
-    person => makePersonRow(person.user_id, person.name, online(person.user_id),
-      [smallButton("Remove", () => removeFriendship(person, `Remove ${person.name} from your friends?`))]),
+    person => makePersonRow(person.user_id, person.name, online(person.user_id), [
+      ...(onlineIds.has(person.user_id) ? [callButton(person.user_id, person.name)] : []),
+      smallButton("Remove", () => removeFriendship(person, `Remove ${person.name} from your friends?`)),
+    ]),
     "No friends yet. Add people you meet from your Recent list.");
   fillList(el("incomingList"), social.incoming,
     person => makePersonRow(person.user_id, person.name, "wants to be friends", [

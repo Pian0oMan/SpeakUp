@@ -498,7 +498,10 @@
     <div class="topbar">
       <button id="leaveRoomBtn" class="ghost">Leave room</button>
       <span id="roomInfo"></span>
-      <span id="roomCount" class="room-count"></span>
+      <div class="head-buttons">
+        <span id="roomCount" class="room-count"></span>
+        <button id="inviteFriendsBtn" class="primary small"><span data-icon="friends"></span> Invite friends</button>
+      </div>
     </div>
 
     <!-- LEFT: everyone in the room. You join muted. -->
@@ -544,6 +547,29 @@
     <div class="popup-actions">
       <button id="popupAddBtn" class="primary small">+ Add to deck</button>
       <button id="popupReportBtn" class="link-btn">Wrong?</button>
+    </div>
+  </div>
+
+  <!-- INVITE FRIENDS to the voice room I'm in (pop-up window) -->
+  <dialog id="inviteDialog" class="card">
+    <h3>Invite friends to this room</h3>
+    <p class="hint">They get an invite with a Join button. Only online friends can be invited.</p>
+    <ul id="inviteList" class="people-list"></ul>
+    <div class="dialog-buttons">
+      <button type="button" class="ghost close-dialog">Done</button>
+    </div>
+  </dialog>
+
+  <!-- AN INVITE I RECEIVED: "Yuki invited you to ..." (shows up anywhere in the app) -->
+  <div id="inviteCard" class="invite-card" hidden>
+    <div id="inviteMascot"></div>
+    <div class="invite-text">
+      <strong id="inviteTitle"></strong>
+      <span id="inviteDetail"></span>
+    </div>
+    <div class="invite-buttons">
+      <button id="inviteNoBtn" class="ghost small">Not now</button>
+      <button id="inviteYesBtn" class="primary small">Join</button>
     </div>
   </div>
 
@@ -663,6 +689,7 @@
   <script src="/static/js/audio.js"></script>    <!-- pronunciation -->
   <script src="/static/js/progress.js"></script> <!-- XP, levels, streaks -->
   <script src="/static/js/social.js"></script>   <!-- friends, recent, online -->
+  <script src="/static/js/invites.js"></script>  <!-- inviting friends to rooms and calls -->
   <script src="/static/js/decks.js"></script>    <!-- decks, library, Anki import -->
   <script src="/static/js/popup.js"></script>    <!-- the word popup, reports -->
   <script src="/static/js/study.js"></script>    <!-- study mode -->

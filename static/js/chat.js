@@ -27,6 +27,13 @@ function leaveChat() {
 // ---------- CHAT ----------
 // The server found us a partner!
 socket.on("matched", partner => {
+  // If I was in a voice room (e.g. I accepted a friend's call), the server took me
+  // out of it: close the room's audio links here too
+  if (currentRoom) {
+    closeRoomPeers();
+    currentRoom = null;
+    roomMembers = {};
+  }
   messages = [];
   nextIcebreakerAt = 0;
   partnerName = partner.name;

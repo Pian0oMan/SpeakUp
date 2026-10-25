@@ -32,6 +32,7 @@
     border-top: 1px solid var(--border);
   }
   .brand { display: none; }
+  .invite-card { left: 12px; right: 12px; bottom: 84px; width: auto; }  /* above the tab bar */
   .progress-box { display: none; }  /* the home page "Today" card shows it on phones */
   .study-card { min-height: 320px; padding: 36px 20px; }
   .study-buttons button { min-width: 0; flex: 1; padding: 12px 10px; font-size: 16px; }

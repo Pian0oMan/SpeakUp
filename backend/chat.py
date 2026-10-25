@@ -102,27 +102,33 @@ def find_partner(data):
     for other in waiting:
         if other["native"] == me["learning"] and other["learning"] == me["native"]:
             waiting.remove(other)
-            partners[me["sid"]] = other
-            partners[other["sid"]] = me
-            chat = {
-                "people": [me, other],
-                "history": [],
-                "questions": random.sample(ICEBREAKERS, len(ICEBREAKERS)),  # shuffled, no repeats
-                "question": None,
-                "answered": set(),
-                "active": True,
-                "contact_saved": False,  # added to each other's "Recent" list yet?
-            }
-            chats[me["sid"]] = chats[other["sid"]] = chat  # one shared chat for both
-            # Tell each person who they got (only PUBLIC info, never the login token).
-            # ONE of them ("initiator") starts the video connection, otherwise both
-            # browsers would try at the same time.
-            socketio.emit("matched", {**public_info(other), "initiator": True}, to=me["sid"])
-            socketio.emit("matched", {**public_info(me), "initiator": False}, to=other["sid"])
-            socketio.start_background_task(icebreaker_timer, chat)
+            pair_up(me, other)
             return
 
     waiting.append(me)  # nobody fits yet, so wait for someone
+
+
+def pair_up(me, other):
+    """Start a 1-on-1 chat + call between two people.
+    Used by Quick Match, and when a friend accepts a call invite."""
+    partners[me["sid"]] = other
+    partners[other["sid"]] = me
+    chat = {
+        "people": [me, other],
+        "history": [],
+        "questions": random.sample(ICEBREAKERS, len(ICEBREAKERS)),  # shuffled, no repeats
+        "question": None,
+        "answered": set(),
+        "active": True,
+        "contact_saved": False,  # added to each other's "Recent" list yet?
+    }
+    chats[me["sid"]] = chats[other["sid"]] = chat  # one shared chat for both
+    # Tell each person who they got (only PUBLIC info, never the login token).
+    # ONE of them ("initiator") starts the video connection, otherwise both
+    # browsers would try at the same time.
+    socketio.emit("matched", {**public_info(other), "initiator": True}, to=me["sid"])
+    socketio.emit("matched", {**public_info(me), "initiator": False}, to=other["sid"])
+    socketio.start_background_task(icebreaker_timer, chat)
 
 
 @socketio.on("leave")

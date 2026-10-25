@@ -303,6 +303,30 @@
 }
 .mobile-only { display: none; }
 
+/* An invite I received: a card in the bottom-right corner, on top of everything */
+.invite-card {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 45;
+  width: 340px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 10px 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--brand);
+  border-radius: 16px;
+  padding: 14px 16px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+  animation: pop-in 0.35s both;
+}
+.invite-text strong { display: block; }
+.invite-text span { color: var(--muted); font-size: 13px; }
+.invite-buttons { grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 8px; }
+#inviteFriendsBtn { display: inline-flex; align-items: center; gap: 6px; }
+#inviteDialog .people-list { max-height: 320px; overflow-y: auto; }
+
 /* ---------- Voice rooms: the list (the library uses the same cards) ---------- */
 .room-list {
   display: grid;

@@ -13,6 +13,7 @@ tz_of = {}                # sid -> the browser's time zone offset (minutes, like
 # so the server knows which account is behind each connection.
 online = {}   # user id -> set of their open connections (one per browser tab)
 user_of = {}  # sid -> user id
+person_of = {}  # sid -> who that is: name, languages, login token (stays on the server)
 
 
 @socketio.on("hello")
@@ -22,11 +23,13 @@ def hello(data):
         return
     go_offline(request.sid)  # in case this connection said hello before (e.g. new login)
     user_of[request.sid] = person["user_id"]
+    person_of[request.sid] = person  # who this connection is (for invites)
     online.setdefault(person["user_id"], set()).add(request.sid)
     tz_of[request.sid] = int(data.get("tz", 0))  # for streaks: when is midnight for them?
 
 
 def go_offline(sid):
+    person_of.pop(sid, None)
     user_id = user_of.pop(sid, None)
     if user_id in online:
         online[user_id].discard(sid)
