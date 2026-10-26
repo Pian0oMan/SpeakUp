@@ -4,13 +4,15 @@
 async function enterApp() {
   loggedIn = true;
   profile = await api("/api/profile");
+  // First time here, or I haven't answered the welcome questions yet: ask them first.
+  // (No "fluency" in the profile at all = 09_onboarding.sql hasn't been run: skip them)
+  if (!profile || (profile.fluency === null && "fluency" in profile)) return startOnboarding();
   await loadDeck();
   sayHello();     // so my friends see me online
   markSeen();     // for "Last online 5 min ago"
   loadSocial();   // friends + recent people
   loadProgress(); // level, XP, streak
-  if (profile) openMenu();
-  else openProfile("Welcome! Pick your languages to get started."); // e.g. confirmed by email
+  openMenu();
 }
 
 // Show the app (sidebar + content) with one view: homeView, deckView or profileView
@@ -43,6 +45,9 @@ function openProfile(message) {
     el("profLearning").value = profile.learning;
     el("profTranslate").value = profile.translate_to;
     el("profCountry").value = profile.country || "";
+    el("profFluency").value = profile.fluency || "";
+    el("profStudying").value = profile.studying_for || "";
+    fillInterestPicker(el("profInterests"), profile.interests || []);
     blockSameLanguage(["profNative", "profLearning"]);
   }
   el("profileStatus").textContent = message;

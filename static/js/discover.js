@@ -2,6 +2,7 @@
 // and other learners can cheer them on. It's also a way to find new friends.
 
 let posts = [];
+let people = []; // "People to meet": they share my interests and aren't my friends yet
 
 async function loadPosts() {
   try {
@@ -41,6 +42,7 @@ function makePostCard(post) {
   details.className = "post-details";
   details.append(countryTag(post.country));
   if (post.learning) details.append(`Learning ${post.learning}`);
+  if (post.fluency) details.append(fluencyTag(post.fluency));
   who.append(name, details);
   const when = document.createElement("span");
   when.className = "post-time";
@@ -52,6 +54,15 @@ function makePostCard(post) {
   body.className = "post-body";
   body.textContent = post.body;
   card.append(head, body);
+
+  // Something in common? (not on my own posts)
+  const both = post.mine ? [] : sharedInterests(post.interests);
+  if (both.length) {
+    const common = document.createElement("p");
+    common.className = "post-common";
+    common.textContent = `You both like ${interestList(both)}`;
+    card.appendChild(common);
+  }
 
   // The progress card, if they attached one
   if (post.stats) {
@@ -87,6 +98,45 @@ function makePostCard(post) {
   return card;
 }
 
+// ---------- PEOPLE TO MEET ----------
+async function loadPeople() {
+  try {
+    people = await api("/api/people");
+  } catch {
+    people = [];
+  }
+  renderPeople();
+}
+
+function renderPeople() {
+  const list = el("peopleList");
+  list.innerHTML = "";
+  // Hide anyone who became my friend since the list was loaded
+  const toShow = (Array.isArray(people) ? people : []).filter(person => relationTo(person.user_id) !== "friend");
+  el("peopleBox").hidden = toShow.length === 0;
+  toShow.forEach(person => {
+    const card = document.createElement("div");
+    card.className = "meet-card";
+    const avatar = document.createElement("div");
+    avatar.className = "person-avatar big";
+    avatar.textContent = person.username[0].toUpperCase();
+    const name = document.createElement("strong");
+    name.textContent = person.username;
+    const langs = document.createElement("div");
+    langs.className = "meet-langs";
+    langs.append(languageTag(person.native, person.learning));
+    if (person.fluency) langs.append(fluencyTag(person.fluency));
+    card.append(avatar, name, countryTag(person.country), langs,
+      interestChips(person.interests, 3), makeFriendButton(person.user_id, person.username));
+    list.appendChild(card);
+  });
+}
+
+function renderDiscover() {
+  renderPeople();
+  renderPosts();
+}
+
 async function toggleCheer(post) {
   const result = await api(`/api/posts/${post.id}/cheer`, { method: "POST" });
   post.cheered = result.cheered;
@@ -120,6 +170,7 @@ el("postForm").onsubmit = async event => {
 el("navDiscover").onclick = () => {
   showView("discoverView");
   loadPosts();
+  loadPeople();
 };
 
 // Someone posted (or deleted a post): refresh, if I'm looking at the feed

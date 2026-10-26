@@ -149,12 +149,12 @@ function autoColor(name) {
 document.querySelectorAll(".lang-select").forEach(select => {
   LANGUAGES.forEach(lang => select.add(new Option(lang, lang)));
 });
-el("regLearning").value = "Spanish";
+el("obLearning").value = "Spanish";
 
 // Language PAIRS ("I speak" + "I'm learning"): the language picked on one side
 // is blocked (greyed out) on the other side, so they can never be the same.
 const LANGUAGE_PAIRS = [
-  ["regNative", "regLearning"],
+  ["obNative", "obLearning"],
   ["profNative", "profLearning"],
   ["matchNative", "matchLearning"],
 ];
@@ -169,9 +169,6 @@ LANGUAGE_PAIRS.forEach(pair => {
   pair.forEach(id => el(id).addEventListener("change", () => blockSameLanguage(pair)));
   blockSameLanguage(pair);
 });
-
-// When creating an account, translations default to the language you speak
-el("regNative").addEventListener("change", () => (el("regTranslate").value = el("regNative").value));
 
 // REAL-TIME: open an always-on connection to the server
 const socket = io();
@@ -192,7 +189,7 @@ async function api(path, options = {}) {
   return response.json();
 }
 
-// Read the name + language + country fields of a form. prefix "reg" reads regName, regNative, ...
+// Read the Profile page's fields
 function readProfileForm(prefix) {
   return {
     username: el(prefix + "Name").value.trim(),
@@ -200,5 +197,94 @@ function readProfileForm(prefix) {
     learning: el(prefix + "Learning").value,
     translate_to: el(prefix + "Translate").value,
     country: el(prefix + "Country").value || null,
+    fluency: el(prefix + "Fluency").value || null,
+    studying_for: el(prefix + "Studying").value || null,
+    interests: pickedInterests(el(prefix + "Interests")),
   };
+}
+
+// ---------- LEVEL + INTERESTS (from the welcome questions) ----------
+// The answers people can pick. The server checks against the same lists (account.py).
+const FLUENCY_LABELS = {
+  beginner: "Beginner", elementary: "Elementary", intermediate: "Intermediate", advanced: "Advanced",
+};
+const STUDYING_FOR_LABELS = {
+  just_started: "Just starting", under_6_months: "Less than 6 months", "6_to_12_months": "6 to 12 months",
+  "1_to_3_years": "1 to 3 years", over_3_years: "More than 3 years",
+};
+const INTERESTS = {
+  anime: "Anime & manga", music: "Music", gaming: "Gaming", movies: "Movies & TV", books: "Books",
+  travel: "Travel", food: "Food & cooking", sports: "Sports", fitness: "Fitness", art: "Art & design",
+  photography: "Photography", tech: "Technology", science: "Science", history: "History",
+  fashion: "Fashion", nature: "Nature & animals", kpop: "K-pop & J-pop", business: "Business",
+  languages: "Languages", memes: "Memes & internet",
+};
+const MAX_INTERESTS = 10;
+
+// Fill the Profile page's level dropdowns
+el("profFluency").add(new Option("Not set", ""));
+Object.entries(FLUENCY_LABELS).forEach(([value, label]) => el("profFluency").add(new Option(label, value)));
+el("profStudying").add(new Option("Not set", ""));
+Object.entries(STUDYING_FOR_LABELS).forEach(([value, label]) => el("profStudying").add(new Option(label, value)));
+
+// An interest picker: one chip per topic, click to pick / unpick.
+// onChange runs after every click (e.g. to update "Pick 2 more").
+function fillInterestPicker(box, chosen = [], onChange = () => {}) {
+  box.innerHTML = "";
+  Object.entries(INTERESTS).forEach(([value, label]) => {
+    const chip = document.createElement("button");
+    chip.type = "button"; // inside a form, a plain button would submit it
+    chip.className = "chip-pick" + (chosen.includes(value) ? " on" : "");
+    chip.dataset.value = value;
+    chip.textContent = label;
+    chip.onclick = () => {
+      if (!chip.classList.contains("on") && pickedInterests(box).length >= MAX_INTERESTS) {
+        showToast(`You can pick up to ${MAX_INTERESTS}`);
+        return;
+      }
+      chip.classList.toggle("on");
+      onChange();
+    };
+    box.appendChild(chip);
+  });
+}
+
+function pickedInterests(box) {
+  return [...box.querySelectorAll(".chip-pick.on")].map(chip => chip.dataset.value);
+}
+
+// Which of someone's interests do I share?
+function sharedInterests(interests) {
+  const mine = (profile && profile.interests) || [];
+  return (interests || []).filter(topic => mine.includes(topic));
+}
+
+// "Music, Travel and Food & cooking"
+function interestList(topics) {
+  const names = topics.map(topic => INTERESTS[topic] || topic);
+  return names.length > 1 ? names.slice(0, -1).join(", ") + " and " + names.at(-1) : names.join("");
+}
+
+// "Intermediate" as a small tag (how well they speak the language they're learning)
+function fluencyTag(fluency) {
+  const tag = document.createElement("span");
+  tag.className = "fluency-tag";
+  tag.textContent = FLUENCY_LABELS[fluency] || "";
+  return tag;
+}
+
+// Someone's interests as small chips, shared ones first and highlighted
+function interestChips(interests, limit = 6) {
+  const box = document.createElement("div");
+  box.className = "interest-chips";
+  const shared = sharedInterests(interests);
+  const rest = (interests || []).filter(topic => !shared.includes(topic));
+  [...shared, ...rest].slice(0, limit).forEach(topic => {
+    const chip = document.createElement("span");
+    chip.className = "interest-chip" + (shared.includes(topic) ? " shared" : "");
+    chip.textContent = INTERESTS[topic] || topic;
+    if (shared.includes(topic)) chip.title = "You both like this";
+    box.appendChild(chip);
+  });
+  return box;
 }

@@ -171,7 +171,7 @@
     </div>
   </section>
 
-  <!-- ===== CREATE ACCOUNT (languages are chosen here, once) ===== -->
+  <!-- ===== CREATE ACCOUNT (just name, email, password: the welcome questions come next) ===== -->
   <section id="registerScreen" class="screen auth" hidden>
     <div class="card">
       <a href="#" class="back-link to-landing">← Back</a>
@@ -185,12 +185,6 @@
           <input id="regPassword" type="password" minlength="6" required>
         </label>
         <label>Confirm password <input id="regConfirm" type="password" minlength="6" required></label>
-        <div class="row">
-          <label>I speak <select id="regNative" class="lang-select"></select></label>
-          <label>I'm learning <select id="regLearning" class="lang-select"></select></label>
-        </div>
-        <label>Show translations in <select id="regTranslate" class="lang-select"></select></label>
-        <label>I'm from <select id="regCountry" class="country-select"></select></label>
         <button type="submit" class="primary">Create account</button>
       </form>
       <p id="registerStatus" class="status"></p>
@@ -331,6 +325,11 @@
             <button type="submit" class="primary small">Post</button>
           </div>
         </form>
+        <!-- People who share my interests (and aren't my friends yet) -->
+        <div id="peopleBox" class="people-meet" hidden>
+          <h3>People who like what you like</h3>
+          <div id="peopleList" class="people-meet-list"></div>
+        </div>
         <div id="postFeed" class="post-feed"></div>
       </div>
 
@@ -437,6 +436,12 @@
           </div>
           <label>Show translations in <select id="profTranslate" class="lang-select"></select></label>
           <label>I'm from <select id="profCountry" class="country-select"></select></label>
+          <div class="row">
+            <label>My level <select id="profFluency" class="fluency-select"></select></label>
+            <label>Learning for <select id="profStudying" class="studying-select"></select></label>
+          </div>
+          <label>My interests <small>(up to 10)</small></label>
+          <div id="profInterests" class="interest-picker"></div>
           <button type="submit" class="primary">Save</button>
           <p id="profileStatus" class="status"></p>
         </form>
@@ -448,6 +453,81 @@
       <h3>Recent</h3>
       <ul id="recentList" class="people-list compact"></ul>
     </aside>
+  </section>
+
+  <!-- ===== WELCOME QUESTIONS: right after signing up, one question per screen =====
+       onboarding.js shows ONE .ob-step at a time and moves the progress bar -->
+  <section id="onboardScreen" class="screen onboard" hidden>
+    <div class="onboard-top">
+      <button id="obBack" class="ghost small">← Back</button>
+      <div class="ob-progress"><div id="obProgress"></div></div>
+      <span id="obCount" class="ob-count"></span>
+      <button id="obLogout" class="ghost small">Log out</button>
+    </div>
+
+    <div class="onboard-body">
+      <!-- The mascot asks the question in a speech bubble -->
+      <div class="ob-ask">
+        <div id="obMascot" class="ob-mascot"></div>
+        <h2 id="obQuestion" class="ob-bubble"></h2>
+      </div>
+
+      <div class="ob-step" data-step="name">
+        <input id="obName" maxlength="20" placeholder="e.g. Alex">
+      </div>
+
+      <div class="ob-step" data-step="languages">
+        <div class="row">
+          <label>I speak <select id="obNative" class="lang-select"></select></label>
+          <label>I'm learning <select id="obLearning" class="lang-select"></select></label>
+        </div>
+      </div>
+
+      <div class="ob-step" data-step="country">
+        <select id="obCountry" class="country-select"></select>
+      </div>
+
+      <!-- Answer cards: data-value is what gets saved -->
+      <div class="ob-step ob-options" data-step="fluency">
+        <button class="ob-option" data-value="beginner">
+          <span class="bars" data-level="1"><i></i><i></i><i></i><i></i></span>
+          <span><strong>Beginner</strong><small>I know a few words</small></span>
+        </button>
+        <button class="ob-option" data-value="elementary">
+          <span class="bars" data-level="2"><i></i><i></i><i></i><i></i></span>
+          <span><strong>Elementary</strong><small>I can handle simple everyday chats</small></span>
+        </button>
+        <button class="ob-option" data-value="intermediate">
+          <span class="bars" data-level="3"><i></i><i></i><i></i><i></i></span>
+          <span><strong>Intermediate</strong><small>I can talk about most things, with some mistakes</small></span>
+        </button>
+        <button class="ob-option" data-value="advanced">
+          <span class="bars" data-level="4"><i></i><i></i><i></i><i></i></span>
+          <span><strong>Advanced</strong><small>I speak comfortably and want to sound natural</small></span>
+        </button>
+      </div>
+
+      <div class="ob-step ob-options" data-step="studying_for">
+        <button class="ob-option" data-value="just_started"><span><strong>Just starting</strong></span></button>
+        <button class="ob-option" data-value="under_6_months"><span><strong>Less than 6 months</strong></span></button>
+        <button class="ob-option" data-value="6_to_12_months"><span><strong>6 to 12 months</strong></span></button>
+        <button class="ob-option" data-value="1_to_3_years"><span><strong>1 to 3 years</strong></span></button>
+        <button class="ob-option" data-value="over_3_years"><span><strong>More than 3 years</strong></span></button>
+      </div>
+
+      <div class="ob-step" data-step="interests">
+        <p id="obInterestCount" class="ob-hint"></p>
+        <div id="obInterests" class="interest-picker"></div>
+      </div>
+
+      <div class="ob-step ob-done" data-step="done">
+        <p id="obSummary"></p>
+      </div>
+    </div>
+
+    <div class="onboard-bottom">
+      <button id="obNext" class="primary">Continue</button>
+    </div>
   </section>
 
   <!-- ===== SEARCHING FOR A PARTNER ===== -->
@@ -715,6 +795,7 @@
   <script src="/static/js/social.js"></script>   <!-- friends, recent, online -->
   <script src="/static/js/invites.js"></script>  <!-- inviting friends to rooms and calls -->
   <script src="/static/js/discover.js"></script> <!-- the Discover feed -->
+  <script src="/static/js/onboarding.js"></script> <!-- the welcome questions -->
   <script src="/static/js/decks.js"></script>    <!-- decks, library, Anki import -->
   <script src="/static/js/popup.js"></script>    <!-- the word popup, reports -->
   <script src="/static/js/study.js"></script>    <!-- study mode -->

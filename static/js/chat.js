@@ -40,6 +40,7 @@ socket.on("matched", partner => {
   partnerUserId = partner.user_id;
   updateAddPartnerButton(); // "+ Add friend" (or "Friends" if we already are)
   el("partnerInfo").replaceChildren(partner.name + " ", languageTag(partner.native, partner.learning));
+  if (partner.fluency) el("partnerInfo").append(" ", fluencyTag(partner.fluency));
   el("partnerAvatar").textContent = partner.name[0].toUpperCase();
   // "Speaking" choices for live captions: the language I'm learning (default) or my own
   const speakLang = el("speakLang");
@@ -50,6 +51,9 @@ socket.on("matched", partner => {
   showCaption(el("partnerCaption"), "", null);
   showScreen("chatScreen");
   render();
+  // Something to talk about: what we both like
+  const both = sharedInterests(partner.interests);
+  if (both.length) addSystemMessage(`You both like ${interestList(both)}.`);
   startCall(partner.initiator); // join the call automatically
 });
 

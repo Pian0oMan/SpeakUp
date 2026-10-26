@@ -46,6 +46,10 @@ def create_post():
         "learning": me["learning"],
         "body": text,
     }
+    # Their level + interests (once they've answered the welcome questions)
+    for key in ("fluency", "interests"):
+        if me.get(key):
+            post[key] = me[key]
     # The progress card is calculated HERE, so nobody can post fake stats
     if data.get("share_stats"):
         state = progress.progress_state(me, progress.tz_from_request())
@@ -53,6 +57,16 @@ def create_post():
     db.table("posts").insert(post).execute()
     socketio.emit("posts_changed")  # everyone looking at Discover sees it right away
     return jsonify({"ok": True})
+
+
+# "People to meet": people who like the same things as me (see people_to_meet() in the SQL)
+@app.route("/api/people")
+def people_to_meet():
+    try:
+        return jsonify(db_for(token_from_request()).rpc("people_to_meet").execute().data)
+    except Exception as error:  # e.g. 09_onboarding.sql hasn't been run yet
+        print("Couldn't load people to meet:", error)
+        return jsonify([])
 
 
 @app.route("/api/posts/<int:post_id>", methods=["DELETE"])

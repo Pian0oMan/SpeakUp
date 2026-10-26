@@ -62,17 +62,12 @@ el("loginForm").onsubmit = async event => {
   el("loginStatus").textContent = error ? error.message : "";
 };
 
-// Create account: languages are chosen HERE, once
+// Create account: just name, email and password. The welcome questions come next.
 el("registerForm").onsubmit = async event => {
   event.preventDefault();
   const status = el("registerStatus");
-  const newProfile = readProfileForm("reg");
   if (el("regPassword").value !== el("regConfirm").value) {
     status.textContent = "The passwords don't match.";
-    return;
-  }
-  if (newProfile.native === newProfile.learning) {
-    status.textContent = "Pick two different languages!";
     return;
   }
 
@@ -81,6 +76,9 @@ el("registerForm").onsubmit = async event => {
   const { data, error } = await sb.auth.signUp({
     email: el("regEmail").value,
     password: el("regPassword").value,
+    // Remember the name with the account, so the welcome questions can use it
+    // (even if they first have to confirm their email and log in later)
+    options: { data: { username: el("regName").value.trim() } },
   });
   if (error || !data.session) {
     registering = false;
@@ -88,10 +86,9 @@ el("registerForm").onsubmit = async event => {
     return;
   }
   token = data.session.access_token;
-  await api("/api/profile", { method: "PUT", body: JSON.stringify(newProfile) }); // save languages
   registering = false;
   status.textContent = "";
-  enterApp();
+  enterApp(); // no profile yet, so this starts the welcome questions
 };
 
 el("logoutBtn").onclick = () => {

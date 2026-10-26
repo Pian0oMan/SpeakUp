@@ -99,13 +99,29 @@ def find_partner(data):
 
     # Perfect language exchange: they speak what I'm learning,
     # and they're learning what I speak.
-    for other in waiting:
-        if other["native"] == me["learning"] and other["learning"] == me["native"]:
-            waiting.remove(other)
-            pair_up(me, other)
-            return
+    fits = [other for other in waiting if other["native"] == me["learning"] and other["learning"] == me["native"]]
+    if fits:
+        # Of everyone who fits, pick the best match (same interests, similar level).
+        # Nobody waits longer because of this: if anyone fits, I get matched now.
+        # (max() keeps the FIRST of equally good matches = whoever has waited longest)
+        other = max(fits, key=lambda person: match_score(me, person))
+        waiting.remove(other)
+        pair_up(me, other)
+        return
 
     waiting.append(me)  # nobody fits yet, so wait for someone
+
+
+FLUENCY_ORDER = ["beginner", "elementary", "intermediate", "advanced"]
+
+
+def match_score(me, other):
+    """Higher = a better match: 2 points per shared interest, minus 1 per step of level difference."""
+    shared = len(set(me.get("interests") or []) & set(other.get("interests") or []))
+    score = 2 * shared
+    if me.get("fluency") in FLUENCY_ORDER and other.get("fluency") in FLUENCY_ORDER:
+        score -= abs(FLUENCY_ORDER.index(me["fluency"]) - FLUENCY_ORDER.index(other["fluency"]))
+    return score
 
 
 def pair_up(me, other):

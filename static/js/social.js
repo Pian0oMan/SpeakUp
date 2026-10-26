@@ -159,6 +159,8 @@ function makeFriendCard(person) {
   const langs = document.createElement("div");
   langs.className = "friend-langs";
   if (person.native) langs.textContent = `Speaks ${person.native} · learning ${person.learning}`;
+  if (person.fluency) langs.append(" ", fluencyTag(person.fluency));
+  const interests = interestChips(person.interests); // shared ones highlighted
 
   const stats = document.createElement("div");
   stats.className = "friend-stats";
@@ -186,7 +188,7 @@ function makeFriendCard(person) {
   if (isOnline) buttons.appendChild(callButton(person.user_id, person.name));
   buttons.appendChild(smallButton("Remove", () => removeFriendship(person, `Remove ${person.name} from your friends?`)));
 
-  li.append(top, langs, stats, status, buttons);
+  li.append(top, langs, interests, stats, status, buttons);
   return li;
 }
 
@@ -227,7 +229,7 @@ function renderSocial() {
 
   updateAddPartnerButton();
   renderRoomList(); // the "Friends only" room filter depends on my friends
-  if (!el("discoverView").hidden) renderPosts(); // "+ Add friend" buttons on posts
+  if (!el("discoverView").hidden) renderDiscover(); // "+ Add friend" buttons on posts and people
   if (currentRoom) renderMembers();
 }
 

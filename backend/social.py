@@ -124,6 +124,8 @@ def add_friend_stats(db, friends):
             "country": card["country"],
             "native": card["native"],
             "learning": card["learning"],
+            "fluency": card.get("fluency"),
+            "interests": card.get("interests") or [],
             "level": state["level"],
             "streak": state["streak"],  # 0 if they haven't practiced since yesterday
             "words": card["words_learned"],

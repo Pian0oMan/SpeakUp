@@ -56,7 +56,7 @@ def my_profile(db):
 # Hovering over a word: a short translation + the language it's in
 def public_info(person):
     """What OTHER people may see about someone (never their login token)."""
-    return {key: person[key] for key in ("sid", "user_id", "name", "native", "learning")}
+    return {key: person.get(key) for key in ("sid", "user_id", "name", "native", "learning", "fluency", "interests")}
 
 
 def person_from_token(token):
@@ -74,5 +74,7 @@ def person_from_token(token):
         "native": profile["native"],
         "learning": profile["learning"],
         "translate_to": profile["translate_to"],
+        "fluency": profile.get("fluency"),           # e.g. "intermediate" (for matching)
+        "interests": profile.get("interests") or [],  # e.g. ["anime", "music"]
         "token": token,             # stays on the server, used to save things as them
     }

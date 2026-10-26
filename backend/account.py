@@ -20,6 +20,15 @@ def config():
 
 
 # ---------- PROFILE ----------
+# The answers the welcome questions can save (keep these in sync with core.js)
+FLUENCY = ["beginner", "elementary", "intermediate", "advanced"]
+STUDYING_FOR = ["just_started", "under_6_months", "6_to_12_months", "1_to_3_years", "over_3_years"]
+INTERESTS = [
+    "anime", "music", "gaming", "movies", "books", "travel", "food", "sports", "fitness", "art",
+    "photography", "tech", "science", "history", "fashion", "nature", "kpop", "business", "languages", "memes",
+]
+MAX_INTERESTS = 10
+
 @app.route("/api/profile", methods=["GET"])
 def get_profile():
     rows = db_for(token_from_request()).table("profiles").select("*").execute().data
@@ -40,5 +49,20 @@ def save_profile():
     country = str(data.get("country") or "").upper()
     if re.fullmatch(r"[A-Z]{2}", country):
         changes["country"] = country
-    db_for(token_from_request()).table("profiles").upsert(changes).execute()
+    # The welcome questions: only answers from the lists above are saved
+    extras = {}
+    if data.get("fluency") in FLUENCY:
+        extras["fluency"] = data["fluency"]
+    if data.get("studying_for") in STUDYING_FOR:
+        extras["studying_for"] = data["studying_for"]
+    if isinstance(data.get("interests"), list):
+        extras["interests"] = [topic for topic in INTERESTS if topic in data["interests"]][:MAX_INTERESTS]
+
+    db = db_for(token_from_request())
+    try:
+        db.table("profiles").upsert({**changes, **extras}).execute()
+    except Exception as error:
+        # 09_onboarding.sql hasn't been run yet: save the basics, so signing up still works
+        print("Saved the profile without level/interests:", error)
+        db.table("profiles").upsert(changes).execute()
     return jsonify({"ok": True})
