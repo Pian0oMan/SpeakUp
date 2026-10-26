@@ -198,6 +198,9 @@
   text-align: center;
 }
 .caption.mine { font-size: 14px; opacity: 0.75; }  /* what I'm saying: smaller */
+.caption-name { color: var(--brand); font-weight: 700; font-size: 0.8em; }  /* "Yuki:" in voice rooms */
+/* In a voice room: whoever is talking right now gets a glowing tile */
+.member-tile.speaking { box-shadow: 0 0 0 3px var(--brand), 0 0 24px rgba(20, 184, 166, 0.35); }
 .caption .word:hover { outline-color: white; }
 
 /* A spoken message in the chat history */

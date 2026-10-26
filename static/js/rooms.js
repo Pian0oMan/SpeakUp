@@ -131,6 +131,7 @@ socket.on("room_error", message => {
 socket.on("room_joined", data => {
   if (el("createRoomDialog").open) el("createRoomDialog").close(); // I made this room
   closeRoomPeers();
+  clearRoomCaptions();
   hangUp(); // just in case I was in a 1-on-1 call
   currentRoom = data.room;
   roomMembers = {};
@@ -177,17 +178,59 @@ socket.on("room_media", ({ sid, mic }) => {
   renderMembers();
 });
 
-// Someone in the room is talking: show their words on their tile for a few seconds
-const roomCaptionTimers = {};
+// LIVE CAPTIONS in a room: a subtitle bar at the bottom of the stage, like in a
+// 1-on-1 call, with one line per person talking ("Yuki: こんにちは..."), and the
+// speaker's tile glows. Every word can be hovered for a translation.
+let roomCaptionLines = {}; // sid -> { name, text, language, mine, timer }
+
+function setRoomCaption(sid, name, text, language, mine) {
+  const old = roomCaptionLines[sid];
+  if (old) clearTimeout(old.timer);
+  if (text) {
+    roomCaptionLines[sid] = {
+      name, text, language, mine,
+      // 4 seconds of quiet: the line disappears
+      timer: setTimeout(() => setRoomCaption(sid, name, "", language, mine), 4000),
+    };
+  } else {
+    delete roomCaptionLines[sid];
+  }
+  drawRoomCaptions();
+  const tile = el("tile-" + (mine ? "me" : sid));
+  if (tile) tile.classList.toggle("speaking", !!text);
+}
+
+function drawRoomCaptions() {
+  const box = el("roomCaptions");
+  box.innerHTML = "";
+  Object.values(roomCaptionLines).forEach(line => {
+    const div = document.createElement("div");
+    div.className = "caption" + (line.mine ? " mine" : "");
+    const who = document.createElement("span");
+    who.className = "caption-name";
+    who.textContent = line.name + ": ";
+    div.appendChild(who);
+    appendWords(div, line.text, line.language);
+    box.appendChild(div);
+  });
+}
+
+function clearRoomCaptions() {
+  Object.values(roomCaptionLines).forEach(line => clearTimeout(line.timer));
+  roomCaptionLines = {};
+  drawRoomCaptions();
+}
+
+// Someone else in the room is talking
 socket.on("room_caption", ({ sid, text, language }) => {
-  showCaption(el("caption-" + sid), text, language);
-  clearTimeout(roomCaptionTimers[sid]);
-  roomCaptionTimers[sid] = setTimeout(() => showCaption(el("caption-" + sid), "", null), 4000);
+  const member = roomMembers[sid];
+  setRoomCaption(sid, member ? member.name : "Someone", text, language, false);
 });
 
 function leaveRoom() {
   socket.emit("leave_room");
   closeRoomPeers();
+  clearRoomCaptions();
   stopMyMedia(); // mic off
   currentRoom = null;
   roomMembers = {};
@@ -277,6 +320,9 @@ function renderMembers() {
   everyone.forEach(member => {
     const tile = document.createElement("div");
     tile.className = "member-tile" + (member.mic ? " talking" : "");
+    tile.id = "tile-" + (member.me ? "me" : member.sid);
+    // Still talking (a caption is showing)? Keep the glow after redrawing
+    if (roomCaptionLines[member.me ? socket.id : member.sid]) tile.classList.add("speaking");
     const avatar = document.createElement("div");
     avatar.className = "avatar";
     avatar.textContent = member.name[0].toUpperCase();
@@ -286,11 +332,7 @@ function renderMembers() {
     const mic = document.createElement("span");
     mic.className = "mic-state";
     mic.textContent = member.mic ? "Mic on" : "Muted";
-    const caption = document.createElement("div"); // live captions while they talk
-    caption.className = "member-caption";
-    caption.id = member.me ? "myRoomCaption" : "caption-" + member.sid;
-    caption.hidden = true;
-    tile.append(avatar, name, langs, mic, caption);
+    tile.append(avatar, name, langs, mic);
     if (!member.me && member.user_id) tile.appendChild(makeFriendButton(member.user_id, member.name));
     box.appendChild(tile);
   });

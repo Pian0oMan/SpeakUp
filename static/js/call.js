@@ -278,9 +278,10 @@ function showCaption(box, text, language) {
   if (text) appendWords(box, text, language);
 }
 
-// What I'm saying: over the video in a 1-on-1 call, or on my own tile in a room
+// What I'm saying: over the video in a 1-on-1 call, or in the room's subtitle bar
 function showMyCaption(text, language) {
-  showCaption(el(currentRoom ? "myRoomCaption" : "myCaption"), text, language);
+  if (currentRoom) setRoomCaption(socket.id, "You", text, language, true);
+  else showCaption(el("myCaption"), text, language);
 }
 
 // My partner is talking: show their words, then hide them after 4 seconds of quiet
