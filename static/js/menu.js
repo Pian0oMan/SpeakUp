@@ -6,6 +6,7 @@ async function enterApp() {
   profile = await api("/api/profile");
   await loadDeck();
   sayHello();     // so my friends see me online
+  markSeen();     // for "Last online 5 min ago"
   loadSocial();   // friends + recent people
   loadProgress(); // level, XP, streak
   if (profile) openMenu();
@@ -41,6 +42,7 @@ function openProfile(message) {
     el("profNative").value = profile.native;
     el("profLearning").value = profile.learning;
     el("profTranslate").value = profile.translate_to;
+    el("profCountry").value = profile.country || "";
     blockSameLanguage(["profNative", "profLearning"]);
   }
   el("profileStatus").textContent = message;

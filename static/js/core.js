@@ -44,6 +44,7 @@ const ICONS = {
   hangUp: '<path d="M3 14.5c5-4.5 13-4.5 18 0l-2.3 2.6-3.6-1.3v-2.3a10 10 0 0 0-6.2 0v2.3l-3.6 1.3z"/>',
   flame: '<path d="M12 3c1 3 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3.5 2-5 .5 1.5 1.5 2.5 2.5 3 .5-2.5-.5-5.5.5-8z"/>',
   star: '<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>',
+  compass: '<circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/>',
 };
 
 function icon(name) {
@@ -75,6 +76,50 @@ function languageTag(native, learning) {
   tag.title = learning ? `speaks ${native}, learning ${learning}` : native;
   return tag;
 }
+
+// COUNTRIES: stored as 2-letter codes ("JP"). The browser knows every country's name
+// (Intl.DisplayNames), and flagcdn.com has a free flag picture for each one.
+const COUNTRY_CODES = (
+  "AD AE AF AG AI AL AM AO AR AS AT AU AW AX AZ BA BB BD BE BF BG BH BI BJ BL BM BN BO BQ BR BS BT " +
+  "BW BY BZ CA CC CD CF CG CH CI CK CL CM CN CO CR CU CV CW CX CY CZ DE DJ DK DM DO DZ EC EE EG EH " +
+  "ER ES ET FI FJ FK FM FO FR GA GB GD GE GF GG GH GI GL GM GN GP GQ GR GT GU GW GY HK HN HR HT HU " +
+  "ID IE IL IM IN IO IQ IR IS IT JE JM JO JP KE KG KH KI KM KN KP KR KW KY KZ LA LB LC LI LK LR LS " +
+  "LT LU LV LY MA MC MD ME MF MG MH MK ML MM MN MO MP MQ MR MS MT MU MV MW MX MY MZ NA NC NE NF NG " +
+  "NI NL NO NP NR NU NZ OM PA PE PF PG PH PK PL PM PN PR PS PT PW PY QA RE RO RS RU RW SA SB SC SD " +
+  "SE SG SH SI SJ SK SL SM SN SO SR SS ST SV SX SY SZ TC TD TG TH TJ TK TL TM TN TO TR TT TV TW TZ " +
+  "UA UG US UY UZ VA VC VE VG VI VN VU WF WS XK YE YT ZA ZM ZW"
+).split(" ");
+const countryNames = new Intl.DisplayNames(["en"], { type: "region" });
+
+function countryName(code) {
+  try {
+    return countryNames.of(code);
+  } catch {
+    return code;
+  }
+}
+
+// A small flag + the country name, e.g. [flag] Japan. Nothing if no country is picked.
+function countryTag(code) {
+  const tag = document.createElement("span");
+  tag.className = "country-tag";
+  if (!code) return tag;
+  const flag = document.createElement("img");
+  flag.className = "flag";
+  flag.src = `https://flagcdn.com/w40/${code.toLowerCase()}.png`;
+  flag.alt = "";
+  flag.onerror = () => flag.remove(); // no picture? just show the name
+  tag.append(flag, countryName(code));
+  return tag;
+}
+
+// Fill every country dropdown, sorted by name
+document.querySelectorAll(".country-select").forEach(select => {
+  select.add(new Option("Choose your country", ""));
+  COUNTRY_CODES.map(code => [countryName(code), code])
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .forEach(([name, code]) => select.add(new Option(name, code)));
+});
 
 // Colorful deck icons (Renshuu style): the deck's picture if it has one, otherwise a
 // rounded square with its first letter, in the color the user picked. With no color
@@ -147,12 +192,13 @@ async function api(path, options = {}) {
   return response.json();
 }
 
-// Read the name + language fields of a form. prefix "reg" reads regName, regNative, ...
+// Read the name + language + country fields of a form. prefix "reg" reads regName, regNative, ...
 function readProfileForm(prefix) {
   return {
     username: el(prefix + "Name").value.trim(),
     native: el(prefix + "Native").value,
     learning: el(prefix + "Learning").value,
     translate_to: el(prefix + "Translate").value,
+    country: el(prefix + "Country").value || null,
   };
 }

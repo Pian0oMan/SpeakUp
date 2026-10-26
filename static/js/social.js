@@ -32,6 +32,13 @@ function askWhoIsOnline() {
 setInterval(() => {
   if (loggedIn) askWhoIsOnline();
 }, 20000);
+
+// Every 2 minutes: tell the server I still have the app open,
+// so my friends see "Last online 5 min ago" after I leave
+function markSeen() {
+  if (loggedIn) api("/api/seen", { method: "POST" }).catch(() => {});
+}
+setInterval(markSeen, 120000);
 socket.on("online", ids => {
   onlineIds = new Set(ids);
   renderSocial();
@@ -127,6 +134,62 @@ function timeAgo(isoTime) {
   return days === 1 ? "yesterday" : `${days} days ago`;
 }
 
+// A friend's profile card on the Friends page:
+// avatar + name + country, languages, words learned, level, streak, when they were last online
+function makeFriendCard(person) {
+  const isOnline = onlineIds.has(person.user_id);
+  const li = document.createElement("li");
+  li.className = "friend-card";
+
+  const top = document.createElement("div");
+  top.className = "friend-top";
+  const avatar = document.createElement("div");
+  avatar.className = "person-avatar big";
+  avatar.textContent = person.name[0].toUpperCase();
+  const dot = document.createElement("span");
+  dot.className = "online-dot" + (isOnline ? " on" : "");
+  avatar.appendChild(dot);
+  const who = document.createElement("div");
+  who.className = "friend-who";
+  const name = document.createElement("strong");
+  name.textContent = person.name;
+  who.append(name, countryTag(person.country));
+  top.append(avatar, who);
+
+  const langs = document.createElement("div");
+  langs.className = "friend-langs";
+  if (person.native) langs.textContent = `Speaks ${person.native} · learning ${person.learning}`;
+
+  const stats = document.createElement("div");
+  stats.className = "friend-stats";
+  const stat = (iconName, text) => {
+    const item = document.createElement("span");
+    item.innerHTML = icon(iconName);
+    item.append(text);
+    return item;
+  };
+  if (person.words !== undefined) {
+    stats.append(
+      stat("decks", `${person.words} words learned`),
+      stat("star", `Level ${person.level}`),
+      stat("flame", `${person.streak}-day streak`),
+    );
+  }
+
+  const status = document.createElement("div");
+  status.className = "friend-status" + (isOnline ? " on" : "");
+  status.textContent = isOnline ? "Online now"
+    : person.last_seen ? `Last online ${timeAgo(person.last_seen)}` : "Offline";
+
+  const buttons = document.createElement("div");
+  buttons.className = "person-buttons";
+  if (isOnline) buttons.appendChild(callButton(person.user_id, person.name));
+  buttons.appendChild(smallButton("Remove", () => removeFriendship(person, `Remove ${person.name} from your friends?`)));
+
+  li.append(top, langs, stats, status, buttons);
+  return li;
+}
+
 function fillList(list, people, makeRow, emptyText) {
   list.innerHTML = "";
   if (people.length === 0 && emptyText) list.innerHTML = `<li>${emptyState("sad", emptyText)}</li>`;
@@ -134,8 +197,6 @@ function fillList(list, people, makeRow, emptyText) {
 }
 
 function renderSocial() {
-  const online = id => (onlineIds.has(id) ? "Online" : "Offline");
-
   // RECENT (right panel + the phone version on the Friends page)
   [el("recentList"), el("recentListMobile")].forEach(list => fillList(list, social.recent,
     person => makePersonRow(person.user_id, person.name,
@@ -147,12 +208,8 @@ function renderSocial() {
     "People you chat with show up here."));
 
   // FRIENDS PAGE
-  fillList(el("friendsList"), social.friends,
-    person => makePersonRow(person.user_id, person.name, online(person.user_id), [
-      ...(onlineIds.has(person.user_id) ? [callButton(person.user_id, person.name)] : []),
-      smallButton("Remove", () => removeFriendship(person, `Remove ${person.name} from your friends?`)),
-    ]),
-    "No friends yet. Add people you meet from your Recent list.");
+  fillList(el("friendsList"), social.friends, makeFriendCard,
+    "No friends yet. Add people you meet from your Recent list, or from Discover.");
   fillList(el("incomingList"), social.incoming,
     person => makePersonRow(person.user_id, person.name, "wants to be friends", [
       smallButton("Accept", () => acceptFriend(person), "primary small"),
@@ -170,6 +227,7 @@ function renderSocial() {
 
   updateAddPartnerButton();
   renderRoomList(); // the "Friends only" room filter depends on my friends
+  if (!el("discoverView").hidden) renderPosts(); // "+ Add friend" buttons on posts
   if (currentRoom) renderMembers();
 }
 

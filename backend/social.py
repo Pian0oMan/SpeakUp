@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 
 from flask import request, jsonify
 
+from backend import progress
 from backend.setup import app, socketio, db_for, token_from_request, my_profile, person_from_token
 
 tz_of = {}                # sid -> the browser's time zone offset (minutes, like JavaScript's getTimezoneOffset)
@@ -102,7 +103,44 @@ def social():
             "last_at": row["last_at"],
             "relation": relation.get(user_id),  # friend / requested / incoming / None
         })
+    add_friend_stats(db, friends)
     return jsonify({"friends": friends, "incoming": incoming, "outgoing": outgoing, "recent": recent})
+
+
+def add_friend_stats(db, friends):
+    """Add each friend's country, languages, level, streak, words learned and "last online"
+    (from the friend_cards() database function, which only shows MY friends)."""
+    try:
+        cards = {row["user_id"]: row for row in db.rpc("friend_cards").execute().data}
+    except Exception as error:  # e.g. 08_friends_discover.sql hasn't been run yet
+        print("Couldn't load friend stats:", error)
+        return
+    for person in friends:
+        card = cards.get(person["user_id"])
+        if not card:
+            continue
+        state = progress.progress_state(card, progress.tz_from_request())
+        person.update({
+            "country": card["country"],
+            "native": card["native"],
+            "learning": card["learning"],
+            "level": state["level"],
+            "streak": state["streak"],  # 0 if they haven't practiced since yesterday
+            "words": card["words_learned"],
+            "last_seen": card["last_seen"],
+        })
+
+
+# The browser calls this every couple of minutes while the app is open,
+# so friends can see "Last online 5 min ago"
+@app.route("/api/seen", methods=["POST"])
+def seen():
+    db = db_for(token_from_request())
+    try:
+        db.table("profiles").update({"last_seen": datetime.now(timezone.utc).isoformat()})             .eq("id", my_profile(db)["id"]).execute()
+    except Exception as error:  # e.g. the SQL for last_seen hasn't been run yet
+        print("Couldn't save last seen:", error)
+    return jsonify({"ok": True})
 
 
 @app.route("/api/friends", methods=["POST"])

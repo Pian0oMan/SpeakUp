@@ -1,4 +1,6 @@
 # ACCOUNT: the web page itself, the login settings, and the user's profile.
+import re
+
 from flask import request, jsonify, send_from_directory
 
 from backend.setup import app, db_for, token_from_request, SUPABASE_URL, SUPABASE_ANON_KEY
@@ -27,10 +29,16 @@ def get_profile():
 @app.route("/api/profile", methods=["PUT"])
 def save_profile():
     data = request.get_json()
-    db_for(token_from_request()).table("profiles").upsert({
+    changes = {
         "username": data["username"],
         "native": data["native"],
         "learning": data["learning"],
         "translate_to": data["translate_to"],
-    }).execute()
+    }
+    # Where I'm from: a 2-letter country code like "JP" (only saved once one is picked,
+    # so saving still works before 08_friends_discover.sql adds the column)
+    country = str(data.get("country") or "").upper()
+    if re.fullmatch(r"[A-Z]{2}", country):
+        changes["country"] = country
+    db_for(token_from_request()).table("profiles").upsert(changes).execute()
     return jsonify({"ok": True})

@@ -12,6 +12,7 @@ These files build Speak Up's database. Run them **in order**, in Supabase:
 | `05_friends.sql` | Friends and recent contacts |
 | `06_progress.sql` | XP, levels, streaks, daily goal |
 | `07_deck_style.sql` | Deck colors and pictures |
+| `08_friends_discover.sql` | Countries, "last online", friends' stats, and the Discover page (posts + cheers) |
 
-Files 04 to 07 are safe to run again. If Supabase offers to "enable RLS" for you,
+Files 04 to 08 are safe to run again. If Supabase offers to "enable RLS" for you,
 run the file as written: every file already turns on Row Level Security itself.

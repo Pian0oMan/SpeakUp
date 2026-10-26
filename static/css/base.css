@@ -79,7 +79,7 @@ button.small { padding: 6px 14px; font-size: 14px; }
 form { display: flex; flex-direction: column; gap: 14px; }
 label { display: flex; flex-direction: column; gap: 4px; font-weight: 600; font-size: 14px; flex: 1; }
 label small { font-weight: 400; color: var(--muted); }
-input, select {
+input, select, textarea {
   font: inherit;
   font-weight: 400;
   color: var(--text);
@@ -88,8 +88,8 @@ input, select {
   border: 1px solid var(--border);
   border-radius: 10px;
 }
-input::placeholder { color: #6d6980; }
-input:focus, select:focus { outline: 2px solid var(--brand); border-color: transparent; }
+input::placeholder, textarea::placeholder { color: #6d6980; }
+input:focus, select:focus, textarea:focus { outline: 2px solid var(--brand); border-color: transparent; }
 option { background: var(--surface); color: var(--text); }
 option:disabled { color: #5d596e; }  /* the language already picked on the other side */
 .row { display: flex; gap: 12px; }  /* two fields side by side */

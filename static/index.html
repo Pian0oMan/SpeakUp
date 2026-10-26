@@ -190,6 +190,7 @@
           <label>I'm learning <select id="regLearning" class="lang-select"></select></label>
         </div>
         <label>Show translations in <select id="regTranslate" class="lang-select"></select></label>
+        <label>I'm from <select id="regCountry" class="country-select"></select></label>
         <button type="submit" class="primary">Create account</button>
       </form>
       <p id="registerStatus" class="status"></p>
@@ -217,6 +218,7 @@
         <span data-icon="friends"></span><span>Friends</span>
         <span id="requestBadge" class="badge" hidden></span>
       </button>
+      <button id="navDiscover" class="nav-item" data-view="discoverView"><span data-icon="compass"></span><span>Discover</span></button>
       <button id="navDeck" class="nav-item" data-view="deckView"><span data-icon="decks"></span><span>Decks</span></button>
       <button id="navLibrary" class="nav-item" data-view="libraryView"><span data-icon="library"></span><span>Library</span></button>
       <button id="navProfile" class="nav-item" data-view="profileView"><span data-icon="user"></span><span>Profile</span></button>
@@ -300,9 +302,10 @@
           <h3>Friend requests</h3>
           <ul id="incomingList" class="people-list"></ul>
         </div>
-        <div class="card friends-card">
+        <div class="card friends-card wide">
           <h3>Your friends</h3>
-          <ul id="friendsList" class="people-list"></ul>
+          <!-- One profile card per friend: country, languages, words learned, last online -->
+          <ul id="friendsList" class="friend-grid"></ul>
         </div>
         <div id="outgoingBox" class="card friends-card" hidden>
           <h3>Requests you sent</h3>
@@ -313,6 +316,22 @@
           <h3>Recent</h3>
           <ul id="recentListMobile" class="people-list"></ul>
         </div>
+      </div>
+
+      <!-- DISCOVER: everyone shares their progress (like LinkedIn) and cheers each other on -->
+      <div id="discoverView" class="view" hidden>
+        <h2>Discover</h2>
+        <p class="view-intro">Share your wins and cheer on other learners.</p>
+        <form id="postForm" class="card post-composer">
+          <textarea id="postText" maxlength="500" rows="3"
+            placeholder="Share a win: your first full conversation, a word you love, a new streak..."></textarea>
+          <div class="composer-bottom">
+            <label class="inline-label"><input type="checkbox" id="postStats" checked> Attach my progress</label>
+            <span id="postCount" class="char-count">0 / 500</span>
+            <button type="submit" class="primary small">Post</button>
+          </div>
+        </form>
+        <div id="postFeed" class="post-feed"></div>
       </div>
 
       <!-- VOICE ROOMS: browse and create -->
@@ -417,6 +436,7 @@
             <label>I'm learning <select id="profLearning" class="lang-select"></select></label>
           </div>
           <label>Show translations in <select id="profTranslate" class="lang-select"></select></label>
+          <label>I'm from <select id="profCountry" class="country-select"></select></label>
           <button type="submit" class="primary">Save</button>
           <p id="profileStatus" class="status"></p>
         </form>
@@ -694,6 +714,7 @@
   <script src="/static/js/progress.js"></script> <!-- XP, levels, streaks -->
   <script src="/static/js/social.js"></script>   <!-- friends, recent, online -->
   <script src="/static/js/invites.js"></script>  <!-- inviting friends to rooms and calls -->
+  <script src="/static/js/discover.js"></script> <!-- the Discover feed -->
   <script src="/static/js/decks.js"></script>    <!-- decks, library, Anki import -->
   <script src="/static/js/popup.js"></script>    <!-- the word popup, reports -->
   <script src="/static/js/study.js"></script>    <!-- study mode -->
