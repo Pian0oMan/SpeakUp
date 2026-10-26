@@ -496,8 +496,7 @@
   <!-- ===== INSIDE A VOICE ROOM ===== -->
   <section id="roomScreen" class="screen" hidden>
     <div class="topbar">
-      <button id="leaveRoomBtn" class="ghost">Leave room</button>
-      <span id="roomInfo"></span>
+      <span id="roomInfo" class="room-info"></span>
       <div class="head-buttons">
         <span id="roomCount" class="room-count"></span>
         <button id="inviteFriendsBtn" class="primary small"><span data-icon="friends"></span> Invite friends</button>
@@ -514,6 +513,8 @@
         <label class="speak-label" title="The language you're speaking, for live captions">
           Speaking <select id="roomSpeakLang"></select>
         </label>
+        <!-- Easy to find: red, right next to the mic (like Discord's disconnect button) -->
+        <button id="leaveRoomBtn" class="leave-btn"><span data-icon="hangUp"></span> Leave</button>
       </div>
     </div>
 
@@ -688,6 +689,7 @@
   <script src="/static/js/chat.js"></script>     <!-- Quick Match, 1-on-1 chat, icebreakers -->
   <script src="/static/js/call.js"></script>     <!-- video/voice calls, live captions -->
   <script src="/static/js/rooms.js"></script>    <!-- voice rooms -->
+  <script src="/static/js/talking.js"></script>  <!-- lights up whoever is talking -->
   <script src="/static/js/audio.js"></script>    <!-- pronunciation -->
   <script src="/static/js/progress.js"></script> <!-- XP, levels, streaks -->
   <script src="/static/js/social.js"></script>   <!-- friends, recent, online -->

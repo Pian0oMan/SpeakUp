@@ -34,7 +34,7 @@
   transition: border-color 0.2s;
   container-type: size;  /* lets the avatar measure THIS tile (the "cq" units below) */
 }
-.member-tile.talking { border-color: var(--success); }  /* mic is on */
+/* (Mic on just shows "Mic on" in green; the glow is only for actually TALKING, see .speaking) */
 /* The avatar: the size for this many people (--avatar), but never taller than
    about 40% of its tile (40cqh) or wider than 70% (70cqw), and always a circle */
 .member-tile .avatar {
@@ -199,8 +199,38 @@
 }
 .caption.mine { font-size: 14px; opacity: 0.75; }  /* what I'm saying: smaller */
 .caption-name { color: var(--brand); font-weight: 700; font-size: 0.8em; }  /* "Yuki:" in voice rooms */
-/* In a voice room: whoever is talking right now gets a glowing tile */
-.member-tile.speaking { box-shadow: 0 0 0 3px var(--brand), 0 0 24px rgba(20, 184, 166, 0.35); }
+/* WHO'S TALKING (talking.js measures their volume): a turquoise glow around their
+   tile, and their avatar gently pulses. Same glow on my partner in a 1-on-1 call. */
+.member-tile.speaking {
+  border-color: #2dd4bf !important;
+  box-shadow: 0 0 0 2px #2dd4bf, 0 0 28px rgba(45, 212, 191, 0.45);
+}
+.member-tile.speaking .avatar,
+#partnerAvatar.speaking {
+  box-shadow: 0 0 0 4px #2dd4bf, 0 0 30px rgba(45, 212, 191, 0.6);
+  animation: talk-pulse 0.9s ease-in-out infinite;
+}
+.member-tile .avatar, #partnerAvatar { transition: box-shadow 0.15s; }
+@keyframes talk-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+@media (prefers-reduced-motion: reduce) {
+  .member-tile.speaking .avatar, #partnerAvatar.speaking { animation: none; }  /* glow only, no pulse */
+}
+
+/* LEAVE: red and right next to the mic, so it's easy to find */
+.leave-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--danger);
+  color: white;
+  font-weight: 700;
+  padding: 0 22px;
+  height: 52px;  /* same height as the round mic button */
+  border-radius: 999px;
+}
+.leave-btn:hover { background: #d92d32; }
+.leave-btn .icon-svg { width: 22px; height: 22px; }
+.room-info { font-weight: 700; }
 .caption .word:hover { outline-color: white; }
 
 /* A spoken message in the chat history */

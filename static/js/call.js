@@ -30,6 +30,7 @@ function startCall(initiator) {
   connection.ontrack = event => {
     remoteStream.addTrack(event.track);
     el("remoteVideo").play().catch(() => {});
+    watchVoice("partner", remoteStream); // their avatar lights up when they talk
   };
   // My browser found a possible route to me: tell my partner about it
   connection.onicecandidate = event => {
@@ -87,6 +88,7 @@ socket.on("call", data => {
 
 // End the link with my partner (my own camera/mic are NOT switched off here)
 function hangUp() {
+  stopWatchingVoice("partner");
   if (peer) peer.close();
   peer = null;
   el("remoteVideo").srcObject = null;
@@ -124,8 +126,13 @@ async function toggleMic() {
       return;
     }
   }
-  if (micTrack) startCaptions(); // mic on = live captions on
-  else stopCaptions();
+  if (micTrack) {
+    startCaptions(); // mic on = live captions on
+    watchVoice("me", new MediaStream([micTrack])); // my own tile lights up when I talk
+  } else {
+    stopCaptions();
+    stopWatchingVoice("me");
+  }
   attachMyMedia();                               // 1-on-1 call
   Object.values(roomPeers).forEach(attachRoomMic); // everyone in my voice room
   updateMyButtons();
@@ -164,6 +171,7 @@ el("camBtn").onclick = async () => {
 
 function stopMyMedia() {
   stopCaptions();
+  stopWatchingVoice("me");
   if (micTrack) micTrack.stop();
   if (camTrack) camTrack.stop();
   micTrack = camTrack = null;

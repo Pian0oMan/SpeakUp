@@ -163,6 +163,7 @@ socket.on("room_member_joined", member => {
 
 socket.on("room_member_left", sid => {
   const member = roomMembers[sid];
+  stopWatchingVoice(sid);
   if (roomPeers[sid]) {
     roomPeers[sid].close();
     roomPeers[sid].audio.srcObject = null;
@@ -196,8 +197,6 @@ function setRoomCaption(sid, name, text, language, mine) {
     delete roomCaptionLines[sid];
   }
   drawRoomCaptions();
-  const tile = el("tile-" + (mine ? "me" : sid));
-  if (tile) tile.classList.toggle("speaking", !!text);
 }
 
 function drawRoomCaptions() {
@@ -251,6 +250,7 @@ function connectToMember(sid, initiator) {
   connection.ontrack = event => {
     stream.addTrack(event.track);
     connection.audio.play().catch(() => {});
+    watchVoice(sid, stream); // light up their tile when they talk
   };
   connection.onicecandidate = event => {
     if (event.candidate) {
@@ -302,6 +302,7 @@ socket.on("room_signal", message => {
 });
 
 function closeRoomPeers() {
+  Object.keys(roomPeers).forEach(stopWatchingVoice);
   Object.values(roomPeers).forEach(connection => {
     connection.close();
     connection.audio.srcObject = null;
@@ -321,8 +322,6 @@ function renderMembers() {
     const tile = document.createElement("div");
     tile.className = "member-tile" + (member.mic ? " talking" : "");
     tile.id = "tile-" + (member.me ? "me" : member.sid);
-    // Still talking (a caption is showing)? Keep the glow after redrawing
-    if (roomCaptionLines[member.me ? socket.id : member.sid]) tile.classList.add("speaking");
     const avatar = document.createElement("div");
     avatar.className = "avatar";
     avatar.textContent = member.name[0].toUpperCase();
