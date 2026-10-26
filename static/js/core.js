@@ -265,11 +265,36 @@ function interestList(topics) {
   return names.length > 1 ? names.slice(0, -1).join(", ") + " and " + names.at(-1) : names.join("");
 }
 
-// "Intermediate" as a small tag (how well they speak the language they're learning)
+// LEVEL FLAMES: the higher the level, the bigger and hotter the flame.
+// Like real fire: red embers, then orange, then yellow, and blue is the hottest.
+const LEVEL_FLAMES = {
+  beginner: { size: 0.55, outer: "#dc2626", inner: "#fca5a5" },
+  elementary: { size: 0.7, outer: "#f97316", inner: "#fed7aa" },
+  intermediate: { size: 0.85, outer: "#facc15", inner: "#fef9c3" },
+  advanced: { size: 1, outer: "#3b82f6", inner: "#dbeafe" },
+};
+
+// A flame for a level, at most px pixels tall. grow = false keeps every level the
+// same size (only the color changes), for small tags where a tiny flame would vanish.
+function levelFlame(fluency, px = 36, grow = true) {
+  const flame = LEVEL_FLAMES[fluency];
+  if (!flame) return "";
+  const size = grow ? Math.round(px * flame.size) : px;
+  return `<svg class="level-flame" viewBox="0 0 24 24" width="${size}" height="${size}" aria-hidden="true">
+    <path fill="${flame.outer}" d="M12 1.5c.8 3.6 3.2 5.6 4.9 7.8 1.5 1.9 2.6 4 2.6 6.5 0 4.2-3.4 6.7-7.5 6.7s-7.5-2.5-7.5-6.7c0-2.9 1.5-5 3.2-6.6.2 1.9 1 3.1 2.2 3.6-.3-4.1.7-8.2 2.1-11.3z"/>
+    <path fill="${flame.inner}" d="M12 11c.6 2 2.6 3.2 2.6 5.6a2.6 2.6 0 0 1-5.2 0c0-1.9 1.8-3.3 2.6-5.6z"/>
+  </svg>`;
+}
+
+// Draw the flames on the welcome question's level cards
+document.querySelectorAll(".flame-box[data-fluency]").forEach(box => (box.innerHTML = levelFlame(box.dataset.fluency)));
+
+// "Intermediate" as a small tag with its flame (how well they speak the language they're learning)
 function fluencyTag(fluency) {
   const tag = document.createElement("span");
   tag.className = "fluency-tag";
-  tag.textContent = FLUENCY_LABELS[fluency] || "";
+  tag.innerHTML = levelFlame(fluency, 13, false);
+  tag.append(FLUENCY_LABELS[fluency] || "");
   return tag;
 }
 
