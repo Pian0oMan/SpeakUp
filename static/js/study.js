@@ -5,6 +5,7 @@ let studyDeck = null;  // the deck being studied
 let studyCards = [];   // its cards, in random order
 let studyIndex = 0;    // which card we're on
 let knownCount = 0;
+let answeredCount = 0; // cards answered this time (each one is saved right away)
 
 function startStudy(deckToStudy) {
   studyDeck = deckToStudy;
@@ -16,6 +17,7 @@ function startStudy(deckToStudy) {
   }
   studyIndex = 0;
   knownCount = 0;
+  answeredCount = 0;
   el("studyTitle").textContent = `Studying: ${deckToStudy.name}`;
   showView("studyView");
   showStudyCard();
@@ -65,10 +67,12 @@ async function answerCard(status) {
   }
   card.status = status;
   studyIndex++;
+  answeredCount++;
   showStudyCard();
   await api("/api/flashcards/" + encodeURIComponent(card.word), {
     method: "PATCH",
     body: JSON.stringify({ status, proficiency: card.proficiency }),
+    keepalive: true, // finishes saving even if I leave or close the tab right after
   });
 }
 
@@ -76,11 +80,21 @@ el("knowItBtn").onclick = () => answerCard("known");
 el("stillLearningBtn").onclick = () => answerCard("learning");
 el("studyAgainBtn").onclick = () => startStudy(studyDeck);
 
-// Leave study mode: at the end, or halfway through. Cards I already answered are saved.
-function exitStudy() {
+// Leave study mode: at the end, or halfway through. Cards I already answered still count:
+// each one was saved the moment I answered it. Also runs when I leave with the sidebar.
+function leaveStudy() {
   stopSpeaking(); // stop any pronunciation still playing
-  renderDecks(); // so the rings show my new progress
-  showView("deckView");
+  renderDecks();     // so the rings show my new progress, on My Decks...
+  renderHomeDecks(); // ...and on the home page
+  const unfinished = studyIndex < studyCards.length;
+  if (unfinished && answeredCount > 0) {
+    showToast(`Progress saved: ${answeredCount} of ${studyCards.length} cards`);
+  }
+  answeredCount = 0; // so the message isn't shown twice
+}
+
+function exitStudy() {
+  showView("deckView"); // showView calls leaveStudy
 }
 el("studyBackBtn").onclick = exitStudy;
 el("studyExitBtn").onclick = exitStudy;

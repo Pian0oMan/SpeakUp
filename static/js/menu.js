@@ -14,6 +14,8 @@ async function enterApp() {
 
 // Show the app (sidebar + content) with one view: homeView, deckView or profileView
 function showView(id) {
+  // Leaving study mode (with Exit OR a sidebar button): redraw my progress
+  if (!el("studyView").hidden && id !== "studyView") leaveStudy();
   showScreen("appScreen");
   document.querySelectorAll(".view").forEach(view => (view.hidden = view.id !== id));
   // Highlight the sidebar button for this view
