@@ -11,6 +11,8 @@ function findPartner() {
   socket.emit("find_partner", { token });
   el("searchStatus").textContent =
     `Looking for someone who speaks ${profile.learning} and is learning ${profile.native}...`;
+  el("searchRoomBtn").hidden = true;
+  updateQueueLive();
   showScreen("searchScreen");
   endSession(); // clicked Next: the recap of the last chat shows while I wait
 }
@@ -23,6 +25,50 @@ function leaveChat() {
   nextIcebreakerAt = 0;
   openMenu();
   endSession(); // the recap of this chat (if there was one)
+}
+
+// ---------- WHO'S WAITING ----------
+// The server sends how many people are waiting, per language pair, e.g. {"Japanese>English": 2}
+// (2 people who speak Japanese and are learning English). Shown on Quick Match and while searching.
+let queueCounts = {};
+socket.on("queue", counts => {
+  queueCounts = counts;
+  updateQueueLive();
+});
+
+function updateQueueLive() {
+  if (!profile) return;
+  const perfect = queueCounts[`${profile.learning}>${profile.native}`] || 0; // they'd match me right away
+  const speakers = Object.entries(queueCounts)
+    .filter(([pair]) => pair.startsWith(profile.learning + ">"))
+    .reduce((sum, [, count]) => sum + count, 0);
+  const text = perfect
+    ? `${perfect} ${perfect === 1 ? "person is" : "people are"} waiting for a partner like you`
+    : speakers
+      ? `${speakers} ${profile.learning} ${speakers === 1 ? "speaker is" : "speakers are"} looking for a partner`
+      : `Nobody's waiting right now. Be the first in line for ${profile.learning}!`;
+  el("matchLive").textContent = text;
+  el("searchQueue").textContent = text;
+}
+
+// I've waited a while: the server now also tries "good enough" partners
+socket.on("search_relaxed", () => {
+  el("searchStatus").textContent = `Still looking... We'll also match you with a native ${profile.learning} ` +
+    `speaker who's learning something else, or another ${profile.learning} learner.`;
+  el("searchRoomBtn").hidden = false;
+});
+el("searchRoomBtn").onclick = () => socket.emit("join_random_room", { token, language: profile.learning });
+
+// Not a perfect language exchange? Say what kind of match it is.
+function matchNote(partner) {
+  if (partner.match === "half" && partner.native === profile.learning) {
+    return `No exchange partner was free, so we found you a native ${profile.learning} speaker. Enjoy the practice!`;
+  }
+  if (partner.match === "half") {
+    return `${partner.name} is learning ${profile.native}, your language. No exchange partner was free, so help them out!`;
+  }
+  if (partner.match === "peers") return `You're both learning ${profile.learning}. Practice it together!`;
+  return "";
 }
 
 
@@ -54,6 +100,8 @@ socket.on("matched", partner => {
   showScreen("chatScreen");
   render();
   startSession(`with ${partner.name}`); // for the recap at the end
+  const note = matchNote(partner);
+  if (note) addSystemMessage(note);
   // Something to talk about: what we both like
   const both = sharedInterests(partner.interests);
   if (both.length) addSystemMessage(`You both like ${interestList(both)}.`);

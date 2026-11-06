@@ -1,6 +1,8 @@
 # QUICK MATCH: finding a partner, the 1-on-1 chat, icebreakers,
 # live captions, and video call messages.
 import random
+import threading
+import time
 from functools import lru_cache
 
 from flask import request
@@ -8,22 +10,34 @@ from flask import request
 from backend import rooms, speaking  # rooms and chat need each other, so: rooms.exit_room(...)
 from backend.progress import award_xp, award_message_xp
 from backend.setup import socketio, db_for, person_from_token, public_info
-from backend.social import save_recent_contact, go_offline, tz_of
+from backend.social import save_recent_contact, go_offline, tz_of, my_blocks
 from backend.translation import translate, detect_language, DEEPL_CODES
 
 
 # ---------- MATCHMAKING ----------
 # Kept in memory (plain Python variables), not the database,
 # because it only matters while people are online.
-waiting = []   # people looking for a partner, e.g. {"sid": ..., "name": "Ana", "native": "Spanish", ...}
+waiting = []   # people looking for a partner, longest-waiting first, e.g. {"sid": ..., "name": "Ana", ...}
 partners = {}  # sid -> that person's partner, e.g. partners["abc"] = {"sid": "xyz", "name": "Ana", ...}
 chats = {}     # sid -> the chat they're in. Both people point to the SAME chat, e.g.
                # {"history": ["Alex: hey!"], "question": "...", "answered": {"abc"}, "active": True}
 
+# Several people can click "Start" at the same moment (each one is handled at the same
+# time), and the matcher below runs on its own too. The lock makes them take turns with
+# the waiting list, so nobody gets matched twice.
+match_lock = threading.RLock()
+
+RELAX_AFTER = 20  # seconds: after waiting this long, "good enough" partners count too (see match_kind)
+matcher_started = False
+
 
 def leave_current_chat(sid):
     # Take this person off the waiting list (if they were on it)
-    waiting[:] = [person for person in waiting if person["sid"] != sid]
+    with match_lock:
+        before = len(waiting)
+        waiting[:] = [person for person in waiting if person["sid"] != sid]
+        if len(waiting) != before:
+            broadcast_queue()
     # If they were chatting, end the chat, break up the pair, and tell the partner
     chat = chats.pop(sid, None)
     if chat:
@@ -33,6 +47,162 @@ def leave_current_chat(sid):
         partners.pop(partner["sid"], None)
         chats.pop(partner["sid"], None)
         socketio.emit("partner_left", to=partner["sid"])
+
+
+def match_kind(a, b):
+    """How well two people fit:
+      "perfect": a real exchange (a speaks what b learns, AND b speaks what a learns)
+      "half":    one of them speaks what the other is learning
+      "peers":   they're learning the same language, and can practice it together
+      None:      no match (or one of them blocked the other, or it's the same account)"""
+    if a["user_id"] == b["user_id"] or a["user_id"] in b.get("blocked", ()) or b["user_id"] in a.get("blocked", ()):
+        return None
+    a_helps_b = a["native"] == b["learning"]
+    b_helps_a = b["native"] == a["learning"]
+    if a_helps_b and b_helps_a:
+        return "perfect"
+    if a_helps_b or b_helps_a:
+        return "half"
+    if a["learning"] == b["learning"]:
+        return "peers"
+    return None
+
+
+KIND_RANK = {"perfect": 3, "half": 2, "peers": 1}
+
+
+@socketio.on("find_partner")
+def find_partner(data):
+    # Look up WHO this is from their login token (we don't just trust the browser)
+    me = person_from_token(data["token"])
+    if not me:
+        return
+    leave_current_chat(request.sid)  # in case they clicked "Next"
+    rooms.exit_room(request.sid)     # or they were in a voice room
+    me["blocked"] = set(my_blocks(db_for(me["token"])))  # never matched with people I blocked
+    me["since"] = time.time()                            # when I started waiting
+    start_matcher()
+
+    with match_lock:
+        # Perfect language exchange: they speak what I'm learning,
+        # and they're learning what I speak.
+        fits = [other for other in waiting if match_kind(me, other) == "perfect"]
+        if fits:
+            # Of everyone who fits, pick the best match (same interests, similar level).
+            # Nobody waits longer because of this: if anyone fits, I get matched now.
+            # (max() keeps the FIRST of equally good matches = whoever has waited longest)
+            other = max(fits, key=lambda person: match_score(me, person))
+            waiting.remove(other)
+            broadcast_queue()
+            pair_up(me, other)
+            return
+
+        waiting.append(me)  # nobody fits yet, so wait for someone (the matcher keeps trying)
+        broadcast_queue()
+
+
+FLUENCY_ORDER = ["beginner", "elementary", "intermediate", "advanced"]
+
+
+def match_score(me, other):
+    """Higher = a better match: 2 points per shared interest, minus 1 per step of level difference."""
+    shared = len(set(me.get("interests") or []) & set(other.get("interests") or []))
+    score = 2 * shared
+    if me.get("fluency") in FLUENCY_ORDER and other.get("fluency") in FLUENCY_ORDER:
+        score -= abs(FLUENCY_ORDER.index(me["fluency"]) - FLUENCY_ORDER.index(other["fluency"]))
+    return score
+
+
+# ---------- WAITING TOO LONG: "good enough" partners ----------
+# A perfect exchange partner isn't always online. After RELAX_AFTER seconds, people who
+# are still waiting can also be matched with a native speaker who's learning something
+# else ("half"), or someone learning the same language ("peers"), if THEY have waited too.
+def start_matcher():
+    global matcher_started
+    with match_lock:
+        if matcher_started:
+            return
+        matcher_started = True
+    socketio.start_background_task(relaxed_matcher)
+
+
+def relaxed_matcher():
+    while True:  # runs in the background for as long as the server runs
+        socketio.sleep(5)
+        with match_lock:
+            match_patient_people()
+
+
+def match_patient_people():
+    now = time.time()
+    patient = [person for person in waiting if now - person["since"] >= RELAX_AFTER]  # longest-waiting first
+    for person in patient:
+        if not person.get("told_relaxed"):
+            person["told_relaxed"] = True
+            socketio.emit("search_relaxed", to=person["sid"])  # "we'll also try other partners now"
+    matched = False
+    while patient:
+        person = patient.pop(0)
+        options = [(KIND_RANK[kind], match_score(person, other), kind, other)
+                   for other in patient if (kind := match_kind(person, other))]
+        if not options:
+            continue
+        _, _, kind, other = max(options, key=lambda option: option[:2])  # the best kind, then the best score
+        patient.remove(other)
+        waiting.remove(person)
+        waiting.remove(other)
+        pair_up(person, other, kind=kind)
+        matched = True
+    if matched:
+        broadcast_queue()
+
+
+# ---------- WHO'S WAITING ----------
+# Everyone sees how many people are waiting, per language pair, e.g. {"Japanese>English": 2}
+# (2 people who speak Japanese and are learning English). No names, just numbers.
+def queue_counts():
+    counts = {}
+    for person in waiting:
+        key = f"{person['native']}>{person['learning']}"
+        counts[key] = counts.get(key, 0) + 1
+    return counts
+
+
+def broadcast_queue():
+    socketio.emit("queue", queue_counts())  # to everyone online
+
+
+@socketio.on("list_queue")
+def list_queue():
+    socketio.emit("queue", queue_counts(), to=request.sid)
+
+
+def pair_up(me, other, kind="perfect"):
+    """Start a 1-on-1 chat + call between two people.
+    Used by Quick Match, and when a friend accepts a call invite (kind="friend")."""
+    partners[me["sid"]] = other
+    partners[other["sid"]] = me
+    chat = {
+        "people": [me, other],
+        "history": [],
+        "questions": icebreakers_for(me, other),
+        "question": None,
+        "answered": set(),
+        "active": True,
+        "contact_saved": False,  # added to each other's "Recent" list yet?
+    }
+    chats[me["sid"]] = chats[other["sid"]] = chat  # one shared chat for both
+    # Tell each person who they got (only PUBLIC info, never the login token).
+    # ONE of them ("initiator") starts the video connection, otherwise both
+    # browsers would try at the same time. "match" says how good the match is.
+    socketio.emit("matched", {**public_info(other), "initiator": True, "match": kind}, to=me["sid"])
+    socketio.emit("matched", {**public_info(me), "initiator": False, "match": kind}, to=other["sid"])
+    socketio.start_background_task(icebreaker_timer, chat)
+
+
+@socketio.on("leave")
+def handle_leave():
+    leave_current_chat(request.sid)
 
 
 # ---------- ICEBREAKERS ----------
@@ -58,6 +228,59 @@ ICEBREAKERS = [
     "What would you do with a free day and no plans?",
     "What is a word in your language that is hard to translate?",
 ]
+
+# Questions about the things two people BOTH like (the interests from the welcome
+# questions; the names match INTERESTS in account.py). These come first.
+INTEREST_ICEBREAKERS = {
+    "anime": ["What anime would you show someone who has never watched one?",
+              "Which anime character are you most like?"],
+    "music": ["What song have you been listening to on repeat?",
+              "Which concert would you love to go to?"],
+    "gaming": ["What game have you spent the most hours playing?",
+               "Do you like playing games alone or with friends?"],
+    "movies": ["What movie could you watch again and again?",
+               "What show should I watch next?"],
+    "books": ["What book changed the way you think?",
+              "What are you reading right now?"],
+    "travel": ["What is the best trip you have ever taken?",
+               "Where do you want to travel next?"],
+    "food": ["What dish do you cook best?",
+             "What is the strangest food you have ever tried?"],
+    "sports": ["What sport do you love to watch or play?",
+               "Which team do you support, and why?"],
+    "fitness": ["What does your favorite workout look like?",
+                "How do you stay motivated to exercise?"],
+    "art": ["What kind of art do you like to make or look at?",
+            "Who is your favorite artist?"],
+    "photography": ["What do you love to take photos of?",
+                    "What is the best photo you have ever taken?"],
+    "tech": ["Which app could you not live without?",
+             "What new technology are you excited about?"],
+    "science": ["What science fact amazes you?",
+                "If you could research anything, what would it be?"],
+    "history": ["Which time in history would you like to visit?",
+                "Which person from history would you like to meet?"],
+    "fashion": ["How would you describe your style?",
+                "What is your favorite piece of clothing?"],
+    "nature": ["What is your favorite animal, and why?",
+               "What is the most beautiful place in nature you have been to?"],
+    "kpop": ["Who is your favorite K-pop or J-pop artist?",
+             "Which song would you use to get someone into K-pop or J-pop?"],
+    "business": ["What business would you start if you could?",
+                 "What do you enjoy most about your work or studies?"],
+    "languages": ["Which other languages would you like to learn?",
+                  "What is your favorite word in any language?"],
+    "memes": ["What meme always makes you laugh?",
+              "What meme is popular in your country right now?"],
+}
+
+
+def icebreakers_for(me, other):
+    """The questions for one chat, shuffled, no repeats. The LAST one is asked first
+    (send_icebreaker pops from the end), so questions about shared interests go last."""
+    shared = set(me.get("interests") or []) & set(other.get("interests") or [])
+    about_us = [question for topic in sorted(shared) for question in INTEREST_ICEBREAKERS.get(topic, [])]
+    return random.sample(ICEBREAKERS, len(ICEBREAKERS)) + random.sample(about_us, min(6, len(about_us)))
 
 
 @lru_cache(maxsize=None)  # remembers results, so each question is only translated once per language
@@ -88,81 +311,17 @@ def icebreaker_timer(chat):
         socketio.sleep(ICEBREAKER_SECONDS)
 
 
-@socketio.on("find_partner")
-def find_partner(data):
-    # Look up WHO this is from their login token (we don't just trust the browser)
-    me = person_from_token(data["token"])
-    if not me:
-        return
-    leave_current_chat(request.sid)  # in case they clicked "Next"
-    rooms.exit_room(request.sid)           # or they were in a voice room
-
-    # Perfect language exchange: they speak what I'm learning,
-    # and they're learning what I speak.
-    fits = [other for other in waiting if other["native"] == me["learning"] and other["learning"] == me["native"]]
-    if fits:
-        # Of everyone who fits, pick the best match (same interests, similar level).
-        # Nobody waits longer because of this: if anyone fits, I get matched now.
-        # (max() keeps the FIRST of equally good matches = whoever has waited longest)
-        other = max(fits, key=lambda person: match_score(me, person))
-        waiting.remove(other)
-        pair_up(me, other)
-        return
-
-    waiting.append(me)  # nobody fits yet, so wait for someone
-
-
-FLUENCY_ORDER = ["beginner", "elementary", "intermediate", "advanced"]
-
-
-def match_score(me, other):
-    """Higher = a better match: 2 points per shared interest, minus 1 per step of level difference."""
-    shared = len(set(me.get("interests") or []) & set(other.get("interests") or []))
-    score = 2 * shared
-    if me.get("fluency") in FLUENCY_ORDER and other.get("fluency") in FLUENCY_ORDER:
-        score -= abs(FLUENCY_ORDER.index(me["fluency"]) - FLUENCY_ORDER.index(other["fluency"]))
-    return score
-
-
-def pair_up(me, other):
-    """Start a 1-on-1 chat + call between two people.
-    Used by Quick Match, and when a friend accepts a call invite."""
-    partners[me["sid"]] = other
-    partners[other["sid"]] = me
-    chat = {
-        "people": [me, other],
-        "history": [],
-        "questions": random.sample(ICEBREAKERS, len(ICEBREAKERS)),  # shuffled, no repeats
-        "question": None,
-        "answered": set(),
-        "active": True,
-        "contact_saved": False,  # added to each other's "Recent" list yet?
-    }
-    chats[me["sid"]] = chats[other["sid"]] = chat  # one shared chat for both
-    # Tell each person who they got (only PUBLIC info, never the login token).
-    # ONE of them ("initiator") starts the video connection, otherwise both
-    # browsers would try at the same time.
-    socketio.emit("matched", {**public_info(other), "initiator": True}, to=me["sid"])
-    socketio.emit("matched", {**public_info(me), "initiator": False}, to=other["sid"])
-    socketio.start_background_task(icebreaker_timer, chat)
-
-
-@socketio.on("leave")
-def handle_leave():
-    leave_current_chat(request.sid)
-
-
 # ---------- CHAT ----------
 @socketio.on("chat_message")
 def handle_chat_message(text):
-    send_chat_message(request.sid, text)
+    send_chat_message(request.sid, str(text)[:1000])
 
 
 def send_chat_message(sid, text, voice=False, language=None):
     """Send a message from sid to their partner (and back to them).
     voice=True means it was spoken in the call (a finished live caption)."""
     partner = partners.get(sid)
-    if not partner:
+    if not partner or not text.strip():
         return  # not in a chat, nobody to send to
     me = partners[partner["sid"]]  # my partner's partner is me!
 

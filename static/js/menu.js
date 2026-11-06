@@ -35,7 +35,9 @@ function openMenu() {
   el("matchLearning").value = profile.learning;
   blockSameLanguage(["matchNative", "matchLearning"]);
   socket.emit("list_rooms"); // for "3 people talking in Japanese" on the voice room card
+  socket.emit("list_queue"); // for "2 people are waiting for a partner like you" on Quick Match
   updateRoomsLive();
+  updateQueueLive();
   updateTalkPanel();
   showView("homeView");
 }
@@ -99,6 +101,7 @@ function openProfile(message) {
   el(id).addEventListener("change", async () => {
     profile = { ...profile, native: el("matchNative").value, learning: el("matchLearning").value };
     updateRoomsLive(); // the voice room card follows the language I'm practicing
+    updateQueueLive(); // and so does "people waiting"
     updateTalkPanel(); // "Talk to someone who speaks ..."
     await api("/api/profile", { method: "PUT", body: JSON.stringify(profile) });
     showToast(`Now practicing ${profile.learning}`);

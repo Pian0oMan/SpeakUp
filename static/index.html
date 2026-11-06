@@ -573,7 +573,13 @@
     <!-- the mascot, determined to find you someone -->
     <div data-mascot="determined" data-size="110"></div>
     <p id="searchStatus"></p>
-    <button id="cancelSearchBtn" class="ghost">Cancel</button>
+    <!-- Who's waiting right now, e.g. "3 Japanese speakers are looking for a partner" -->
+    <p id="searchQueue" class="search-queue"></p>
+    <div class="search-buttons">
+      <!-- Shown after a while: a voice room is another way to talk right now -->
+      <button id="searchRoomBtn" class="primary" hidden>Join a voice room instead</button>
+      <button id="cancelSearchBtn" class="ghost">Cancel</button>
+    </div>
   </section>
 
   <!-- ===== CHAT + VIDEO ===== -->

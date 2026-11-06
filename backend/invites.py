@@ -74,4 +74,4 @@ def answer_call(data):
     for sid in (caller_sid, request.sid):
         chat.leave_current_chat(sid)
         rooms.exit_room(sid)
-    chat.pair_up({**caller, "sid": caller_sid}, {**me, "sid": request.sid})
+    chat.pair_up({**caller, "sid": caller_sid}, {**me, "sid": request.sid}, kind="friend")
