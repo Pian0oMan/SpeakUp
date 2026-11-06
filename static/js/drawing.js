@@ -74,10 +74,26 @@ function render() {
   if (currentRoom) renderRoomMessages(); // so new deck words get highlighted in the room too
 }
 
+// A deck's study button: "Review 12" when cards are due, "Practice" when nothing is
+function studyButton(d, cards) {
+  const due = dueCount(cards);
+  const study = document.createElement("button");
+  study.className = due ? "primary small" : "ghost small";
+  study.textContent = due ? `Review ${due}` : "Practice";
+  study.title = due ? `${due} ${due === 1 ? "card is" : "cards are"} due` : "Nothing due: practice anyway";
+  study.disabled = cards.length === 0;
+  study.onclick = () => startStudy(d);
+  return study;
+}
+
 // My decks on the home page: name, number of cards, overall progress ring, Study button
 function renderHomeDecks() {
   const box = el("homeDecks");
   box.innerHTML = "";
+  // "Review all · 23": everything that's due, from every deck, in one session
+  const allDue = dueCount(Object.values(deck));
+  el("reviewAllBtn").hidden = allDue === 0;
+  el("reviewAllBtn").textContent = `Review all · ${allDue}`;
   if (decks.length === 0) {
     box.innerHTML = emptyState("idle", "No decks yet. Save words from your chats, or add one from the Library.");
     return;
@@ -102,18 +118,14 @@ function renderHomeDecks() {
     bottom.className = "home-deck-bottom";
     const count = document.createElement("span");
     count.textContent = `${cards.length} cards`;
-    const study = document.createElement("button");
-    study.className = "primary small";
-    study.textContent = "Study";
-    study.disabled = cards.length === 0;
-    study.onclick = () => startStudy(d);
-    bottom.append(makeRing(average), count, study);
+    bottom.append(makeRing(average), count, studyButton(d, cards));
 
     tile.append(top, bottom);
     box.appendChild(tile);
   });
 }
 el("seeAllDecksBtn").onclick = () => showView("deckView");
+el("reviewAllBtn").onclick = () => startStudy({ id: null, name: "All decks" });
 
 // Draw the "Save to" dropdown in the chat and one card per deck on the My Decks page
 function renderDecks() {
@@ -137,11 +149,7 @@ function renderDecks() {
     const count = document.createElement("span");
     count.textContent = `${cards.length} cards`;
     title.append(deckIcon(d), d.name, count);
-    const study = document.createElement("button");
-    study.className = "primary small";
-    study.textContent = "Study";
-    study.disabled = cards.length === 0;
-    study.onclick = () => startStudy(d);
+    const study = studyButton(d, cards);
     const customize = document.createElement("button");
     customize.className = "ghost small";
     customize.textContent = "Customize";

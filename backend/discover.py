@@ -10,7 +10,7 @@ FEED_SIZE = 50  # the newest 50 posts
 
 
 def words_learned(db):
-    """How many of my cards I've marked "Know it" in study mode."""
+    """How many of my cards I know well (in study mode, I remembered them for a week or more)."""
     return len(fetch_all(lambda: db.table("flashcards").select("word").eq("status", "known")))
 
 

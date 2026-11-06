@@ -106,11 +106,5 @@ if (window.speechSynthesis) speechSynthesis.getVoices();
 
 el("popupSpeakWord").onclick = () => speak(popupWord.word, popupWord.language);
 el("popupSpeakPhrase").onclick = () => speak(popupWord.phrase, popupWord.language);
-el("studySpeakWord").onclick = () => {
-  const card = studyCards[studyIndex];
-  speak(card.word, card.language);
-};
-el("studySpeakExample").onclick = () => {
-  const card = studyCards[studyIndex];
-  speak(card.example, card.language);
-};
+el("studySpeakWord").onclick = () => speak(studyCard.word, studyCard.language);
+el("studySpeakExample").onclick = () => speak(studyCard.example, studyCard.language);

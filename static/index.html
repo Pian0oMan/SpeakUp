@@ -282,6 +282,8 @@
         <div class="section-head">
           <h3>Your decks</h3>
           <div class="head-buttons">
+            <!-- Everything that's due today, from every deck (hidden when nothing is due) -->
+            <button id="reviewAllBtn" class="primary small" hidden>Review all</button>
             <button class="ghost small open-new-deck">+ New deck</button>
             <button id="seeAllDecksBtn" class="ghost small">All decks</button>
           </div>
@@ -395,11 +397,15 @@
         <div id="studyCard" class="study-card">
           <!-- How well I know this card (filled in by JavaScript) -->
           <div id="studyRing" class="ring big"><span></span></div>
+          <!-- How it's asked: "New word", "Fill in the blank", "Listen. Which word is it?"... -->
+          <div id="studyModeLabel" class="study-mode"></div>
           <div class="study-word-row">
             <div id="studyWord" class="study-word"></div>
             <button id="studySpeakWord" class="speak-btn big" title="Listen"></button>
           </div>
+          <div id="studyHint" class="study-hint"></div>
           <div id="studyAnswer" hidden>
+            <div id="studyAnswerWord" class="study-answer-word"></div>
             <div id="studyReading" class="study-reading"></div>
             <div id="studyTranslation" class="study-translation"></div>
             <div id="studyExplanation" class="study-explanation"></div>
@@ -410,17 +416,20 @@
           </div>
         </div>
         <div class="study-buttons">
-          <button id="showAnswerBtn" class="primary">Show answer</button>
-          <button id="stillLearningBtn" class="ghost" hidden>Still learning</button>
-          <button id="knowItBtn" class="primary" hidden><span data-icon="check"></span> Know it</button>
+          <button id="showAnswerBtn" class="primary">Show answer <kbd>Space</kbd></button>
+          <!-- Did I know it? Under each one: when the card comes back (keys 1 and 2) -->
+          <div id="gradeButtons" class="grade-buttons" hidden>
+            <button class="grade dont-know" data-grade="dont_know"><strong>Don't know</strong><small></small></button>
+            <button class="grade know" data-grade="know"><strong><span data-icon="check"></span> Know it</strong><small></small></button>
+          </div>
         </div>
         <button id="studyReportBtn" class="link-btn" hidden><span data-icon="flag"></span> This translation looks wrong</button>
         <!-- Shown at the end -->
         <div id="studyDone" class="card" hidden>
           <div class="done-mascot" data-mascot="excited" data-size="90"></div>
-          <h3>Deck finished!</h3>
+          <h3>All done for now!</h3>
           <p id="studySummary"></p>
-          <button id="studyAgainBtn" class="primary">Study again</button>
+          <button id="studyAgainBtn" class="primary">Keep reviewing</button>
           <button id="studyBackBtn" class="ghost">Back to decks</button>
         </div>
       </div>
@@ -798,7 +807,7 @@
   <script src="/static/js/onboarding.js"></script> <!-- the welcome questions -->
   <script src="/static/js/decks.js"></script>    <!-- decks, library, Anki import -->
   <script src="/static/js/popup.js"></script>    <!-- the word popup, reports -->
-  <script src="/static/js/study.js"></script>    <!-- study mode -->
+  <script src="/static/js/study.js"></script>    <!-- study mode, spaced repetition -->
   <script src="/static/js/drawing.js"></script>  <!-- drawing messages and decks -->
   <script src="/static/js/main.js"></script>     <!-- starts everything -->
 </body>

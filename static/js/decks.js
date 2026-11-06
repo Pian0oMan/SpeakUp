@@ -112,11 +112,9 @@ function clean(word) {
 
 
 // ---------- PROFICIENCY RINGS ----------
-// Every card has a proficiency from 0 to 100%. "Know it" in study mode adds 25,
-// "Still learning" takes away 10. The ring fills up and goes red -> yellow -> green.
-const KNOW_IT_BONUS = 25;
-const STILL_LEARNING_PENALTY = 10;
-
+// Every card has a proficiency from 0 to 100%: the longer I can go without forgetting it,
+// the fuller the ring (a week = about half, two months = full, see backend/review.py).
+// It fills up and goes red -> yellow -> green.
 function setRing(ring, percent) {
   const p = Math.max(0, Math.min(100, Math.round(percent || 0)));
   ring.style.setProperty("--p", p);                          // how much of the circle is filled

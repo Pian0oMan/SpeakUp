@@ -1,94 +1,246 @@
-// STUDY MODE: one flashcard at a time.
+// STUDY MODE: one flashcard at a time, with SPACED REPETITION.
+// Each card comes back right before you'd forget it. After the answer you pick
+// "Don't know" or "Know it", and the server works out when to show it next
+// (see backend/review.py). Remembered cards come back later and later.
 
-// ---------- STUDY MODE ----------
-let studyDeck = null;  // the deck being studied
-let studyCards = [];   // its cards, in random order
-let studyIndex = 0;    // which card we're on
-let knownCount = 0;
-let answeredCount = 0; // cards answered this time (each one is saved right away)
+// ---------- WHICH CARDS ARE DUE ----------
+const NEW_PER_DAY = 15; // new cards per day, so the reviews don't pile up
+
+function startOfToday() {
+  const midnight = new Date();
+  midnight.setHours(0, 0, 0, 0);
+  return midnight.getTime();
+}
+
+// How many NEW cards I can still start today (across all my decks)
+function newLeftToday() {
+  const today = startOfToday();
+  const started = Object.values(deck)
+    .filter(card => card.first_studied_at && new Date(card.first_studied_at).getTime() >= today).length;
+  return Math.max(0, NEW_PER_DAY - started);
+}
+
+// A study session: every card whose review time has come, plus a few new ones.
+// (No due_at = never studied = new.)
+function dueCards(cards) {
+  const now = Date.now();
+  const reviews = cards.filter(card => card.due_at && new Date(card.due_at).getTime() <= now);
+  const fresh = cards.filter(card => !card.due_at).slice(0, newLeftToday());
+  return { reviews, fresh };
+}
+
+function dueCount(cards) {
+  const { reviews, fresh } = dueCards(cards);
+  return reviews.length + fresh.length;
+}
+
+// The cards of one deck, or of ALL decks (id null = "Review all" on the home page)
+function cardsOf(someDeck) {
+  return Object.values(deck).filter(card => someDeck.id === null || card.deck_id === someDeck.id);
+}
+
+// Swap every card with a random card before it ("Fisher-Yates shuffle")
+function shuffle(list) {
+  for (let i = list.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [list[i], list[j]] = [list[j], list[i]];
+  }
+  return list;
+}
+
+
+// ---------- A STUDY SESSION ----------
+let studyDeck = null;   // the deck being studied
+let studyQueue = [];    // the cards still to come in this session
+let studyCard = null;   // the card on the screen
+let studyMode = "word"; // how it's asked (see pickMode)
+let practicing = false; // nothing was due, so it's extra practice with every card
+let reviewedCount = 0;
+let forgottenCount = 0;
+let answeredCount = 0;  // cards answered this time (each one is saved right away)
 
 function startStudy(deckToStudy) {
   studyDeck = deckToStudy;
-  studyCards = Object.values(deck).filter(card => card.deck_id === deckToStudy.id);
-  // Shuffle: swap every card with a random card before it ("Fisher-Yates shuffle")
-  for (let i = studyCards.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [studyCards[i], studyCards[j]] = [studyCards[j], studyCards[i]];
-  }
-  studyIndex = 0;
-  knownCount = 0;
-  answeredCount = 0;
-  el("studyTitle").textContent = `Studying: ${deckToStudy.name}`;
+  const cards = cardsOf(deckToStudy);
+  const { reviews, fresh } = dueCards(cards);
+  practicing = reviews.length + fresh.length === 0;
+  // Reviews first (shuffled), then the new cards in the order they were saved
+  studyQueue = practicing ? shuffle([...cards]) : [...shuffle(reviews), ...fresh];
+  reviewedCount = forgottenCount = answeredCount = 0;
+  el("studyTitle").textContent = `${practicing ? "Practicing" : "Reviewing"}: ${deckToStudy.name}`;
   showView("studyView");
-  showStudyCard();
+  nextStudyCard();
 }
 
-function showStudyCard() {
-  const done = studyIndex >= studyCards.length;
+// New words are shown as they are. Words I've seen before are asked in different
+// ways, because remembering a word is harder (and better practice) than recognizing it:
+//   word:    see the word, remember what it means
+//   meaning: see the meaning, remember the word
+//   blank:   fill the word into the sentence it came from
+//   listen:  hear the word, remember what it is
+function pickMode(card) {
+  if (!card.reps) return "word";
+  const modes = ["word", "word", "listen"];
+  if (card.translation) modes.push("meaning", "meaning");
+  if (blankSentence(card)) modes.push("blank", "blank");
+  return modes[Math.floor(Math.random() * modes.length)];
+}
+
+// "Me senté en el banco" + banco -> "Me senté en el _____" (null if the word isn't in it)
+function blankSentence(card) {
+  if (!card.example) return null;
+  const index = card.example.toLowerCase().indexOf(card.word.toLowerCase());
+  if (index < 0) return null;
+  return card.example.slice(0, index) + "_____" + card.example.slice(index + card.word.length);
+}
+
+const MODE_LABELS = {
+  word: card => (card.reps || card.due_at ? "What does it mean?" : "New word"),
+  meaning: card => `How do you say it${card.language ? " in " + card.language : ""}?`,
+  blank: () => "Fill in the blank",
+  listen: () => "Listen. Which word is it?",
+};
+
+function nextStudyCard() {
+  studyCard = studyQueue.shift() || null;
+  const done = !studyCard;
   el("studyCard").hidden = done;
   el("studyDone").hidden = !done;
   el("studyReportBtn").hidden = true;
   el("showAnswerBtn").hidden = done;
-  el("stillLearningBtn").hidden = el("knowItBtn").hidden = true;
-  if (done) {
-    el("studyProgress").textContent = "";
-    el("studySummary").textContent =
-      `You knew ${knownCount} of ${studyCards.length} cards. ${studyCards.length - knownCount} to keep practicing.`;
-    return;
-  }
-  const card = studyCards[studyIndex];
-  el("studyProgress").textContent = `${studyIndex + 1} / ${studyCards.length}`;
-  el("studyWord").textContent = card.word;
+  el("gradeButtons").hidden = true;
+  if (done) return showStudySummary();
+
+  const card = studyCard;
+  studyMode = pickMode(card);
+  el("studyProgress").textContent = `${studyQueue.length + 1} left`;
+  el("studyModeLabel").textContent = MODE_LABELS[studyMode](card);
+
+  // THE QUESTION
+  const prompt = { word: card.word, meaning: card.translation, blank: blankSentence(card), listen: "" }[studyMode];
+  el("studyWord").textContent = prompt;
+  el("studyWord").classList.toggle("sentence", studyMode === "meaning" || studyMode === "blank");
+  el("studyHint").textContent = studyMode === "blank" ? card.translation || "" : "";
+  // The speaker says the word, so it's only there when that doesn't give the answer away
+  el("studySpeakWord").hidden = studyMode === "meaning" || studyMode === "blank";
+  el("studySpeakWord").classList.toggle("huge", studyMode === "listen");
+
+  // THE ANSWER (hidden until "Show answer")
+  el("studyAnswerWord").textContent = card.word;
+  el("studyAnswerWord").hidden = studyMode === "word";
   el("studyReading").textContent = card.reading || "";        // e.g. げんき for 元気
   el("studyTranslation").textContent = card.translation || "(no translation yet)";
+  el("studyTranslation").hidden = studyMode === "meaning" || studyMode === "blank"; // already on screen
   el("studyExplanation").textContent = card.explanation || ""; // notes from the library / Anki deck
   el("studyExample").textContent = card.example ? `"${card.example}"` : "";
   el("studySpeakExample").hidden = !card.example;
-  setRing(el("studyRing"), card.proficiency);
   el("studyAnswer").hidden = true;
+  setRing(el("studyRing"), card.proficiency);
+
+  loadPreviews(card);
+  if (studyMode === "listen") speak(card.word, card.language);
 }
 
-el("showAnswerBtn").onclick = () => {
+function showAnswer() {
   el("studyAnswer").hidden = false;
+  el("studySpeakWord").hidden = false;
   el("showAnswerBtn").hidden = true;
-  el("stillLearningBtn").hidden = el("knowItBtn").hidden = false;
+  el("gradeButtons").hidden = false;
   el("studyReportBtn").hidden = false;
-};
+}
+el("showAnswerBtn").onclick = showAnswer;
 
-// Save how well I know the card (and its new proficiency), then go to the next one
-async function answerCard(status) {
-  const card = studyCards[studyIndex];
-  const before = card.proficiency || 0;
-  if (status === "known") {
-    knownCount++;
-    card.proficiency = Math.min(100, before + KNOW_IT_BONUS);
-  } else {
-    card.proficiency = Math.max(0, before - STILL_LEARNING_PENALTY);
-  }
-  card.status = status;
-  studyIndex++;
-  answeredCount++;
-  showStudyCard();
-  await api("/api/flashcards/" + encodeURIComponent(card.word), {
-    method: "PATCH",
-    body: JSON.stringify({ status, proficiency: card.proficiency }),
-    keepalive: true, // finishes saving even if I leave or close the tab right after
+// Under each button: when the card would come back, e.g. "Good · 3 days".
+// The server works it out from the card's schedule (cards with the same schedule share it).
+const previewCache = {};
+async function loadPreviews(card) {
+  document.querySelectorAll("#gradeButtons small").forEach(small => (small.textContent = ""));
+  const params = new URLSearchParams({
+    interval_days: card.interval_days || 0, ease: card.ease || 2.5, reps: card.reps || 0,
+  }).toString();
+  previewCache[params] ??= api("/api/review/previews?" + params).catch(() => ({}));
+  const previews = await previewCache[params];
+  if (studyCard !== card) return; // already on the next card
+  document.querySelectorAll("#gradeButtons .grade").forEach(button => {
+    button.querySelector("small").textContent = previews[button.dataset.grade] || "";
   });
 }
 
-el("knowItBtn").onclick = () => answerCard("known");
-el("stillLearningBtn").onclick = () => answerCard("learning");
+// I picked "Don't know" or "Know it": go to the next card right away, and save in the background
+async function gradeCard(grade) {
+  const card = studyCard;
+  if (!card || el("gradeButtons").hidden) return;
+  reviewedCount++;
+  answeredCount++;
+  // Didn't know it: it comes back in a minute (see review.py), so I see it
+  // again in THIS session, a few cards from now
+  if (grade === "dont_know") {
+    forgottenCount++;
+    studyQueue.splice(Math.min(3, studyQueue.length), 0, card);
+  }
+  nextStudyCard();
+  const result = await api(`/api/cards/${card.id}/review`, {
+    method: "POST",
+    body: JSON.stringify({ grade }),
+    keepalive: true, // finishes saving even if I leave or close the tab right after
+  }).catch(() => null);
+  if (result && !result.error) Object.assign(card, result); // its new schedule, ring and status
+}
+
+document.querySelectorAll("#gradeButtons .grade").forEach(button => {
+  button.onclick = () => gradeCard(button.dataset.grade);
+});
+
+// KEYBOARD: Space shows the answer, then 1 = Don't know, 2 = Know it
+document.addEventListener("keydown", event => {
+  if (el("studyView").hidden || el("studyCard").hidden || document.querySelector("dialog[open]")) return;
+  if (event.target.closest("input, textarea, select")) return;
+  if ((event.key === " " || event.key === "Enter") && !el("showAnswerBtn").hidden) {
+    event.preventDefault();
+    showAnswer();
+  } else if (event.key === "1") {
+    gradeCard("dont_know");
+  } else if (event.key === "2") {
+    gradeCard("know");
+  }
+});
+
+// The end: what I did, and when the next review is
+function showStudySummary() {
+  el("studyProgress").textContent = "";
+  const comingBack = forgottenCount ? ` ${forgottenCount} of them will come back again soon.` : "";
+  const next = cardsOf(studyDeck)
+    .map(card => card.due_at && new Date(card.due_at).getTime())
+    .filter(time => time && time > Date.now())
+    .sort((a, b) => a - b)[0];
+  el("studySummary").textContent = reviewedCount
+    ? `You reviewed ${reviewedCount} ${reviewedCount === 1 ? "card" : "cards"}.${comingBack}` +
+      (next ? ` Next review ${timeUntil(next)}.` : "")
+    : "Nothing to review right now.";
+  el("studyAgainBtn").textContent = dueCount(cardsOf(studyDeck)) ? "Keep reviewing" : "Practice anyway";
+}
+
+// e.g. "in 5 min", "in 3 hours", "tomorrow", "in 4 days"
+function timeUntil(time) {
+  const minutes = Math.round((time - Date.now()) / 60000);
+  if (minutes < 60) return `in ${Math.max(1, minutes)} min`;
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return `in ${hours} ${hours === 1 ? "hour" : "hours"}`;
+  const days = Math.round(hours / 24);
+  return days === 1 ? "tomorrow" : `in ${days} days`;
+}
+
 el("studyAgainBtn").onclick = () => startStudy(studyDeck);
 
 // Leave study mode: at the end, or halfway through. Cards I already answered still count:
 // each one was saved the moment I answered it. Also runs when I leave with the sidebar.
 function leaveStudy() {
   stopSpeaking(); // stop any pronunciation still playing
-  renderDecks();     // so the rings show my new progress, on My Decks...
+  renderDecks();     // so the rings and "due" counts show my new progress, on My Decks...
   renderHomeDecks(); // ...and on the home page
-  const unfinished = studyIndex < studyCards.length;
+  const unfinished = studyCard !== null;
   if (unfinished && answeredCount > 0) {
-    showToast(`Progress saved: ${answeredCount} of ${studyCards.length} cards`);
+    showToast(`Progress saved: ${answeredCount} ${answeredCount === 1 ? "card" : "cards"} reviewed`);
   }
   answeredCount = 0; // so the message isn't shown twice
 }
@@ -98,7 +250,4 @@ function exitStudy() {
 }
 el("studyBackBtn").onclick = exitStudy;
 el("studyExitBtn").onclick = exitStudy;
-el("studyReportBtn").onclick = () => {
-  const card = studyCards[studyIndex];
-  openReport(card.word, card.translation, card.example);
-};
+el("studyReportBtn").onclick = () => openReport(studyCard.word, studyCard.translation, studyCard.example);

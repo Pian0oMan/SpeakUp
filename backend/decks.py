@@ -5,7 +5,7 @@ import re
 
 from flask import request, jsonify
 
-from backend import dictionary
+from backend import dictionary, review
 from backend.anki_import import read_apkg, AnkiError
 from backend.progress import award_xp, tz_from_request
 from backend.setup import app, db_for, token_from_request, fetch_all, my_profile
@@ -99,13 +99,18 @@ def pronounce():
     return jsonify({"url": url})
 
 
+CARD_FIELDS = ("id, word, color, translation, deck_id, example, status, reading, explanation, "
+               "source, language, proficiency")
+
+
 @app.route("/api/flashcards", methods=["GET"])
 def list_flashcards():
     db = db_for(token_from_request())
-    rows = fetch_all(lambda: db.table("flashcards")
-                     .select("word, color, translation, deck_id, example, status, reading, explanation, "
-                             "source, language, proficiency")
-                     .order("created_at"))
+    try:  # with each card's review schedule (when it's due, see review.py)
+        rows = fetch_all(lambda: db.table("flashcards")
+                         .select(CARD_FIELDS + ", " + review.SCHEDULE_FIELDS).order("created_at"))
+    except Exception:  # 10_review.sql hasn't been run yet: every card counts as new
+        rows = fetch_all(lambda: db.table("flashcards").select(CARD_FIELDS).order("created_at"))
     return jsonify(rows)
 
 

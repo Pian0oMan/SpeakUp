@@ -13,7 +13,7 @@ XP_FOR = {
     "icebreaker": 10,     # answering an icebreaker question
     "save_word": 5,       # a new word saved to a deck
     "know_it": 3,         # study mode: "Know it"
-    "still_learning": 1,  # study mode: "Still learning" (practice still counts!)
+    "still_learning": 1,  # study mode: "Don't know" (practice still counts!)
 }
 DAILY_GOAL = 50
 MESSAGE_XP_EVERY = 20     # seconds: message XP at most this often, so spamming doesn't pay

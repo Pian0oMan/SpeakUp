@@ -201,3 +201,32 @@ dialog h3 { margin: 0; }
 .file-btn:hover { background: var(--surface-2); }
 .deck-head .card-top span { color: var(--muted); font-weight: 400; font-size: 14px; margin-left: 4px; }
 .room-card .card-top h3 { margin: 0; }
+
+/* ---------- Spaced repetition: how the card is asked, and the 2 answer buttons ---------- */
+.study-mode { color: var(--muted); font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
+.study-word.sentence { font-size: clamp(24px, 3.6vw, 36px); font-weight: 700; max-width: 640px; line-height: 1.35; }
+.study-hint { color: var(--muted); font-size: 18px; }
+.study-hint:empty { display: none; }
+.study-answer-word { font-size: clamp(32px, 5vw, 52px); font-weight: 800; }
+.speak-btn.huge { width: 96px; height: 96px; }  /* "Listen" cards: the speaker IS the question */
+.speak-btn.huge svg { width: 44px; height: 44px; }
+.grade-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; width: 100%; max-width: 520px; }
+.study-buttons .grade {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+  padding: 14px 12px;
+  font-size: 18px;
+  background: var(--surface-2);
+  color: var(--text);
+  border: 2px solid transparent;
+}
+.study-buttons .grade:hover { border-color: var(--border); }
+.grade small { color: var(--muted); font-size: 12px; font-weight: 600; min-height: 1.2em; }
+.grade strong { display: inline-flex; align-items: center; gap: 6px; }
+.study-buttons .grade.know { background: var(--brand); color: var(--on-brand); }  /* the main button */
+.study-buttons .grade.know:hover { background: var(--brand); }
+.grade.know small { color: var(--on-brand); opacity: 0.7; }
+kbd { font: 600 11px var(--font); padding: 2px 6px; margin-left: 8px; border-radius: var(--radius-sm); background: rgba(0, 0, 0, 0.2); }

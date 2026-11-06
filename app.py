@@ -7,6 +7,7 @@
 #   backend/dictionary.py   word meanings + real pronunciations (Wiktionary, Jisho, ...)
 #   backend/anki_import.py  reading Anki deck files (.apkg)
 #   backend/decks.py        decks, flashcards, the word popup, library, Anki import, reports
+#   backend/review.py       spaced repetition: when each card comes back
 #   backend/progress.py     XP, levels, streaks
 #   backend/social.py       who's online, recent contacts, friends (+ their stats)
 #   backend/discover.py     the Discover feed: posts about your progress, cheers
@@ -17,7 +18,7 @@
 # Importing a file runs it, and that's what connects its pages (@app.route) and
 # real-time events (@socketio.on) to the server.
 from backend.setup import app, socketio
-from backend import account, decks, progress, social, discover, chat, rooms, invites  # noqa: F401  (imported for their routes)
+from backend import account, decks, review, progress, social, discover, chat, rooms, invites  # noqa: F401  (imported for their routes)
 
 if __name__ == "__main__":
     socketio.run(app, debug=True)
