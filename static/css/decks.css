@@ -4,7 +4,7 @@
 .new-deck { flex-direction: row; gap: 8px; max-width: 560px; margin-bottom: 20px; }
 .new-deck input { flex: 1; }
 #deckGroups { display: flex; flex-direction: column; gap: 16px; max-width: 560px; }
-.deck-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.deck-head { display: flex; justify-content: space-between; align-items: center; gap: 24px; flex-wrap: wrap; margin-bottom: 8px; }
 .deck-head h3 { margin: 0; font-size: 18px; }
 .deck-head span { color: var(--muted); font-weight: 400; font-size: 14px; }
 .deck-head-buttons { display: flex; gap: 12px; align-items: center; }
@@ -132,6 +132,15 @@ dialog h3 { margin: 0; }
   gap: 16px;
 }
 .study-card .ring { position: absolute; top: 20px; right: 20px; }
+.study-image {
+  max-width: min(100%, 400px);
+  max-height: 220px;
+  object-fit: contain;
+  border: var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  background: var(--surface-2);
+}
 .study-word-row { display: flex; align-items: center; gap: 16px; }
 .study-word { font-size: clamp(40px, 7vw, 72px); font-weight: 800; line-height: 1.1; }
 #studyAnswer { display: flex; flex-direction: column; align-items: center; gap: 10px; }
@@ -143,9 +152,72 @@ dialog h3 { margin: 0; }
 .study-buttons { display: flex; justify-content: center; gap: 14px; margin: 24px 0 10px; }
 .study-buttons button { font-size: 18px; padding: 14px 36px; min-width: 190px; border-radius: var(--radius); }
 #studyReportBtn { display: block; margin: 0 auto; }
-#studyDone { margin-top: 20px; display: flex; flex-direction: column; gap: 10px; align-items: center; text-align: center; padding: 40px; }
-#studyDone h3 { font-size: 26px; }
-#studyDone h3, #studyDone p { margin: 0; }
+/* ---------- The session summary (end of studying) ---------- */
+.study-done {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 14px;
+  background: var(--surface);
+  border: var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  padding: 36px 32px 32px;
+  animation: done-in 0.35s ease-out;
+}
+.study-done h3 { margin: 0; font-size: clamp(28px, 4vw, 38px); font-weight: 800; }
+.done-subtitle { margin: -6px 0 6px; color: var(--muted); font-size: 16px; }
+.done-mascot { animation: done-bounce 0.6s ease-out 0.15s both; }
+/* Three big colored stickers: cards, XP, time */
+.done-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; width: 100%; max-width: 560px; }
+.done-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 16px 10px;
+  border: var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  color: var(--on-color);
+  animation: done-pop 0.4s ease-out both;
+}
+.done-stat .icon-svg { width: 24px; height: 24px; }
+.done-stat strong { font-size: clamp(28px, 4vw, 38px); font-weight: 800; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.done-stat small { font-family: var(--mono); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+.stat-cards { background: var(--sky); animation-delay: 0.1s; }
+.stat-xp { background: var(--yellow); animation-delay: 0.2s; }
+.stat-time { background: var(--violet); animation-delay: 0.3s; }
+/* Knew vs. didn't know: one bar, teal = knew, pink = didn't */
+.done-split { width: 100%; max-width: 560px; margin-top: 4px; }
+.done-split-labels { display: flex; justify-content: space-between; align-items: end; font-size: 14px; color: var(--muted); margin-bottom: 6px; }
+.done-split-labels .icon-svg { width: 14px; height: 14px; color: var(--brand-dark); vertical-align: -2px; }
+.done-split-labels strong { color: var(--text); }
+.done-accuracy { font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.done-bar { height: 18px; border: var(--line); border-radius: var(--radius); background: var(--pink); overflow: hidden; }
+.done-bar div { height: 100%; width: 0; background: var(--brand); border-right: var(--line); transition: width 0.9s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.done-next { margin: 0; color: var(--muted); font-size: 14px; min-height: 1em; }
+.done-buttons { display: flex; gap: 12px; margin-top: 6px; flex-wrap: wrap; justify-content: center; }
+.done-buttons button { font-size: 16px; padding: 12px 24px; }
+@keyframes done-in { from { opacity: 0; transform: translateY(12px); } }
+@keyframes done-pop { from { opacity: 0; transform: scale(0.8); } 70% { transform: scale(1.05); } }
+@keyframes done-bounce { from { transform: translateY(16px) scale(0.85); opacity: 0; } 60% { transform: translateY(-6px); } }
+@media (max-width: 560px) {
+  .study-done { padding: 28px 16px 24px; }
+  .done-stats { gap: 8px; }
+  .done-stat { padding: 12px 4px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .study-done, .done-stat, .done-mascot { animation: none; }
+  .done-bar div { transition: none; }
+}
+
+/* ---------- "Are you sure?" pop-ups ---------- */
+.confirm-dialog { max-width: 440px; }
+.confirm-top { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+.confirm-top h3 { overflow-wrap: anywhere; }
+.confirm-top .hint { margin: 6px 0 0; }
 
 /* Small pop-up at the bottom of the screen */
 .toast {
@@ -199,7 +271,20 @@ dialog h3 { margin: 0; }
   font-weight: 600;
 }
 .file-btn:hover { background: var(--surface-2); }
-.deck-head .card-top span { color: var(--muted); font-weight: 400; font-size: 14px; margin-left: 4px; }
+/* "12 cards": a small label next to the name, with room before the buttons */
+.deck-head .card-top span {
+  color: var(--muted);
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: var(--surface-2);
+  border-radius: var(--radius);
+  padding: 3px 8px;
+  margin-left: 2px;
+  white-space: nowrap;
+}
 .room-card .card-top h3 { margin: 0; }
 
 /* ---------- Spaced repetition: how the card is asked, and the 2 answer buttons ---------- */
@@ -230,3 +315,23 @@ dialog h3 { margin: 0; }
 .study-buttons .grade.know:hover { background: var(--brand); }
 .grade.know small { color: var(--on-brand); opacity: 0.7; }
 kbd { font: 600 11px var(--font); padding: 2px 6px; margin-left: 8px; border-radius: var(--radius-sm); background: rgba(0, 0, 0, 0.2); }
+
+/* ---------- Anki import: progress bar + "done" ---------- */
+.anki-progress { margin: 14px 0 4px; }
+.anki-progress-text { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 6px; }
+.anki-progress-text strong { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.anki-bar { height: 16px; border: var(--line); border-radius: var(--radius); background: var(--surface-2); overflow: hidden; }
+.anki-bar div {
+  height: 100%;
+  width: 0;
+  background: repeating-linear-gradient(-45deg, var(--brand) 0 10px, var(--brand-dark) 10px 20px);
+  background-size: 28px 28px;
+  animation: anki-stripes 0.8s linear infinite;  /* moving stripes: it's working */
+  transition: width 0.3s ease-out;
+}
+@keyframes anki-stripes { to { background-position: 28px 0; } }
+@media (prefers-reduced-motion: reduce) { .anki-bar div { animation: none; } }
+.anki-done { display: flex; gap: 12px; align-items: flex-start; margin: 14px 0 4px; padding: 12px; border: var(--line); border-radius: var(--radius); background: var(--brand-soft); color: var(--text); }
+.anki-done > span .icon-svg { width: 22px; height: 22px; }
+.anki-done .hint { margin: 4px 0 0; color: var(--text); opacity: 0.8; }
+#ankiDialog .dialog-buttons { margin-top: 12px; }

@@ -58,6 +58,22 @@ let practicing = false; // nothing was due, so it's extra practice with every ca
 let reviewedCount = 0;
 let forgottenCount = 0;
 let answeredCount = 0;  // cards answered this time (each one is saved right away)
+let session = null;     // what I did this session, for the summary at the end (see newSession)
+
+// XP per answer: the same numbers as XP_FOR in backend/progress.py
+const XP_KNOW = 3;
+const XP_DONT_KNOW = 1;
+
+function newSession() {
+  return {
+    startedAt: Date.now(),
+    known: 0,             // answers "Know it"
+    forgot: 0,            // answers "Don't know"
+    cards: new Set(),     // the different cards I answered
+    newWords: new Set(),  // cards I saw for the very first time
+    xp: 0,
+  };
+}
 
 function startStudy(deckToStudy) {
   studyDeck = deckToStudy;
@@ -67,6 +83,7 @@ function startStudy(deckToStudy) {
   // Reviews first (shuffled), then the new cards in the order they were saved
   studyQueue = practicing ? shuffle([...cards]) : [...shuffle(reviews), ...fresh];
   reviewedCount = forgottenCount = answeredCount = 0;
+  session = newSession();
   el("studyTitle").textContent = `${practicing ? "Practicing" : "Reviewing"}: ${deckToStudy.name}`;
   showView("studyView");
   nextStudyCard();
@@ -136,9 +153,20 @@ function nextStudyCard() {
   el("studySpeakExample").hidden = !card.example;
   el("studyAnswer").hidden = true;
   setRing(el("studyRing"), card.proficiency);
+  showCardPicture(card);
 
   loadPreviews(card);
   if (studyMode === "listen") speak(card.word, card.language);
+}
+
+// The card's picture, if it has one (hidden again if it can't be loaded)
+function showCardPicture(card) {
+  const picture = el("studyImage");
+  const url = cardPictureUrl(card);
+  picture.hidden = !url;
+  picture.onerror = () => (picture.hidden = true);
+  if (url) picture.src = url;
+  else picture.removeAttribute("src");
 }
 
 function showAnswer() {
@@ -172,6 +200,11 @@ async function gradeCard(grade) {
   if (!card || el("gradeButtons").hidden) return;
   reviewedCount++;
   answeredCount++;
+  session.cards.add(card.id);
+  if (!card.reps && !card.due_at) session.newWords.add(card.id);
+  if (grade === "know") session.known++;
+  else session.forgot++;
+  session.xp += grade === "know" ? XP_KNOW : XP_DONT_KNOW;
   // Didn't know it: it comes back in a minute (see review.py), so I see it
   // again in THIS session, a few cards from now
   if (grade === "dont_know") {
@@ -205,19 +238,69 @@ document.addEventListener("keydown", event => {
   }
 });
 
-// The end: what I did, and when the next review is
-function showStudySummary() {
+// THE SUMMARY: how much I studied, the XP I got, how many I knew.
+// Shown when the cards run out, and when I stop halfway (if I answered at least one).
+function showStudySummary(stoppedEarly = false) {
   el("studyProgress").textContent = "";
-  const comingBack = forgottenCount ? ` ${forgottenCount} of them will come back again soon.` : "";
+  const answers = session.known + session.forgot;
+  const accuracy = answers ? Math.round((session.known / answers) * 100) : 0;
+  const seconds = Math.round((Date.now() - session.startedAt) / 1000);
+
+  // The headline and the mascot depend on how it went
+  const [title, mood] = !answers ? ["All done for now!", "happy"]
+    : stoppedEarly ? ["Nice work!", "happy"]
+    : accuracy >= 80 ? ["Amazing session!", "excited"]
+    : accuracy >= 50 ? ["Session complete!", "excited"]
+    : ["Good practice!", "determined"];
+  el("doneTitle").textContent = title;
+  el("doneMascot").innerHTML = mascot(mood, 100);
+  const newWords = session.newWords.size;
+  el("doneSubtitle").textContent = !answers ? "Nothing to review right now."
+    : newWords ? `You met ${newWords} new ${newWords === 1 ? "word" : "words"}.`
+    : stoppedEarly ? "Your progress is saved. Come back for the rest any time."
+    : "Every card you review sticks a little longer.";
+
+  // The numbers count up from 0, the bar fills up
+  countUp(el("doneCards"), session.cards.size, n => n);
+  countUp(el("doneXp"), session.xp, n => `+${n}`);
+  countUp(el("doneTime"), seconds, formatDuration);
+  el("doneKnown").textContent = session.known;
+  el("doneForgot").textContent = session.forgot;
+  countUp(el("doneAccuracy"), accuracy, n => `${n}%`);
+  el("doneBarFill").style.width = "0%";
+  requestAnimationFrame(() => requestAnimationFrame(() => (el("doneBarFill").style.width = `${accuracy}%`)));
+  document.querySelector("#studyDone .done-split").hidden = !answers;
+  document.querySelector("#studyDone .done-stats").hidden = !answers;
+
+  // When the next review is
+  const comingBack = forgottenCount ? `${forgottenCount} ${forgottenCount === 1 ? "card comes" : "cards come"} back soon. ` : "";
   const next = cardsOf(studyDeck)
     .map(card => card.due_at && new Date(card.due_at).getTime())
     .filter(time => time && time > Date.now())
     .sort((a, b) => a - b)[0];
-  el("studySummary").textContent = reviewedCount
-    ? `You reviewed ${reviewedCount} ${reviewedCount === 1 ? "card" : "cards"}.${comingBack}` +
-      (next ? ` Next review ${timeUntil(next)}.` : "")
-    : "Nothing to review right now.";
-  el("studyAgainBtn").textContent = dueCount(cardsOf(studyDeck)) ? "Keep reviewing" : "Practice anyway";
+  el("studySummary").textContent = stoppedEarly ? "" : comingBack + (next ? `Next review ${timeUntil(next)}.` : "");
+
+  el("studyAgainBtn").textContent = studyQueue.length ? `Keep going · ${studyQueue.length} left`
+    : dueCount(cardsOf(studyDeck)) ? "Keep reviewing" : "Practice anyway";
+}
+
+// 75 -> "1:15"
+function formatDuration(seconds) {
+  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
+}
+
+// Count a number up from 0 in about a second (straight to the end if motion is turned off)
+function countUp(spot, target, format) {
+  const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (still || target === 0) return (spot.textContent = format(target));
+  const start = performance.now();
+  const step = now => {
+    const t = Math.min(1, (now - start) / 900);
+    const eased = 1 - Math.pow(1 - t, 3); // fast first, slow at the end
+    spot.textContent = format(Math.round(target * eased));
+    if (t < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
 }
 
 // e.g. "in 5 min", "in 3 hours", "tomorrow", "in 4 days"
@@ -230,7 +313,14 @@ function timeUntil(time) {
   return days === 1 ? "tomorrow" : `in ${days} days`;
 }
 
-el("studyAgainBtn").onclick = () => startStudy(studyDeck);
+// "Keep going" picks up where I stopped; otherwise it's a new session
+el("studyAgainBtn").onclick = () => {
+  if (studyQueue.length) {
+    nextStudyCard();
+  } else {
+    startStudy(studyDeck);
+  }
+};
 
 // Leave study mode: at the end, or halfway through. Cards I already answered still count:
 // each one was saved the moment I answered it. Also runs when I leave with the sidebar.
@@ -249,5 +339,18 @@ function exitStudy() {
   showView("deckView"); // showView calls leaveStudy
 }
 el("studyBackBtn").onclick = exitStudy;
-el("studyExitBtn").onclick = exitStudy;
+
+// "← Exit" halfway: if I answered anything, first show what I did (the card I was on waits for "Keep going")
+el("studyExitBtn").onclick = () => {
+  if (!studyCard || answeredCount === 0) return exitStudy();
+  stopSpeaking();
+  studyQueue.unshift(studyCard);
+  studyCard = null;
+  el("studyCard").hidden = true;
+  el("showAnswerBtn").hidden = true;
+  el("gradeButtons").hidden = true;
+  el("studyReportBtn").hidden = true;
+  el("studyDone").hidden = false;
+  showStudySummary(true);
+};
 el("studyReportBtn").onclick = () => openReport(studyCard.word, studyCard.translation, studyCard.example);

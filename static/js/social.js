@@ -245,6 +245,25 @@ el("navFriends").onclick = () => {
   loadSocial();
 };
 
+// THE RECENT PANEL can be hidden (✕) and opened again (the "Recent" tab on the right edge).
+// Remembered in this browser, so it stays the way I left it.
+function setRecentOpen(open) {
+  el("appScreen").classList.toggle("recent-closed", !open);
+  el("openRecentBtn").hidden = open;
+  try {
+    localStorage.setItem("recentOpen", open ? "yes" : "no");
+  } catch {
+    // can't remember it (e.g. a private window): it still opens / closes for now
+  }
+}
+el("closeRecentBtn").onclick = () => setRecentOpen(false);
+el("openRecentBtn").onclick = () => setRecentOpen(true);
+try {
+  setRecentOpen(localStorage.getItem("recentOpen") !== "no");
+} catch {
+  setRecentOpen(true);
+}
+
 // "+ Add friend" in the 1-on-1 chat bar
 let partnerUserId = null;
 function updateAddPartnerButton() {

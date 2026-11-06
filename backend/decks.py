@@ -1,12 +1,13 @@
 # DECKS + FLASHCARDS: decks, cards, the word popup, pronunciation,
 # the library, Anki import, and translation reports.
+import hashlib
 import os
 import re
 
 from flask import request, jsonify
 
 from backend import dictionary, review
-from backend.anki_import import read_apkg, AnkiError
+from backend.anki_import import read_apkg, read_collection, read_media_index, unpack, AnkiError, COLLECTIONS
 from backend.progress import award_xp, tz_from_request
 from backend.setup import app, db_for, token_from_request, fetch_all, my_profile
 from backend.translation import translate_for, script_language, DEEPL_CODES
@@ -106,12 +107,15 @@ CARD_FIELDS = ("id, word, color, translation, deck_id, example, status, reading,
 @app.route("/api/flashcards", methods=["GET"])
 def list_flashcards():
     db = db_for(token_from_request())
-    try:  # with each card's review schedule (when it's due, see review.py)
-        rows = fetch_all(lambda: db.table("flashcards")
-                         .select(CARD_FIELDS + ", " + review.SCHEDULE_FIELDS).order("created_at"))
-    except Exception:  # 10_review.sql hasn't been run yet: every card counts as new
-        rows = fetch_all(lambda: db.table("flashcards").select(CARD_FIELDS).order("created_at"))
-    return jsonify(rows)
+    # With each card's review schedule (when it's due, see review.py) and its picture.
+    # If an update SQL file hasn't been run yet, those columns are left out.
+    for fields in (CARD_FIELDS + ", image, " + review.SCHEDULE_FIELDS,   # 13_card_images.sql
+                   CARD_FIELDS + ", " + review.SCHEDULE_FIELDS):         # 10_review.sql
+        try:
+            return jsonify(fetch_all(lambda: db.table("flashcards").select(fields).order("created_at")))
+        except Exception:
+            pass
+    return jsonify(fetch_all(lambda: db.table("flashcards").select(CARD_FIELDS).order("created_at")))
 
 
 @app.route("/api/flashcards", methods=["POST"])
@@ -183,6 +187,7 @@ def add_cards(db, deck_id, cards, source, language=None):
         if not word or word in have:
             continue
         have.add(word)
+        card["added"] = True  # (so only these cards' pictures get uploaded)
         new_rows.append({
             "word": word,
             "deck_id": deck_id,
@@ -193,6 +198,7 @@ def add_cards(db, deck_id, cards, source, language=None):
             "example": card.get("example"),
             "source": source,
             "language": language or card.get("language"),
+            **({"image": card["image"]} if card.get("image") else {}),
         })
     for start in range(0, len(new_rows), 500):  # send them in batches of 500
         db.table("flashcards").insert(new_rows[start:start + 500]).execute()
@@ -228,15 +234,29 @@ def add_library_deck(library_id):
 
 @app.route("/api/import-anki", methods=["POST"])
 def import_anki():
-    """Upload an Anki deck (.apkg) and turn it into one of my decks."""
-    file = request.files.get("file")
-    if not file:
-        return jsonify({"error": "Choose an .apkg file first."}), 400
+    """Turn an Anki deck into one of my decks. The browser normally sends only the card
+    database out of the .apkg ("collection", a few MB), not the whole file, which is mostly
+    pictures and sounds (often 100+ MB). A whole .apkg ("file") works too."""
+    collection, file = request.files.get("collection"), request.files.get("file")
+    media = request.files.get("media")  # which picture is which file in the .apkg (sent with "collection")
+    name = request.form.get("name") or (file.filename if file else "")
     try:
-        cards = read_apkg(file.stream)
+        if collection:
+            inner = os.path.basename(collection.filename or "")
+            if inner not in COLLECTIONS:
+                return jsonify({"error": "That doesn't look like an Anki deck (.apkg) file."}), 400
+            cards, info = read_collection(unpack(collection.read(), inner))
+        elif file:
+            cards, info = read_apkg(file.stream)
+        else:
+            return jsonify({"error": "Choose an .apkg file first."}), 400
     except AnkiError as error:
         return jsonify({"error": str(error)}), 400
-    name = os.path.splitext(file.filename or "")[0].strip()[:40] or "Anki deck"  # deck name = file name
+    # Deck name = file name, cut at a space if it's longer than 40 letters
+    name = " ".join(os.path.splitext(name)[0].replace("_", " ").split())
+    if len(name) > 40:
+        name = name[:41].rsplit(" ", 1)[0][:40]
+    name = name or "Anki deck"
     db = db_for(token_from_request())
     # Anki files don't say which language the words are in: guess from the writing
     # system (no DeepL calls for thousands of cards), or assume the language I'm learning
@@ -244,8 +264,39 @@ def import_anki():
     for card in cards:
         card["language"] = script_language(card["word"], learning) or learning
     new_deck = db.table("decks").insert({"name": name}).execute().data[0]
-    added, skipped = add_cards(db, new_deck["id"], cards, "anki")
-    return jsonify({"deck": new_deck, "added": added, "skipped": skipped})
+    pictures = plan_pictures(db, new_deck["id"], cards, media.read() if media and collection else None)
+    try:
+        added, skipped = add_cards(db, new_deck["id"], cards, "anki")
+    except Exception as error:  # e.g. Supabase timed out halfway: don't leave a half-empty deck behind
+        print("Anki import failed:", error)
+        db.table("decks").delete().eq("id", new_deck["id"]).execute()
+        return jsonify({"error": "Couldn't save the cards. Please try again."}), 500
+    wanted = {card.get("image") for card in cards if card.get("added")}  # not the skipped ones
+    pictures = [picture for picture in pictures if picture["path"] in wanted]
+    return jsonify({"deck": new_deck, "added": added, "skipped": skipped, **info, "pictures": pictures})
+
+
+def plan_pictures(db, deck_id, cards, media_index):
+    """Give each card with a picture its place in Storage (card["image"]), and return
+    what the browser has to upload: [{"zip": "3943", "path": "<my id>/<deck>/<name>.webp"}].
+    Empty if the pictures can't be stored (13_card_images.sql not run yet)."""
+    if media_index is None:
+        return []
+    try:
+        db.table("flashcards").select("image").limit(1).execute()
+    except Exception:
+        return []
+    in_zip = read_media_index(media_index)
+    me = my_profile(db)["id"]
+    uploads = {}
+    for card in cards:
+        picture = card.pop("picture", None)
+        if picture and picture in in_zip:
+            # A short, safe file name made from the picture's name (it can have any letters)
+            path = f"{me}/{deck_id}/{hashlib.sha1(picture.encode()).hexdigest()[:20]}.webp"
+            card["image"] = path
+            uploads[path] = in_zip[picture]
+    return [{"zip": zip_name, "path": path} for path, zip_name in uploads.items()]
 
 
 @app.errorhandler(413)

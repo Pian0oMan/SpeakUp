@@ -1,0 +1,6 @@
+{
+  // Use the project's own Python (with Flask etc. installed), not the system one
+  "python.defaultInterpreterPath": "${workspaceFolder}\\.venv\\Scripts\\python.exe",
+  // New terminals start with .venv already activated
+  "python.terminal.activateEnvironment": true
+}

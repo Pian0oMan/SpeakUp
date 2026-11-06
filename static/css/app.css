@@ -238,7 +238,45 @@
   border-left: var(--line);
   padding: 24px 16px;
 }
-.recent-panel h3 { margin: 0 0 12px; font-size: 16px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+.recent-panel h3 { margin: 0; font-size: 16px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+.recent-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.recent-close { display: inline-grid; place-items: center; padding: 4px; border-radius: var(--radius-sm); color: var(--muted); }
+.recent-close:hover { color: var(--text); background: var(--surface-2); }
+.recent-close .icon-svg { width: 18px; height: 18px; }
+/* Hidden: the content gets the space, and a tab on the right edge brings the panel back.
+   (Only on wide screens: on smaller ones there's no panel, Recent is on the Friends page.) */
+@media (min-width: 1151px) {
+  .shell.recent-closed { grid-template-columns: 230px 1fr; }
+  .shell.recent-closed .recent-panel { display: none; }
+}
+@media (max-width: 1150px) {
+  .recent-tab { display: none; }
+}
+.recent-tab {
+  position: fixed;
+  right: 0;
+  top: 50%;
+  z-index: 20;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  writing-mode: vertical-rl;  /* the word runs top to bottom, like a tab on a folder */
+  padding: 14px 8px;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: var(--yellow);
+  color: var(--on-color);
+  border: var(--line);
+  border-right: none;
+  border-radius: var(--radius) 0 0 var(--radius);
+  box-shadow: -3px 3px 0 var(--ink);
+  transform: translateY(-50%);
+}
+.recent-tab:hover { padding-right: 12px; }  /* slides out a little */
+.recent-tab .icon-svg { width: 16px; height: 16px; transform: rotate(90deg); }
 .friends-card { max-width: 560px; margin-bottom: 16px; }
 .friends-card h3 { margin: 0 0 8px; }
 .people-list { list-style: none; padding: 0; margin: 0; }

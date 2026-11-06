@@ -440,6 +440,8 @@
         <div id="studyCard" class="study-card">
           <!-- How well I know this card (filled in by JavaScript) -->
           <div id="studyRing" class="ring big"><span></span></div>
+          <!-- The card's picture (e.g. the anime scene from an Anki deck), if it has one -->
+          <img id="studyImage" class="study-image" alt="" hidden>
           <!-- How it's asked: "New word", "Fill in the blank", "Listen. Which word is it?"... -->
           <div id="studyModeLabel" class="study-mode"></div>
           <div class="study-word-row">
@@ -467,13 +469,30 @@
           </div>
         </div>
         <button id="studyReportBtn" class="link-btn" hidden><span data-icon="flag"></span> This translation looks wrong</button>
-        <!-- Shown at the end -->
-        <div id="studyDone" class="card" hidden>
-          <div class="done-mascot" data-mascot="excited" data-size="90"></div>
-          <h3>All done for now!</h3>
-          <p id="studySummary"></p>
-          <button id="studyAgainBtn" class="primary">Keep reviewing</button>
-          <button id="studyBackBtn" class="ghost">Back to decks</button>
+        <!-- THE SESSION SUMMARY: shown at the end, or when I stop halfway (study.js fills it in) -->
+        <div id="studyDone" class="study-done" hidden>
+          <div id="doneMascot" class="done-mascot"></div>
+          <h3 id="doneTitle">Session complete!</h3>
+          <p id="doneSubtitle" class="done-subtitle"></p>
+          <div class="done-stats">
+            <div class="done-stat stat-cards"><span data-icon="decks"></span><strong id="doneCards">0</strong><small>cards studied</small></div>
+            <div class="done-stat stat-xp"><span data-icon="zap"></span><strong id="doneXp">+0</strong><small>XP earned</small></div>
+            <div class="done-stat stat-time"><span data-icon="clock"></span><strong id="doneTime">0:00</strong><small>time studied</small></div>
+          </div>
+          <!-- Knew it vs. didn't know it, as one bar -->
+          <div class="done-split">
+            <div class="done-split-labels">
+              <span><span data-icon="check"></span> Knew <strong id="doneKnown">0</strong></span>
+              <strong id="doneAccuracy" class="done-accuracy">0%</strong>
+              <span>Didn't know <strong id="doneForgot">0</strong></span>
+            </div>
+            <div class="done-bar"><div id="doneBarFill"></div></div>
+          </div>
+          <p id="studySummary" class="done-next"></p>
+          <div class="done-buttons">
+            <button id="studyBackBtn" class="ghost">Back to decks</button>
+            <button id="studyAgainBtn" class="primary">Keep reviewing</button>
+          </div>
         </div>
       </div>
 
@@ -508,11 +527,18 @@
       </div>
     </main>
 
-    <!-- RIGHT SIDE: people I chatted with recently (friends or not), and who's online -->
+    <!-- RIGHT SIDE: people I chatted with recently (friends or not), and who's online.
+         It can be hidden with the ✕, and opened again with the "Recent" tab on the right edge. -->
     <aside class="recent-panel">
-      <h3>Recent</h3>
+      <div class="recent-head">
+        <h3>Recent</h3>
+        <button id="closeRecentBtn" class="recent-close" title="Hide"><span data-icon="close"></span></button>
+      </div>
       <ul id="recentList" class="people-list compact"></ul>
     </aside>
+    <button id="openRecentBtn" class="recent-tab" title="Show the people you talked to recently" hidden>
+      <span data-icon="friends"></span> Recent
+    </button>
   </section>
 
   <!-- ===== WELCOME QUESTIONS: right after signing up, one question per screen =====
@@ -772,6 +798,23 @@
     </form>
   </dialog>
 
+  <!-- ARE YOU SURE? Before deleting a deck (decks.js) -->
+  <dialog id="deleteDeckDialog" class="card confirm-dialog">
+    <form method="dialog">
+      <div class="confirm-top">
+        <div data-mascot="sad" data-size="64"></div>
+        <div>
+          <h3>Delete <span id="deleteDeckName"></span>?</h3>
+          <p id="deleteDeckText" class="hint"></p>
+        </div>
+      </div>
+      <div class="dialog-buttons">
+        <button type="submit" value="cancel" class="ghost" autofocus>Keep it</button>
+        <button type="submit" value="delete" class="danger">Delete deck</button>
+      </div>
+    </form>
+  </dialog>
+
   <!-- CUSTOMIZE A DECK (pop-up window): name, color, picture -->
   <dialog id="customizeDialog" class="card">
     <form id="customizeForm">
@@ -813,13 +856,25 @@
       <h3>Import an Anki deck</h3>
       <p class="hint">
         Download a shared deck (an <strong>.apkg</strong> file) from AnkiWeb, then upload it here.
-        Each card's first field becomes the word, and the second one the translation.
+        Speak Up finds the word, its meaning, its reading and its picture on each card.
+        Pictures are shrunk to save space. Sounds stay in Anki.
       </p>
       <input id="ankiFile" type="file" accept=".apkg" required>
+      <!-- While importing: which step it's on, and a bar that fills up -->
+      <div id="ankiProgress" class="anki-progress" hidden>
+        <div class="anki-progress-text"><span id="ankiStep">Opening the deck...</span><strong id="ankiPercent">0%</strong></div>
+        <div class="anki-bar"><div id="ankiBarFill"></div></div>
+      </div>
+      <!-- When it's done -->
+      <div id="ankiDone" class="anki-done" hidden>
+        <span data-icon="check"></span>
+        <div><strong id="ankiDoneText"></strong><p id="ankiDoneNote" class="hint"></p></div>
+      </div>
       <p id="ankiStatus" class="status"></p>
       <div class="dialog-buttons">
         <button type="button" class="ghost close-dialog">Close</button>
-        <button type="submit" class="primary">Import</button>
+        <button type="submit" id="ankiImportBtn" class="primary">Import</button>
+        <button type="button" id="ankiStudyBtn" class="primary" hidden>Study it now</button>
       </div>
     </form>
   </dialog>

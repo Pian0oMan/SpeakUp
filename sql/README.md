@@ -17,6 +17,7 @@ These files build Speak Up's database. Run them **in order**, in Supabase:
 | `10_review.sql` | Spaced repetition: when each card is due, and how fast its interval grows |
 | `11_speaking.sql` | Speaking time: minutes you talked, per language, per day |
 | `12_safety.sql` | Blocking and reporting people (and "People to meet" skips blocked people) |
+| `13_card_images.sql` | Pictures on flashcards from Anki decks (a Storage bucket, shrunk pictures only) |
 
-Files 04 to 12 are safe to run again. If Supabase offers to "enable RLS" for you,
+Files 04 to 13 are safe to run again. If Supabase offers to "enable RLS" for you,
 run the file as written: every file already turns on Row Level Security itself.

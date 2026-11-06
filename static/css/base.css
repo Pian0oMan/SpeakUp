@@ -114,7 +114,7 @@ button {
   transition: transform 0.08s, box-shadow 0.08s, background 0.15s;
 }
 /* Outlined buttons sit on a hard shadow, lift a little on hover, and press down when clicked */
-button.primary, button.ghost {
+button.primary, button.ghost, button.danger {
   border: var(--line);
   border-radius: var(--radius);
   box-shadow: var(--shadow-sm);
@@ -122,11 +122,12 @@ button.primary, button.ghost {
 }
 button.primary { background: var(--brand); color: var(--on-brand); padding: 9px 18px; }
 button.ghost { background: var(--surface); color: var(--text); padding: 7px 14px; }
-button.primary:hover:not(:disabled), button.ghost:hover:not(:disabled) {
+button.danger { background: var(--danger); color: #fff; padding: 9px 18px; }
+button.primary:hover:not(:disabled), button.ghost:hover:not(:disabled), button.danger:hover {
   transform: translate(-1px, -1px);
   box-shadow: 3px 3px 0 var(--ink);
 }
-button.primary:active:not(:disabled), button.ghost:active:not(:disabled) {
+button.primary:active:not(:disabled), button.ghost:active:not(:disabled), button.danger:active {
   transform: translate(2px, 2px);
   box-shadow: none;
 }
@@ -184,8 +185,6 @@ button .icon-svg { width: 18px; height: 18px; }
 .round { display: inline-grid; place-items: center; color: var(--text); }
 .round.off { color: white; }
 .icebreaker-label .icon-svg { width: 14px; height: 14px; margin-right: 4px; }
-#studyDone h3 { display: flex; align-items: center; gap: 8px; }
-#studyDone h3 .icon-svg { color: var(--accent); }
 #studyReportBtn .icon-svg { width: 14px; height: 14px; }
 
 /* ---------- Language tags, like "EN → JA" ---------- */
