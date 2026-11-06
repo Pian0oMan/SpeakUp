@@ -10,8 +10,10 @@ let camTrack = null;  // my camera (null = off)
 let callState = "connecting";                 // connecting | connected | failed | ended
 let partnerMedia = { mic: false, cam: false }; // is my partner's mic / camera on?
 
-// A free public "STUN" server tells each browser its address on the internet
-const ICE_SERVERS = [{ urls: "stun:stun.l.google.com:19302" }];
+// A free public "STUN" server tells each browser its address on the internet.
+// When the app starts, the server's list replaces this one: it also has a TURN server
+// (if one is set up in .env), which passes the call along on strict networks.
+let ICE_SERVERS = [{ urls: "stun:stun.l.google.com:19302" }];
 
 function sendCall(data) {
   socket.emit("call", data);

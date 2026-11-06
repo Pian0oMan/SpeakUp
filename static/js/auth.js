@@ -4,6 +4,7 @@
 async function start() {
   const config = await (await fetch("/api/config")).json();
   sb = supabase.createClient(config.url, config.anonKey);
+  if (config.iceServers) ICE_SERVERS = config.iceServers; // with a TURN server, if one is set up
 
   // Runs whenever login state changes: page load, log in, log out, token refresh
   sb.auth.onAuthStateChange((event, session) => {

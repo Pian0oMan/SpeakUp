@@ -3,7 +3,8 @@ import re
 
 from flask import request, jsonify, send_from_directory
 
-from backend.setup import app, db_for, token_from_request, SUPABASE_URL, SUPABASE_ANON_KEY
+from backend.setup import (app, db_for, token_from_request, SUPABASE_URL, SUPABASE_ANON_KEY,
+                           TURN_URLS, TURN_USERNAME, TURN_CREDENTIAL)
 
 
 # Visiting http://localhost:5000/ sends the HTML page
@@ -12,11 +13,25 @@ def home():
     return send_from_directory(app.static_folder, "index.html")
 
 
-# The browser needs these two values to log in with Supabase.
-# (The anon key is safe to share: the security rules protect the data.)
+# The service worker: what makes Speak Up installable as an app (see static/sw.js).
+# It has to come from "/" (not "/static/"), so it's allowed to handle the whole site.
+@app.route("/sw.js")
+def service_worker():
+    response = send_from_directory(app.static_folder, "sw.js")
+    response.headers["Cache-Control"] = "no-cache"  # so a new version is picked up right away
+    return response
+
+
+# The browser needs these values to log in with Supabase and to connect calls.
+# (The anon key is safe to share: the security rules protect the data.
+# The TURN password is shared too: that's how TURN works with a fixed password,
+# so use a TURN service with a monthly limit.)
 @app.route("/api/config")
 def config():
-    return jsonify({"url": SUPABASE_URL, "anonKey": SUPABASE_ANON_KEY})
+    ice_servers = [{"urls": "stun:stun.l.google.com:19302"}]  # free: tells each browser its address
+    if TURN_URLS:
+        ice_servers.append({"urls": TURN_URLS, "username": TURN_USERNAME, "credential": TURN_CREDENTIAL})
+    return jsonify({"url": SUPABASE_URL, "anonKey": SUPABASE_ANON_KEY, "iceServers": ice_servers})
 
 
 # ---------- PROFILE ----------

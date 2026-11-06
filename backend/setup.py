@@ -16,6 +16,13 @@ DEEPL_API_KEY = os.getenv("DEEPL_API_KEY")
 if not SUPABASE_URL or not SUPABASE_ANON_KEY:
     raise SystemExit("Fill in SUPABASE_URL and SUPABASE_ANON_KEY in the .env file first!")
 
+# Optional: a TURN server for calls. Most calls connect browser-to-browser directly, but
+# strict networks (schools, offices, some phone networks) block that. A TURN server then
+# passes the call along. Several addresses can be listed, separated by commas (see README.md).
+TURN_URLS = [url.strip() for url in os.getenv("TURN_URLS", "").split(",") if url.strip()]
+TURN_USERNAME = os.getenv("TURN_USERNAME", "")
+TURN_CREDENTIAL = os.getenv("TURN_CREDENTIAL", "")
+
 # This file is in speakup/backend/, the website files are in speakup/static/
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 app = Flask(__name__, static_folder=os.path.join(ROOT, "static"))
