@@ -91,8 +91,9 @@ function makePostCard(post) {
   foot.appendChild(cheer);
   if (post.mine) {
     foot.appendChild(smallButton("Delete", () => deletePost(post)));
-  } else if (relationTo(post.user_id) !== "friend") {
-    foot.appendChild(makeFriendButton(post.user_id, post.author_name));
+  } else {
+    if (relationTo(post.user_id) !== "friend") foot.appendChild(makeFriendButton(post.user_id, post.author_name));
+    foot.appendChild(reportButton(post.user_id, post.author_name, "discover"));
   }
   card.appendChild(foot);
   return card;
@@ -176,4 +177,11 @@ el("navDiscover").onclick = () => {
 // Someone posted (or deleted a post): refresh, if I'm looking at the feed
 socket.on("posts_changed", () => {
   if (!el("discoverView").hidden) loadPosts();
+});
+// I blocked someone from the feed: their posts disappear
+socket.on("report_done", result => {
+  if (result.blocked && !el("discoverView").hidden) {
+    loadPosts();
+    loadPeople();
+  }
 });

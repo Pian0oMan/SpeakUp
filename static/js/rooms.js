@@ -224,6 +224,7 @@ function clearRoomCaptions() {
 // Someone else in the room is talking
 socket.on("room_caption", ({ sid, text, language }) => {
   const member = roomMembers[sid];
+  if (member && isBlocked(member.user_id)) return;
   setRoomCaption(sid, member ? member.name : "Someone", text, language, false);
 });
 
@@ -251,6 +252,8 @@ function connectToMember(sid, initiator) {
   connection.audio.srcObject = stream;
   connection.ontrack = event => {
     stream.addTrack(event.track);
+    const member = roomMembers[sid];
+    connection.audio.muted = Boolean(member && isBlocked(member.user_id)); // people I blocked stay silent
     connection.audio.play().catch(() => {});
     watchVoice(sid, stream); // light up their tile when they talk
   };
@@ -334,7 +337,18 @@ function renderMembers() {
     mic.className = "mic-state";
     mic.textContent = member.mic ? "Mic on" : "Muted";
     tile.append(avatar, name, langs, mic);
-    if (!member.me && member.user_id) tile.appendChild(makeFriendButton(member.user_id, member.name));
+    if (!member.me && member.user_id) {
+      // Someone I blocked: muted for me, and their messages are hidden
+      const blocked = isBlocked(member.user_id);
+      if (roomPeers[member.sid]) roomPeers[member.sid].audio.muted = blocked;
+      if (blocked) {
+        tile.classList.add("blocked");
+        mic.textContent = "Blocked · muted for you";
+      } else {
+        tile.appendChild(makeFriendButton(member.user_id, member.name));
+      }
+      tile.appendChild(reportButton(member.user_id, member.name, "room"));
+    }
     box.appendChild(tile);
   });
   el("roomCount").textContent = `${everyone.length} / ${currentRoom.max_size}`;
@@ -377,6 +391,8 @@ function renderRoomMessages() {
   const box = el("roomMessages");
   box.innerHTML = "";
   roomMessages.forEach(msg => {
+    const sender = roomMembers[msg.from];
+    if (sender && isBlocked(sender.user_id)) return; // hidden: I blocked them
     const div = document.createElement("div");
     if (msg.system) {
       div.className = "message system";

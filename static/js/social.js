@@ -1,7 +1,7 @@
 // FRIENDS, RECENT CONTACTS, and who's ONLINE.
 
 // ---------- FRIENDS + RECENT + ONLINE ----------
-let social = { friends: [], incoming: [], outgoing: [], recent: [] };
+let social = { friends: [], incoming: [], outgoing: [], recent: [], blocked: [] };
 let onlineIds = new Set(); // account ids of people who are online right now
 
 // Tell the server who I am, so friends can see I'm online
@@ -220,8 +220,12 @@ function renderSocial() {
   fillList(el("outgoingList"), social.outgoing,
     person => makePersonRow(person.user_id, person.name, "waiting for an answer",
       [smallButton("Cancel", () => removeFriendship(person))]), "");
+  fillList(el("blockedList"), social.blocked || [],
+    person => makePersonRow(person.user_id, person.name, "Blocked",
+      [smallButton("Unblock", () => unblock(person))]), "");
   el("incomingBox").hidden = social.incoming.length === 0;
   el("outgoingBox").hidden = social.outgoing.length === 0;
+  el("blockedBox").hidden = !(social.blocked || []).length;
 
   // A little number on "Friends" in the sidebar when requests are waiting
   el("requestBadge").hidden = social.incoming.length === 0;
@@ -230,7 +234,10 @@ function renderSocial() {
   updateAddPartnerButton();
   renderRoomList(); // the "Friends only" room filter depends on my friends
   if (!el("discoverView").hidden) renderDiscover(); // "+ Add friend" buttons on posts and people
-  if (currentRoom) renderMembers();
+  if (currentRoom) {
+    renderMembers();      // friend buttons, and people I blocked are muted...
+    renderRoomMessages(); // ...and their messages hidden
+  }
 }
 
 el("navFriends").onclick = () => {
@@ -242,6 +249,7 @@ el("navFriends").onclick = () => {
 let partnerUserId = null;
 function updateAddPartnerButton() {
   const spot = el("addPartnerBtn");
+  el("reportPartnerBtn").hidden = !partnerUserId; // nobody to report after I blocked them
   if (!partnerUserId) {
     spot.hidden = true;
     return;

@@ -4,6 +4,7 @@ from flask import request, jsonify
 
 from backend import progress
 from backend.setup import app, socketio, db_for, token_from_request, fetch_all, my_profile
+from backend.social import my_blocks
 
 POST_MAX_LENGTH = 500
 FEED_SIZE = 50  # the newest 50 posts
@@ -19,6 +20,8 @@ def list_posts():
     db = db_for(token_from_request())
     my_id = my_profile(db)["id"]
     posts = db.table("posts").select("*").order("created_at", desc=True).limit(FEED_SIZE).execute().data
+    blocked = my_blocks(db)
+    posts = [post for post in posts if post["user_id"] not in blocked]  # people I blocked are hidden
     ids = [post["id"] for post in posts]
     cheers = fetch_all(lambda: db.table("cheers").select("post_id, user_id").in_("post_id", ids)) if ids else []
     for post in posts:

@@ -6,7 +6,8 @@ from flask_socketio import join_room, leave_room
 
 from backend import chat  # rooms and chat need each other, so: chat.leave_current_chat(...)
 from backend.progress import award_message_xp
-from backend.setup import socketio, person_from_token, public_info
+from backend.setup import socketio, db_for, person_from_token, public_info
+from backend.social import my_blocks
 from backend.translation import detect_language, DEEPL_CODES
 
 
@@ -88,10 +89,12 @@ def join_random_room(data):
     if not person:
         return
     language = data.get("language") or person["learning"]
+    blocked = my_blocks(db_for(person["token"]))  # never drop me into a room with someone I blocked
     open_rooms = [room for room in rooms.values()
                   if room["language"] == language
                   and len(room["members"]) < room["max_size"]
-                  and person["sid"] not in room["members"]]
+                  and person["sid"] not in room["members"]
+                  and not any(member["user_id"] in blocked for member in room["members"].values())]
     with_people = [room for room in open_rooms if room["members"]]
     choices = with_people or open_rooms
     if not choices:

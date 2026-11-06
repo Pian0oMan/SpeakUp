@@ -16,6 +16,7 @@ These files build Speak Up's database. Run them **in order**, in Supabase:
 | `09_onboarding.sql` | The welcome questions (level, how long you've studied, interests) and "People to meet" |
 | `10_review.sql` | Spaced repetition: when each card is due, and how fast its interval grows |
 | `11_speaking.sql` | Speaking time: minutes you talked, per language, per day |
+| `12_safety.sql` | Blocking and reporting people (and "People to meet" skips blocked people) |
 
-Files 04 to 09 are safe to run again. If Supabase offers to "enable RLS" for you,
+Files 04 to 12 are safe to run again. If Supabase offers to "enable RLS" for you,
 run the file as written: every file already turns on Row Level Security itself.

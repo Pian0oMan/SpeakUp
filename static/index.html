@@ -185,6 +185,9 @@
           <input id="regPassword" type="password" minlength="6" required>
         </label>
         <label>Confirm password <input id="regConfirm" type="password" minlength="6" required></label>
+        <!-- Speak Up connects you with strangers, so it's for teens and adults only -->
+        <label class="check-label"><input id="regAge" type="checkbox" required>
+          I'm 13 or older, and I'll be kind to the people I meet.</label>
         <button type="submit" class="primary">Create account</button>
       </form>
       <p id="registerStatus" class="status"></p>
@@ -315,6 +318,11 @@
         <div id="outgoingBox" class="card friends-card" hidden>
           <h3>Requests you sent</h3>
           <ul id="outgoingList" class="people-list"></ul>
+        </div>
+        <!-- People I blocked: never matched with me, hidden everywhere. They aren't told. -->
+        <div id="blockedBox" class="card friends-card" hidden>
+          <h3>Blocked</h3>
+          <ul id="blockedList" class="people-list"></ul>
         </div>
         <!-- Phones have no room for the Recent panel on the right, so it's shown here instead -->
         <div class="card friends-card mobile-only">
@@ -562,6 +570,7 @@
       <button id="menuBtn" class="ghost"><span data-icon="menu"></span> Menu</button>
       <span id="partnerInfo"></span>
       <button id="addPartnerBtn" class="ghost small">+ Add friend</button>
+      <button id="reportPartnerBtn" class="ghost small" title="Report or block"><span data-icon="flag"></span></button>
       <button id="nextBtn" class="primary">Next <span data-icon="next"></span></button>
     </div>
 
@@ -814,6 +823,38 @@
     </div>
   </dialog>
 
+  <!-- REPORT OR BLOCK SOMEONE (from a chat, a voice room or Discover) -->
+  <dialog id="userReportDialog" class="card">
+    <form id="userReportForm">
+      <h3 id="userReportTitle">Report or block</h3>
+      <p class="hint">
+        Reports go to the Speak Up team, with the last messages of your conversation.
+        The other person is never told.
+      </p>
+      <label>What happened?
+        <select id="userReportReason">
+          <option value="">Nothing to report, I just want to block them</option>
+          <option value="harassment">Harassment or bullying</option>
+          <option value="inappropriate">Sexual or inappropriate content</option>
+          <option value="hate">Hate speech</option>
+          <option value="spam">Spam or scams</option>
+          <option value="underage">They seem to be under 13</option>
+          <option value="other">Something else</option>
+        </select>
+      </label>
+      <label>Details <small>(optional)</small>
+        <textarea id="userReportDetails" maxlength="1000" rows="3"></textarea>
+      </label>
+      <label class="check-label"><input id="userReportBlock" type="checkbox" checked>
+        <span id="userReportBlockText">Block them: you'll never be matched again</span></label>
+      <p id="userReportStatus" class="status"></p>
+      <div class="dialog-buttons">
+        <button type="button" class="ghost close-dialog">Cancel</button>
+        <button type="submit" id="userReportSend" class="primary">Send</button>
+      </div>
+    </form>
+  </dialog>
+
   <!-- Small pop-up message, e.g. "Saved banco → bench" -->
   <div id="toast" class="toast" hidden></div>
 
@@ -840,6 +881,7 @@
   <script src="/static/js/popup.js"></script>    <!-- the word popup, reports -->
   <script src="/static/js/study.js"></script>    <!-- study mode, spaced repetition -->
   <script src="/static/js/recap.js"></script>    <!-- the recap after a conversation -->
+  <script src="/static/js/safety.js"></script>   <!-- reporting and blocking people -->
   <script src="/static/js/drawing.js"></script>  <!-- drawing messages and decks -->
   <script src="/static/js/main.js"></script>     <!-- starts everything -->
 </body>

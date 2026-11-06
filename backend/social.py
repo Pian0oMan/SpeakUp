@@ -74,6 +74,7 @@ def social():
     """Everything for the Friends page and the Recent panel, in one request."""
     db = db_for(token_from_request())
     my_id = my_profile(db)["id"]
+    blocked = my_blocks(db)
     friends, incoming, outgoing, relation = [], [], [], {}
     for row in db.table("friendships").select("*").execute().data:
         sent_by_me = row["requester"] == my_id
@@ -82,6 +83,8 @@ def social():
             "user_id": row["addressee"] if sent_by_me else row["requester"],
             "name": row["addressee_name"] if sent_by_me else row["requester_name"],
         }
+        if person["user_id"] in blocked:
+            continue  # e.g. a new friend request from someone I blocked
         if row["status"] == "accepted":
             friends.append(person)
             relation[person["user_id"]] = "friend"
@@ -97,6 +100,8 @@ def social():
     for row in rows:
         mine_is_a = row["user_a"] == my_id
         user_id = row["user_b"] if mine_is_a else row["user_a"]
+        if user_id in blocked:
+            continue
         recent.append({
             "user_id": user_id,
             "name": row["name_b"] if mine_is_a else row["name_a"],
@@ -104,7 +109,8 @@ def social():
             "relation": relation.get(user_id),  # friend / requested / incoming / None
         })
     add_friend_stats(db, friends)
-    return jsonify({"friends": friends, "incoming": incoming, "outgoing": outgoing, "recent": recent})
+    return jsonify({"friends": friends, "incoming": incoming, "outgoing": outgoing, "recent": recent,
+                    "blocked": [{"user_id": user_id, "name": name} for user_id, name in blocked.items()]})
 
 
 def add_friend_stats(db, friends):
@@ -153,6 +159,8 @@ def add_friend():
     other = data.get("user_id")
     if not other or other == me["id"]:
         return jsonify({"error": "You can't add yourself."}), 400
+    if other in my_blocks(db):
+        return jsonify({"error": "You blocked this person. Unblock them on the Friends page first."}), 400
     for row in db.table("friendships").select("*").execute().data:
         if {row["requester"], row["addressee"]} == {me["id"], other}:
             # They already asked me? Then my request just means "yes!"
@@ -189,4 +197,47 @@ def remove_friend(friendship_id):
     for row in rows:
         notify_user(row["requester"])
         notify_user(row["addressee"])
+    return jsonify({"ok": True})
+
+
+# ---------- BLOCKING ----------
+# Blocked people are never matched with me, stop being my friend, and are hidden from
+# my Recent list, Discover and "People to meet". They're never told.
+def my_blocks(db):
+    """Everyone I blocked: {user id: name}. Empty if 12_safety.sql hasn't been run yet."""
+    try:
+        return {row["blocked"]: row["blocked_name"]
+                for row in db.table("blocks").select("blocked, blocked_name").execute().data}
+    except Exception:
+        return {}
+
+
+def block_user(db, my_id, other_id, name):
+    """Block someone (as me: the security rules apply), and end our friendship."""
+    db.table("blocks").upsert({"blocker": my_id, "blocked": other_id,
+                               "blocked_name": str(name or "")[:20] or "Someone"},
+                              on_conflict="blocker,blocked").execute()
+    for row in db.table("friendships").select("id, requester, addressee").execute().data:
+        if other_id in (row["requester"], row["addressee"]):
+            db.table("friendships").delete().eq("id", row["id"]).execute()
+    notify_user(my_id)
+    notify_user(other_id)  # their friends list changes too
+
+
+@app.route("/api/blocks", methods=["POST"])
+def block_person():
+    data = request.get_json()  # {"user_id": "...", "name": "Yuki"}
+    db = db_for(token_from_request())
+    my_id = my_profile(db)["id"]
+    if not data.get("user_id") or data["user_id"] == my_id:
+        return jsonify({"error": "You can't block yourself."}), 400
+    block_user(db, my_id, data["user_id"], data.get("name"))
+    return jsonify({"ok": True})
+
+
+@app.route("/api/blocks/<user_id>", methods=["DELETE"])
+def unblock_person(user_id):
+    db = db_for(token_from_request())
+    db.table("blocks").delete().eq("blocked", user_id).execute()  # only MY blocks (security rules)
+    notify_user(my_profile(db)["id"])
     return jsonify({"ok": True})

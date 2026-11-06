@@ -509,6 +509,10 @@
 .anki-form h3 { margin: 0; }
 .more-cards { color: var(--muted); font-size: 13px; padding-top: 8px; }
 
+/* ---------- A checkbox with a sentence next to it (sign-up, report window) ---------- */
+.check-label { flex-direction: row; align-items: flex-start; gap: 10px; font-weight: 400; line-height: 1.4; }
+.check-label input { width: 16px; height: 16px; padding: 0; margin-top: 2px; flex: none; accent-color: var(--brand); }
+
 /* ---------- Conversation recap (after a chat or voice room) ---------- */
 dialog.recap { max-width: 480px; }
 .recap-top { display: flex; align-items: center; gap: 14px; }
