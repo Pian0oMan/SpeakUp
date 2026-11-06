@@ -18,7 +18,7 @@
   border-bottom: 1px solid var(--border);
 }
 .deck-list li.empty, .deck-list li.more-cards { display: block; color: var(--muted); font-size: 14px; }
-.swatch { padding: 2px 10px; border-radius: 6px; font-weight: 600; color: #16131c; }
+.swatch { padding: 2px 10px; border-radius: var(--radius); font-weight: 600; color: #16131c; }
 .card-translation { color: var(--muted); cursor: pointer; }
 .card-translation:hover { color: var(--text); text-decoration: underline dotted; }
 .card-translation.missing { font-style: italic; }
@@ -72,10 +72,10 @@
   z-index: 30;
   width: 290px;
   background: var(--surface-2);
-  border-radius: 14px;
+  border-radius: var(--radius);
   padding: 12px 14px;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
-  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  border: var(--line);
 }
 .popup-head { display: flex; align-items: center; gap: 8px; }
 .popup-head strong { font-size: 18px; }
@@ -96,13 +96,13 @@
 
 /* ---------- Report dialog ---------- */
 dialog {
-  border: 1px solid var(--border);
+  border: var(--line);
   max-width: 420px;
   width: calc(100% - 32px);
   background: var(--surface);
   color: var(--text);
 }
-dialog::backdrop { background: rgba(0, 0, 0, 0.6); }  /* darkens the page behind it */
+dialog::backdrop { background: rgba(28, 25, 23, 0.45); }  /* darkens the page behind it */
 dialog h3 { margin: 0; }
 .dialog-buttons { display: flex; justify-content: flex-end; gap: 8px; }
 
@@ -122,7 +122,7 @@ dialog h3 { margin: 0; }
   position: relative;
   min-height: 440px;
   background: var(--surface);
-  border-radius: 28px;
+  border-radius: var(--radius);
   padding: 48px 40px;
   display: flex;
   flex-direction: column;
@@ -141,7 +141,7 @@ dialog h3 { margin: 0; }
 .study-example-row { display: flex; align-items: center; gap: 10px; justify-content: center; margin-top: 10px; }
 .study-example { color: var(--muted); font-style: italic; font-size: 18px; }
 .study-buttons { display: flex; justify-content: center; gap: 14px; margin: 24px 0 10px; }
-.study-buttons button { font-size: 18px; padding: 14px 36px; min-width: 190px; border-radius: 12px; }
+.study-buttons button { font-size: 18px; padding: 14px 36px; min-width: 190px; border-radius: var(--radius); }
 #studyReportBtn { display: block; margin: 0 auto; }
 #studyDone { margin-top: 20px; display: flex; flex-direction: column; gap: 10px; align-items: center; text-align: center; padding: 40px; }
 #studyDone h3 { font-size: 26px; }
@@ -154,13 +154,13 @@ dialog h3 { margin: 0; }
   left: 50%;
   transform: translateX(-50%);
   background: var(--surface-2);
-  border: 1px solid var(--border);
+  border: var(--line);
   color: var(--text);
   padding: 10px 18px;
-  border-radius: 999px;
+  border-radius: var(--radius);
   font-size: 14px;
   z-index: 40;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--shadow);
 }
 
 /* ---------- Customize deck pop-up ---------- */
@@ -174,7 +174,7 @@ dialog h3 { margin: 0; }
   border-radius: 50%;
   border: 3px solid transparent;
 }
-.color-choice.selected { border-color: var(--text); }  /* a white ring around the chosen color */
+.color-choice.selected { border-color: var(--text); }  /* an ink ring around the chosen color */
 .color-custom {
   flex: 0;
   width: 30px;
@@ -193,9 +193,9 @@ dialog h3 { margin: 0; }
   flex: 0;
   white-space: nowrap;
   cursor: pointer;
-  border: 1px solid var(--border);
+  border: var(--line);
   padding: 6px 14px;
-  border-radius: 8px;
+  border-radius: var(--radius);
   font-weight: 600;
 }
 .file-btn:hover { background: var(--surface-2); }

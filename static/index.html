@@ -10,16 +10,18 @@
   <meta name="theme-color" content="#fff6e6">
   <link rel="icon" type="image/png" href="/static/icons/icon-192.png">
   <link rel="apple-touch-icon" href="/static/icons/icon-180.png">
-  <!-- Inter: a clean, modern font from Google Fonts (close to what Discord and Linear use) -->
+  <!-- FONTS (Google Fonts): Bricolage Grotesque for everything (chunky when bold, easy to read
+       when not) and Space Mono for small labels, like "TALK NOW" -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <!-- STYLES: one file per part of the app. ORDER MATTERS: later files can override earlier ones. -->
   <link rel="stylesheet" href="/static/css/base.css">     <!-- colors, buttons, forms, icons -->
   <link rel="stylesheet" href="/static/css/landing.css">  <!-- landing page, log in, sign up -->
   <link rel="stylesheet" href="/static/css/app.css">      <!-- sidebar, home, friends, room list -->
   <link rel="stylesheet" href="/static/css/chat.css">     <!-- voice rooms, video calls, chat -->
   <link rel="stylesheet" href="/static/css/decks.css">    <!-- decks, word popup, study mode -->
-  <link rel="stylesheet" href="/static/css/flat.css">     <!-- the flat Discord-like finishing touches -->
+  <link rel="stylesheet" href="/static/css/bold.css">     <!-- the bold look: outlines + hard shadows -->
   <link rel="stylesheet" href="/static/css/mascot.css">   <!-- the mascot -->
   <link rel="stylesheet" href="/static/css/phones.css">   <!-- smaller screens: LAST, so it wins -->
 </head>
@@ -231,14 +233,20 @@
       <!-- HOME -->
       <div id="homeView" class="view">
         <h2 id="greeting"></h2>
-        <!-- THE TWO MAIN THINGS: big, bold, and first. Everything below is quieter. -->
-        <div class="main-actions">
-          <div class="action-card match">
-            <div class="action-mascot" data-mascot="wave" data-size="96"></div>
-            <span class="action-kicker"><span data-icon="zap"></span> 1-on-1</span>
-            <h3>Quick Match</h3>
-            <p>Video or voice chat with someone who speaks the language you're learning.</p>
-            <!-- Pick the languages for this match. Changes are saved to your profile. -->
+        <!-- TALK NOW: the ONE big thing on the page. A switch picks HOW to talk:
+             1-on-1 (Quick Match) or a group voice room. menu.js fills in the text. -->
+        <section id="talkPanel" class="talk-panel">
+          <div class="talk-main">
+            <div class="talk-top">
+              <span class="kicker">Talk now</span>
+              <div class="mode-switch">
+                <button id="modeMatch" class="mode on" aria-pressed="true"><span data-icon="zap"></span> 1-on-1</button>
+                <button id="modeRoom" class="mode" aria-pressed="false"><span data-icon="rooms"></span> Group room</button>
+              </div>
+            </div>
+            <h3 id="talkTitle"></h3>
+            <p id="talkText"></p>
+            <!-- Pick the languages. Changes are saved to your profile. -->
             <div class="chips">
               <label class="chip-label">I speak
                 <select id="matchNative" class="lang-select chip"></select>
@@ -248,19 +256,18 @@
                 <select id="matchLearning" class="lang-select chip"></select>
               </label>
             </div>
-            <button id="quickMatchBtn" class="action-btn">Start</button>
+            <div class="talk-bottom">
+              <button id="talkStartBtn" class="action-btn"></button>
+              <!-- Who's around: "2 people are waiting for a partner like you" / "3 people talking in Spanish now" -->
+              <span id="matchLive" class="live-count"></span>
+              <span id="roomsLive" class="live-count" hidden></span>
+            </div>
           </div>
+          <div id="talkMascot" class="talk-mascot"></div>
+        </section>
 
-          <div class="action-card room">
-            <div class="action-mascot" data-mascot="excited" data-size="96"></div>
-            <span class="action-kicker"><span data-icon="rooms"></span> Group</span>
-            <h3>Random Voice Room</h3>
-            <p id="randomRoomText">Jump into a group conversation right now.</p>
-            <span id="roomsLive" class="live-count"></span>
-            <button id="randomRoomBtn" class="action-btn">Join a room</button>
-          </div>
-        </div>
-        <!-- TODAY: daily goal, streak, level -->
+        <!-- TODAY: daily goal, streak, level, speaking time, in one strip.
+             Every cell is the same: a 48px picture, a SHORT value, and a short label. -->
         <div class="today">
           <div class="today-item">
             <div id="goalRing" class="ring big"><span></span></div>

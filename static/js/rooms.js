@@ -48,18 +48,14 @@ function roomMatchesFilters(room) {
   return true;
 }
 
-// RANDOM VOICE ROOM (home page): the server picks an open room in my language,
-// preferring rooms where people are already talking
-el("randomRoomBtn").onclick = () => {
-  socket.emit("join_random_room", { token, language: profile.learning });
-};
+// (RANDOM VOICE ROOM: the home page's "Group room" switch + Start button, in menu.js.
+// The server picks an open room in my language, preferring rooms where people are talking.)
 
-// "3 people talking in Japanese right now" on the home page card
+// "3 people talking in Japanese now" on the home page's Talk now panel
 function updateRoomsLive() {
   if (!profile) return;
   const mine = roomList.filter(room => room.language === profile.learning);
   const people = mine.reduce((sum, room) => sum + room.count, 0);
-  el("randomRoomText").textContent = `Jump into a group conversation in ${profile.learning} right now.`;
   el("roomsLive").textContent = people > 0
     ? `${people} ${people === 1 ? "person" : "people"} talking in ${profile.learning} now`
     : mine.length > 0

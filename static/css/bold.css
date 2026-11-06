@@ -1,0 +1,114 @@
+/* THE BOLD LOOK: loaded after the other files, so it has the last word on borders,
+   shadows and labels. Every box gets the same ink outline and hard shadow, so all
+   the screens look like one set of stickers. (The colors and shapes are in base.css.) */
+
+/* ---------- Boxes: outline + hard shadow ---------- */
+.room-card, .step, .feature, .friend-card, .meet-card, .invite-card, .level-up-box,
+.study-card, .word-popup, .demo-chat, .demo-popup, .member-tile, .recap-stat {
+  border: var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.study-card, .demo-chat, .level-up-box { box-shadow: var(--shadow-lg); }
+.room-card, .meet-card, .friend-card, .member-tile, .word-popup { background: var(--surface); }
+.recap-stat { box-shadow: var(--shadow-sm); }
+dialog { border: var(--line); border-radius: var(--radius); box-shadow: var(--shadow-lg); padding: 24px; }
+
+/* Cards you can click lift up under the mouse */
+.room-card, .feature { transition: transform 0.1s, box-shadow 0.1s; }
+.room-card:hover, .feature:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--ink); }
+.feature:hover { border-color: var(--ink); }
+
+/* ---------- Small labels: the mono font ---------- */
+.recent-panel h3, .study-mode, .icebreaker-label, .voice-label, .char-count, #studyProgress,
+.ob-count, .room-count, .post-time, .eyebrow, .step-number, .xp-text {
+  font-family: var(--mono);
+}
+.recent-panel h3 { color: var(--text); font-size: 13px; }
+
+/* ---------- Lists of people ---------- */
+.people-list li { border-bottom-color: transparent; padding: 8px; border-radius: var(--radius); }
+.people-list li:hover { background: var(--surface-2); }
+.person-avatar { border: var(--line); background: var(--surface-2); }
+.person-avatar.big { background: var(--brand); color: var(--on-color); }
+.online-dot { border-color: var(--ink); }
+.remove-btn { color: var(--muted); display: inline-grid; place-items: center; padding: 4px; border-radius: var(--radius-sm); }
+.remove-btn:hover { color: var(--danger); background: var(--surface-2); }
+.remove-btn .icon-svg { width: 16px; height: 16px; }
+
+/* ---------- Tags and chips ---------- */
+.chip-pick { border: var(--line); background: var(--surface); }
+.chip-pick:hover { background: var(--surface-2); border-color: var(--ink); }
+.chip-pick.on { background: var(--brand); border-color: var(--on-color); color: var(--on-color); box-shadow: var(--shadow-sm); }
+.interest-chip { border: 1.5px solid var(--ink); background: var(--surface); color: var(--text); }
+.interest-chip.shared { background: var(--brand-soft); color: var(--text); }
+.friend-card .interest-chip { background: var(--surface); }
+.fluency-tag { border: 1.5px solid var(--ink); color: var(--text); }
+.cheer-btn { border: var(--line); background: var(--surface); }
+.cheer-btn.cheered { background: var(--brand); color: var(--on-color); }
+.post-stats { border: 2px dashed var(--ink); background: var(--brand-soft); }
+.post-common { color: var(--text); }
+.badge { border: 2px solid var(--ink); }
+.swatch { border: 1.5px solid var(--ink); }
+.toggle { border: var(--line); box-shadow: var(--shadow-sm); padding: 7px 12px; }
+
+/* ---------- Chat: outlined bubbles ---------- */
+.message { border: var(--line); border-radius: var(--radius); box-shadow: var(--shadow-sm); background: var(--surface); }
+.message.me { background: var(--brand-soft); }
+.message.system { border: none; box-shadow: none; background: none; }
+.message.icebreaker { background: var(--accent-light); }
+.icebreaker-label, .answer-badge { color: var(--text); }
+.sender-name, .voice-label, .caption-name { color: var(--brand-dark); }
+.translation { border-top-style: dashed; }
+.topbar { background: var(--bg); }
+#chatForm button, .chat-form button { border: var(--line); box-shadow: var(--shadow-sm); font-weight: 800; }
+#chatForm button:active, .chat-form button:active { transform: translate(2px, 2px); box-shadow: none; }
+
+/* Calls: round buttons with an outline; voice rooms sit on the paper, not on black */
+.round { border: var(--line); background: var(--surface); box-shadow: var(--shadow-sm); }
+.round.off { background: var(--danger); border-color: var(--ink); }
+.leave-btn { border: var(--line); box-shadow: var(--shadow-sm); }
+.avatar { border: var(--line); color: var(--on-color); }
+.room-stage { background: transparent; }
+.member-tile { border-width: 2px; }
+.member-tile.speaking { border-color: var(--ink) !important; }
+
+/* ---------- Decks, study, the word popup ---------- */
+.ring { border: var(--line); }
+.ring::before { inset: 3px; }
+.ring.big::before { inset: 5px; }
+.speak-btn { border: var(--line); background: var(--surface); color: var(--text); }
+.speak-btn:hover { color: var(--text); background: var(--brand-soft); }
+.study-buttons .grade { border: var(--line); box-shadow: var(--shadow-sm); }
+.study-buttons .grade:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--ink); }
+.study-buttons .grade:active { transform: translate(2px, 2px); box-shadow: none; }
+.study-buttons .grade.know:hover { background: var(--brand); }
+.study-translation { color: var(--brand-dark); }
+kbd { font-family: var(--mono); background: rgba(28, 25, 23, 0.12); }
+.toast { background: var(--ink); color: var(--on-ink); border: var(--line); box-shadow: 4px 4px 0 var(--brand); }
+.color-choice { border: 2px solid var(--ink); }
+.color-choice.selected { box-shadow: 0 0 0 3px var(--surface), 0 0 0 5px var(--ink); }
+.color-custom { border: 2px solid var(--ink); }
+.file-btn { border: var(--line); box-shadow: var(--shadow-sm); background: var(--surface); }
+.deck-list li { border-bottom-color: var(--surface-2); }
+.popup-phrase-translation::before { color: var(--brand-dark); }
+
+/* ---------- Landing page, log in, welcome questions ---------- */
+.landing-hero h1 { font-size: 66px; letter-spacing: -0.035em; }
+.eyebrow { color: var(--on-color); background: var(--yellow); border: var(--line); box-shadow: var(--shadow-sm); }
+.step-number { background: var(--yellow); color: var(--on-color); border: var(--line); }
+.feature-icon { background: var(--brand-soft); color: var(--text); border: var(--line); }
+.marquee { background: var(--rail); border-color: var(--ink); }  /* always a dark band */
+.marquee-track { color: var(--on-rail); font-weight: 800; }
+.marquee-track span:nth-child(3n) { color: var(--yellow); }
+.screen-frame { border: 2px dashed var(--ink); }
+.final-cta { background: var(--brand); color: var(--on-color); border: var(--line); box-shadow: var(--shadow-lg); }
+.demo-popup { background: var(--yellow); }
+.demo-highlight { background: var(--yellow); border: 1.5px solid var(--ink); }
+.auth .card { box-shadow: var(--shadow-lg); }
+.ob-bubble { border: var(--line); box-shadow: var(--shadow-sm); }
+.ob-option { border: var(--line); box-shadow: var(--shadow-sm); }
+.ob-option:hover { border-color: var(--ink); background: var(--surface-2); }
+.ob-option.on { border-color: var(--ink); background: var(--yellow); }
+.onboard-top, .onboard-bottom { border-color: var(--ink); }
+

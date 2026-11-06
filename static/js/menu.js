@@ -36,8 +36,46 @@ function openMenu() {
   blockSameLanguage(["matchNative", "matchLearning"]);
   socket.emit("list_rooms"); // for "3 people talking in Japanese" on the voice room card
   updateRoomsLive();
+  updateTalkPanel();
   showView("homeView");
 }
+
+// ---------- TALK NOW: one panel, two ways to talk ----------
+// "1-on-1" = Quick Match (a partner who speaks what I'm learning), "Group room" = a random
+// voice room in that language. The switch changes the text, the color and the Start button.
+let talkMode = "match";
+
+function setTalkMode(mode) {
+  talkMode = mode;
+  [["modeMatch", "match"], ["modeRoom", "room"]].forEach(([id, value]) => {
+    el(id).classList.toggle("on", mode === value);
+    el(id).setAttribute("aria-pressed", mode === value);
+  });
+  updateTalkPanel();
+}
+el("modeMatch").onclick = () => setTalkMode("match");
+el("modeRoom").onclick = () => setTalkMode("room");
+
+function updateTalkPanel() {
+  if (!profile) return;
+  const room = talkMode === "room";
+  el("talkPanel").classList.toggle("room", room);
+  el("talkTitle").textContent = room
+    ? `Jump into a ${profile.learning} voice room`
+    : `Talk to someone who speaks ${profile.learning}`;
+  el("talkText").textContent = room
+    ? "A group conversation with up to 10 people. Talk, or just listen and use the side chat."
+    : `Video, voice or text. They're learning ${profile.native}, so you help each other.`;
+  el("matchLive").hidden = room;
+  el("roomsLive").hidden = !room;
+  el("talkStartBtn").innerHTML = (room ? "Join a room" : "Start talking") + icon("next");
+  el("talkMascot").innerHTML = mascot(room ? "excited" : "wave", 150);
+}
+
+el("talkStartBtn").onclick = () => {
+  if (talkMode === "room") socket.emit("join_random_room", { token, language: profile.learning });
+  else findPartner();
+};
 
 function openProfile(message) {
   if (profile) {
@@ -61,6 +99,7 @@ function openProfile(message) {
   el(id).addEventListener("change", async () => {
     profile = { ...profile, native: el("matchNative").value, learning: el("matchLearning").value };
     updateRoomsLive(); // the voice room card follows the language I'm practicing
+    updateTalkPanel(); // "Talk to someone who speaks ..."
     await api("/api/profile", { method: "PUT", body: JSON.stringify(profile) });
     showToast(`Now practicing ${profile.learning}`);
   });

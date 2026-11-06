@@ -29,18 +29,24 @@
     justify-content: space-around;
     padding: 6px;
     border-right: none;
-    border-top: 1px solid var(--border);
+    border-top: var(--line);
   }
   .brand { display: none; }
   .invite-card { left: 12px; right: 12px; bottom: 84px; width: auto; }  /* above the tab bar */
   .progress-box { display: none; }  /* the home page "Today" card shows it on phones */
   .study-card { min-height: 320px; padding: 36px 20px; }
   .study-buttons button { min-width: 0; flex: 1; padding: 12px 10px; font-size: 16px; }
-  .main-actions { grid-template-columns: 1fr; }
-  .action-mascot { display: none; }  /* not enough room next to the text on a phone */
-  .today { grid-template-columns: 1fr; }
-  .nav-item { flex-direction: column; gap: 2px; padding: 8px; font-size: 12px; }
-  .nav-item.active { box-shadow: inset 0 3px 0 var(--brand); }
+  .talk-panel { grid-template-columns: 1fr; padding: 18px; box-shadow: var(--shadow); }
+  .talk-mascot { display: none; }  /* not enough room next to the text on a phone */
+  /* Today: 2 x 2 cells (the lines between cells move with them) */
+  .today { grid-template-columns: 1fr 1fr; }
+  .today-item:nth-child(3) { border-left: none; }
+  .today-item:nth-child(n + 3) { border-top: var(--line); }
+  /* A deck row: name on top, ring + count + button underneath */
+  .home-deck { flex-wrap: wrap; }
+  .home-deck-bottom { width: 100%; justify-content: flex-end; }
+  .nav-item { flex-direction: column; gap: 2px; padding: 6px; font-size: 11px; }
+  .nav-item.active { box-shadow: none; }
   .nav-item.logout { margin-top: 0; }
   .content { padding: 24px 16px; }
   .hero { flex-direction: column; align-items: stretch; text-align: center; }

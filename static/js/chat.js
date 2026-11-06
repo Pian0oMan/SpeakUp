@@ -1,7 +1,7 @@
 // QUICK MATCH: finding a partner, the 1-on-1 chat, and icebreakers.
 
 // ---------- MATCHING ----------
-el("quickMatchBtn").onclick = findPartner;
+// (The home page's Start button is in menu.js: it does Quick Match OR a voice room)
 el("nextBtn").onclick = findPartner;    // leave this partner and find a new one
 el("menuBtn").onclick = leaveChat;
 el("cancelSearchBtn").onclick = leaveChat;

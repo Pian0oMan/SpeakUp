@@ -20,7 +20,7 @@
 }
 .member-tile {
   background: var(--surface);
-  border-radius: 18px;
+  border-radius: var(--radius);
   padding: 12px;
   display: flex;
   flex-direction: column;
@@ -28,7 +28,7 @@
   justify-content: center;  /* the person sits in the middle of their tile */
   gap: calc(var(--avatar) * 0.06);
   text-align: center;
-  border: 2px solid var(--border);
+  border: var(--line);
   min-height: 0;
   overflow: hidden;
   transition: border-color 0.2s;
@@ -52,7 +52,7 @@
 .member-caption {
   font-size: clamp(13px, calc(var(--avatar) * 0.1), 18px);
   background: rgba(0, 0, 0, 0.5);
-  border-radius: 8px;
+  border-radius: var(--radius);
   padding: 4px 8px;
   margin-top: 4px;
   max-width: 100%;
@@ -98,7 +98,7 @@
   gap: 12px;
   padding: 10px 16px;
   background: var(--surface);
-  border-bottom: 1px solid var(--border);
+  border-bottom: var(--line);
 }
 #partnerInfo { font-weight: 600; text-align: center; }
 
@@ -115,7 +115,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: var(--text);
+  color: var(--on-rail);  /* light text: the video area stays dark */
   background: var(--rail);
 }
 .avatar {
@@ -130,15 +130,15 @@
   font-weight: 800;
   color: var(--on-brand);
 }
-#callStatus { color: var(--muted); font-size: 14px; }
+#callStatus { color: rgba(255, 246, 230, 0.7); font-size: 14px; }
 #localVideo {
   position: absolute;
   right: 16px;
   top: 16px;  /* top corner, so it never covers the captions */
   width: 22%;
   min-width: 120px;
-  border: 2px solid var(--border);
-  border-radius: 12px;
+  border: var(--line);
+  border-radius: var(--radius);
   transform: scaleX(-1);  /* mirror, like looking in a mirror */
 }
 .call-controls {
@@ -157,7 +157,7 @@
   border-radius: 50%;
   font-size: 22px;
   background: var(--surface-2);
-  border: 1px solid var(--border);
+  border: var(--line);
 }
 .round.off { background: var(--danger); border-color: transparent; }  /* red = switched off */
 .speak-label {
@@ -170,7 +170,7 @@
   font-weight: 400;
   background: rgba(0, 0, 0, 0.55);
   padding: 6px 10px;
-  border-radius: 999px;
+  border-radius: var(--radius);
   white-space: nowrap;
 }
 .speak-label select { padding: 2px 6px; font-size: 13px; }
@@ -194,7 +194,7 @@
   color: white;
   font-size: 20px;
   padding: 6px 14px;
-  border-radius: 10px;
+  border-radius: var(--radius);
   text-align: center;
 }
 .caption.mine { font-size: 14px; opacity: 0.75; }  /* what I'm saying: smaller */
@@ -202,12 +202,12 @@
 /* WHO'S TALKING (talking.js measures their volume): a turquoise glow around their
    tile, and their avatar gently pulses. Same glow on my partner in a 1-on-1 call. */
 .member-tile.speaking {
-  border-color: #2dd4bf !important;
-  box-shadow: 0 0 0 2px #2dd4bf, 0 0 28px rgba(45, 212, 191, 0.45);
+  border-color: var(--brand) !important;
+  box-shadow: 4px 4px 0 var(--brand);  /* a teal shadow while they talk */
 }
 .member-tile.speaking .avatar,
 #partnerAvatar.speaking {
-  box-shadow: 0 0 0 4px #2dd4bf, 0 0 30px rgba(45, 212, 191, 0.6);
+  box-shadow: 0 0 0 4px var(--brand), 0 0 0 6px var(--ink);  /* a teal ring with an ink edge */
   animation: talk-pulse 0.9s ease-in-out infinite;
 }
 .member-tile .avatar, #partnerAvatar { transition: box-shadow 0.15s; }
@@ -226,7 +226,7 @@
   font-weight: 700;
   padding: 0 22px;
   height: 52px;  /* same height as the round mic button */
-  border-radius: 999px;
+  border-radius: var(--radius);
 }
 .leave-btn:hover { background: #d92d32; }
 .leave-btn .icon-svg { width: 22px; height: 22px; }
@@ -240,7 +240,7 @@
   display: flex;
   flex-direction: column;
   background: var(--surface);
-  border-left: 1px solid var(--border);
+  border-left: var(--line);
   min-height: 0;  /* lets the messages area scroll instead of stretching the page */
   padding: 12px;
 }
@@ -253,7 +253,7 @@
 
 .message {
   padding: 8px 12px;
-  border-radius: 16px;
+  border-radius: var(--radius);
   margin: 8px 0;
   max-width: 85%;
   width: fit-content;
@@ -282,7 +282,7 @@
   max-width: 100%;
   width: auto;
   background: var(--accent-light);
-  border: 1px solid rgba(255, 193, 69, 0.5);
+  border: var(--line);
 }
 .icebreaker-label {
   font-size: 12px;
@@ -297,17 +297,17 @@
 #typing { color: var(--muted); font-size: 13px; font-style: italic; height: 18px; margin: 0; }
 
 /* Each word is a <span class="word"> so it can be clicked */
-.word { cursor: pointer; border-radius: 4px; padding: 0 2px; }
+.word { cursor: pointer; border-radius: var(--radius-sm); padding: 0 2px; }
 .word:hover { outline: 1px dashed var(--muted); }
 .word.saved { color: #16131c; }  /* dark text on a highlight color stays readable */
 
 #chatForm, .chat-form { flex-direction: row; gap: 8px; }
-#chatInput, .chat-form input { flex: 1; border-radius: 999px; padding: 10px 16px; }
+#chatInput, .chat-form input { flex: 1; border-radius: var(--radius-sm); padding: 10px 16px; }
 #chatForm button, .chat-form button {
   background: var(--brand);
   color: var(--on-brand);
   padding: 8px 18px;
-  border-radius: 999px;
+  border-radius: var(--radius);
   font-weight: 600;
 }
 
