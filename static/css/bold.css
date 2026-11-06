@@ -112,3 +112,26 @@ kbd { font-family: var(--mono); background: rgba(28, 25, 23, 0.12); }
 .ob-option.on { border-color: var(--ink); background: var(--yellow); }
 .onboard-top, .onboard-bottom { border-color: var(--ink); }
 
+/* ---------- Bright color blocks: always DARK text, in light and dark mode ---------- */
+.talk-panel, .nav-item.active, .brand, .wordmark, .logo, .demo-popup, .ob-option.on, .today-icon, .gradient-text {
+  color: var(--on-color);
+  --limbs: var(--on-color);  /* the mascot standing on a bright block keeps dark arms and legs */
+}
+.talk-panel .mode-switch { color: var(--text); }  /* the switch has its own background */
+.demo-popup .muted, .ob-option.on small { color: rgba(28, 25, 23, 0.7); }
+
+/* ---------- The dark mode button (sidebar, landing page) ---------- */
+.theme-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
+}
+.theme-btn:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--ink); }
+.theme-btn:active { transform: translate(2px, 2px); box-shadow: none; }
+.sidebar-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }

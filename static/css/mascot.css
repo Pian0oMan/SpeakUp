@@ -50,3 +50,6 @@
 .level-up-box h2 { margin: 6px 0 4px; font-size: 30px; font-weight: 800; }
 .level-up-box p { margin: 0; color: var(--muted); }
 @keyframes fade-in { from { opacity: 0; } }
+
+/* His arms and legs follow the theme (dark lines on cream, cream lines on dark) */
+.mascot .mascot-legs, .mascot .mascot-arms { stroke: var(--limbs, #16131c); }

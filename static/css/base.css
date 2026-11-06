@@ -56,6 +56,28 @@
   --mono: "Space Mono", ui-monospace, monospace;
 }
 
+/* DARK MODE (switched by js/theme.js): the same look, inverted. The page goes dark,
+   and the outlines + shadows turn cream, so the "stickers" still stand out.
+   The bright color blocks stay the same, with dark text on them. */
+:root[data-theme="dark"] {
+  --ink: #efe4cf;
+  --on-ink: #191714;
+  --bg: #191714;
+  --dots: rgba(239, 228, 207, 0.07);
+  --surface: #24211d;
+  --surface-2: #322d27;
+  --text: #f3eadb;
+  --muted: #a89c88;
+  --nav-bg: rgba(25, 23, 20, 0.94);
+  --limbs: #efe4cf;
+  --brand-dark: #4fd8cb;   /* teal TEXT on dark needs to be lighter */
+  --brand-soft: #173f3a;
+  --accent: #ffd23f;
+  --accent-light: #3a3011;
+  --success: #3ddc84;
+  color-scheme: dark;      /* dark scrollbars and form controls too */
+}
+
 * { box-sizing: border-box; }  /* padding doesn't make things wider than their width */
 
 body {

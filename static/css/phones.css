@@ -31,7 +31,7 @@
     border-right: none;
     border-top: var(--line);
   }
-  .brand { display: none; }
+  .sidebar-top { display: none; }  /* no logo or theme button in the tab bar (the theme is on the Profile page) */
   .invite-card { left: 12px; right: 12px; bottom: 84px; width: auto; }  /* above the tab bar */
   .progress-box { display: none; }  /* the home page "Today" card shows it on phones */
   .study-card { min-height: 320px; padding: 36px 20px; }

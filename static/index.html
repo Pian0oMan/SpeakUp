@@ -8,6 +8,16 @@
   <!-- INSTALLABLE APP (PWA): the name + icon for the home screen, and the color of the title bar -->
   <link rel="manifest" href="/static/manifest.json">
   <meta name="theme-color" content="#fff6e6">
+  <!-- DARK MODE: pick the theme BEFORE the page is drawn, so it never flashes the wrong
+       colors. (The buttons and the Profile setting are in js/theme.js.) -->
+  <script>
+    (function () {
+      let choice = "system";
+      try { choice = localStorage.getItem("theme") || "system"; } catch (error) {}
+      const dark = choice === "dark" || (choice === "system" && matchMedia("(prefers-color-scheme: dark)").matches);
+      document.documentElement.dataset.theme = dark ? "dark" : "light";
+    })();
+  </script>
   <link rel="icon" type="image/png" href="/static/icons/icon-192.png">
   <link rel="apple-touch-icon" href="/static/icons/icon-180.png">
   <!-- FONTS (Google Fonts): Bricolage Grotesque for everything (chunky when bold, easy to read
@@ -33,6 +43,7 @@
     <nav class="landing-nav">
       <span class="wordmark">Speak Up</span>
       <div class="nav-buttons">
+        <button class="theme-btn" title="Dark mode"></button>
         <button class="ghost to-login">Log in</button>
         <button class="primary to-register">Sign up</button>
       </div>
@@ -205,7 +216,10 @@
   <!-- ===== THE APP: sidebar on the left, one "view" at a time on the right ===== -->
   <section id="appScreen" class="screen shell" hidden>
     <nav class="sidebar">
-      <div class="brand">Speak Up</div>
+      <div class="sidebar-top">
+        <div class="brand">Speak Up</div>
+        <button class="theme-btn" title="Dark mode"></button>
+      </div>
       <!-- MY PROGRESS: level, XP bar and streak, always visible -->
       <div class="progress-box" title="Earn XP by chatting, answering icebreakers, saving words and studying">
         <div class="progress-row">
@@ -480,6 +494,14 @@
           </div>
           <label>My interests <small>(up to 10)</small></label>
           <div id="profInterests" class="interest-picker"></div>
+          <!-- Changes right away, and is remembered on this device (not part of the profile) -->
+          <label>Theme
+            <select id="profTheme">
+              <option value="system">Same as my device</option>
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+            </select>
+          </label>
           <button type="submit" class="primary">Save</button>
           <p id="profileStatus" class="status"></p>
         </form>
@@ -883,6 +905,7 @@
        main.js last (it starts the app once everything else is loaded). -->
   <script src="/static/js/mascot.js"></script>   <!-- draws the mascot -->
   <script src="/static/js/core.js"></script>     <!-- shared state, icons, api() -->
+  <script src="/static/js/theme.js"></script>    <!-- light / dark mode -->
   <script src="/static/js/auth.js"></script>     <!-- landing page, log in, sign up -->
   <script src="/static/js/menu.js"></script>     <!-- home page, profile, sidebar -->
   <script src="/static/js/chat.js"></script>     <!-- Quick Match, 1-on-1 chat, icebreakers -->
