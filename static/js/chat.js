@@ -12,6 +12,7 @@ function findPartner() {
   el("searchStatus").textContent =
     `Looking for someone who speaks ${profile.learning} and is learning ${profile.native}...`;
   showScreen("searchScreen");
+  endSession(); // clicked Next: the recap of the last chat shows while I wait
 }
 
 // Leave the chat (or the search) and go back to the menu
@@ -21,6 +22,7 @@ function leaveChat() {
   stopMyMedia(); // switch off camera + mic
   nextIcebreakerAt = 0;
   openMenu();
+  endSession(); // the recap of this chat (if there was one)
 }
 
 
@@ -51,6 +53,7 @@ socket.on("matched", partner => {
   showCaption(el("partnerCaption"), "", null);
   showScreen("chatScreen");
   render();
+  startSession(`with ${partner.name}`); // for the recap at the end
   // Something to talk about: what we both like
   const both = sharedInterests(partner.interests);
   if (both.length) addSystemMessage(`You both like ${interestList(both)}.`);
@@ -68,6 +71,7 @@ socket.on("partner_left", () => {
 
 // A new chat message (from me or my partner), with its translation
 socket.on("chat_message", msg => {
+  if (msg.from === socket.id) noteSentMessage(); // for the recap
   messages.push(msg);
   el("typing").textContent = ""; // they sent it, so they're done typing
   render();

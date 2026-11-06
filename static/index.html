@@ -256,24 +256,33 @@
         <div class="today">
           <div class="today-item">
             <div id="goalRing" class="ring big"><span></span></div>
-            <div>
-              <strong id="goalText">0 / 50 XP</strong>
-              <span>Daily goal</span>
+            <div class="today-text">
+              <strong id="goalText">0 / 50</strong>
+              <span>XP today</span>
             </div>
           </div>
           <div class="today-item">
             <!-- the mascot's mood shows how my streak is doing (JavaScript draws him) -->
             <div id="streakMascot" class="today-mascot"></div>
-            <div>
+            <div class="today-text">
               <strong id="todayStreak">0 days</strong>
-              <span id="bestStreak">Best: 0</span>
+              <span id="bestStreak">best: 0</span>
             </div>
           </div>
           <div class="today-item">
-            <div class="today-icon level"><span data-icon="star"></span></div>
-            <div>
-              <strong id="todayLevel">Level 1</strong>
-              <span id="toNextLevel">100 XP to level 2</span>
+            <!-- my level, as a big number on a yellow badge -->
+            <div class="today-icon level"><small>LV</small><b id="levelNumber">1</b></div>
+            <div class="today-text">
+              <strong id="toNextLevel">100 XP</strong>
+              <span id="nextLevelLabel">to level 2</span>
+            </div>
+          </div>
+          <!-- How much I actually SPOKE (counted while my mic hears me in calls and rooms) -->
+          <div id="speakCell" class="today-item">
+            <div class="today-icon speak"><span data-icon="mic"></span></div>
+            <div class="today-text">
+              <strong id="speakWeek">0 min</strong>
+              <span>this week</span>
             </div>
           </div>
         </div>
@@ -783,6 +792,28 @@
     </form>
   </dialog>
 
+  <!-- CONVERSATION RECAP: after a chat or voice room (recap.js fills it in) -->
+  <dialog id="recapDialog" class="card recap">
+    <div class="recap-top">
+      <div data-mascot="excited" data-size="64"></div>
+      <div>
+        <h3 id="recapTitle">Nice talk!</h3>
+        <p class="hint">Here's what you did in this conversation.</p>
+      </div>
+    </div>
+    <div id="recapStats" class="recap-stats"></div>
+    <!-- The words I looked up (hovered or tapped) and didn't save yet -->
+    <div id="recapWordsBox">
+      <h4>Words you looked up</h4>
+      <ul id="recapWords" class="recap-words"></ul>
+      <label class="inline-label">Add to <select id="recapDeck"></select></label>
+    </div>
+    <div class="dialog-buttons">
+      <button type="button" class="ghost close-dialog">Done</button>
+      <button type="button" id="recapAddBtn" class="primary">Add to deck</button>
+    </div>
+  </dialog>
+
   <!-- Small pop-up message, e.g. "Saved banco → bench" -->
   <div id="toast" class="toast" hidden></div>
 
@@ -808,6 +839,7 @@
   <script src="/static/js/decks.js"></script>    <!-- decks, library, Anki import -->
   <script src="/static/js/popup.js"></script>    <!-- the word popup, reports -->
   <script src="/static/js/study.js"></script>    <!-- study mode, spaced repetition -->
+  <script src="/static/js/recap.js"></script>    <!-- the recap after a conversation -->
   <script src="/static/js/drawing.js"></script>  <!-- drawing messages and decks -->
   <script src="/static/js/main.js"></script>     <!-- starts everything -->
 </body>

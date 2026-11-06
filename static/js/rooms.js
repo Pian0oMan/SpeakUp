@@ -146,6 +146,7 @@ socket.on("room_joined", data => {
 
   el("roomInfo").textContent = `${currentRoom.name} · ${currentRoom.language}`;
   showScreen("roomScreen");
+  startSession(`in ${currentRoom.name}`); // for the recap when I leave
   renderMembers();
   renderRoomMessages();
 
@@ -234,6 +235,7 @@ function leaveRoom() {
   currentRoom = null;
   roomMembers = {};
   openRooms();
+  endSession(); // the recap of this room
 }
 el("leaveRoomBtn").onclick = leaveRoom;
 
@@ -353,6 +355,7 @@ function sizeTiles(box, count) {
 
 // --- The side chat ---
 socket.on("room_message", msg => {
+  if (msg.from === socket.id) noteSentMessage(); // for the recap
   roomMessages.push(msg);
   renderRoomMessages();
 });

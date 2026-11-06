@@ -53,10 +53,47 @@ function lightUp(who, talking) {
   if (spot) spot.classList.toggle("speaking", talking);
 }
 
+let lastTick = Date.now();
 setInterval(() => {
   const now = Date.now();
+  // Real time since the last check (browsers slow timers down in background tabs)
+  const passed = Math.min(now - lastTick, 1000);
+  lastTick = now;
   Object.entries(voiceMeters).forEach(([who, meter]) => {
     if (volumeOf(meter) > LOUD_ENOUGH) meter.lastLoud = now;
-    lightUp(who, now - meter.lastLoud < STAY_LIT);
+    const talking = now - meter.lastLoud < STAY_LIT;
+    lightUp(who, talking);
+    if (who === "me" && talking) countMySpeech(passed);
   });
 }, 100);
+
+
+// ---------- SPEAKING TIME ----------
+// While MY voice lights up, count the time, per language I'm speaking (the "Speaking"
+// picker). It's sent to the server every 30 seconds (see backend/speaking.py).
+let unsentSpeech = {}; // language -> milliseconds not sent yet, e.g. { Japanese: 12400 }
+
+function countMySpeech(ms) {
+  const language = el(currentRoom ? "roomSpeakLang" : "speakLang").value;
+  if (!language) return;
+  unsentSpeech[language] = (unsentSpeech[language] || 0) + ms;
+  noteSpeech(ms); // for the recap at the end of the conversation
+}
+
+// Send the whole seconds; the rest waits for next time
+function sendSpeech() {
+  const report = {};
+  let total = 0;
+  Object.entries(unsentSpeech).forEach(([language, ms]) => {
+    const seconds = Math.floor(ms / 1000);
+    if (seconds > 0) {
+      report[language] = seconds;
+      unsentSpeech[language] = ms - seconds * 1000;
+      total += seconds;
+    }
+  });
+  if (!total) return;
+  socket.emit("spoken", report);
+  addSpokenSeconds(total); // the home page counts up right away
+}
+setInterval(sendSpeech, 30000);

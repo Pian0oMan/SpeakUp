@@ -15,6 +15,7 @@ These files build Speak Up's database. Run them **in order**, in Supabase:
 | `08_friends_discover.sql` | Countries, "last online", friends' stats, and the Discover page (posts + cheers) |
 | `09_onboarding.sql` | The welcome questions (level, how long you've studied, interests) and "People to meet" |
 | `10_review.sql` | Spaced repetition: when each card is due, and how fast its interval grows |
+| `11_speaking.sql` | Speaking time: minutes you talked, per language, per day |
 
 Files 04 to 09 are safe to run again. If Supabase offers to "enable RLS" for you,
 run the file as written: every file already turns on Row Level Security itself.

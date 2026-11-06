@@ -21,15 +21,17 @@ function showProgress(p) {
   el("xpText").textContent = `${intoLevel} / ${levelSize} XP`;
 
   setRing(el("goalRing"), Math.min(100, (p.xp_today / p.daily_goal) * 100));
-  el("goalText").textContent = `${p.xp_today} / ${p.daily_goal} XP`;
-  el("todayStreak").textContent = `${p.streak} ${p.streak === 1 ? "day" : "days"} streak`;
+  // Short values (they never wrap), with the details in the label underneath
+  el("goalText").textContent = `${p.xp_today} / ${p.daily_goal}`;
+  el("todayStreak").textContent = `${p.streak} ${p.streak === 1 ? "day" : "days"}`;
+  el("bestStreak").textContent = `best: ${p.best_streak}`;
   // The mascot's mood follows my streak: sleepy with no streak, happy while it's
   // alive, excited once I've reached today's goal
   const mood = p.xp_today >= p.daily_goal ? "excited" : p.streak > 0 ? "happy" : "sleepy";
-  el("streakMascot").innerHTML = mascot(mood, 52);
-  el("bestStreak").textContent = `Best: ${p.best_streak}`;
-  el("todayLevel").textContent = `Level ${p.level}`;
-  el("toNextLevel").textContent = `${p.level_end - p.xp} XP to level ${p.level + 1}`;
+  el("streakMascot").innerHTML = mascot(mood, 40);
+  el("levelNumber").textContent = p.level;
+  el("toNextLevel").textContent = `${p.level_end - p.xp} XP`;
+  el("nextLevelLabel").textContent = `to level ${p.level + 1}`;
 }
 
 // LEVEL UP: the mascot jumps up in the middle of the screen for a few seconds
@@ -52,9 +54,42 @@ socket.on("xp", p => {
   showProgress(p);
   if (p.level_up) {
     celebrateLevelUp(p.level);
-  } else if (p.reason !== "message" && p.reason !== "save_word") {
-    // Messages happen a lot, and saving a word already shows "Saved ... → ...",
-    // so those two only update the bar
+  } else if (!["message", "save_word", "speaking"].includes(p.reason)) {
+    // Messages and speaking happen a lot, and saving a word already shows
+    // "Saved ... → ...", so those only update the bar
     showToast(`+${p.gained} XP`);
   }
 });
+
+
+// ---------- SPEAKING TIME (the home page "Today" card) ----------
+let speaking = { today: 0, week: 0 }; // seconds
+
+async function loadSpeaking() {
+  try {
+    speaking = await api("/api/speaking");
+  } catch {
+    // e.g. 11_speaking.sql hasn't been run yet: it stays at 0
+  }
+  showSpeaking();
+}
+
+function showSpeaking() {
+  el("speakWeek").textContent = shortMinutes(speaking.week);
+  // Today's time (and how it's counted) when I point at it
+  el("speakCell").title = `${shortMinutes(speaking.today)} today. Counted while your microphone ` +
+    "hears you talking in calls and voice rooms.";
+}
+
+// e.g. "0 min", "<1 min", "42 min": short enough to never wrap
+function shortMinutes(seconds) {
+  if (seconds > 0 && seconds < 60) return "<1 min";
+  return `${Math.round(seconds / 60)} min`;
+}
+
+// talking.js just sent some seconds to the server: count them here too, without asking again
+function addSpokenSeconds(seconds) {
+  speaking.today += seconds;
+  speaking.week += seconds;
+  showSpeaking();
+}

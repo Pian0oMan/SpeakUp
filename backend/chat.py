@@ -5,7 +5,7 @@ from functools import lru_cache
 
 from flask import request
 
-from backend import rooms  # rooms and chat need each other, so: rooms.exit_room(...)
+from backend import rooms, speaking  # rooms and chat need each other, so: rooms.exit_room(...)
 from backend.progress import award_xp, award_message_xp
 from backend.setup import socketio, db_for, person_from_token, public_info
 from backend.social import save_recent_contact, go_offline, tz_of
@@ -262,3 +262,4 @@ def handle_disconnect(reason=None):
     leave_current_chat(request.sid)
     rooms.exit_room(request.sid)
     go_offline(request.sid)
+    speaking.last_report.pop(request.sid, None)

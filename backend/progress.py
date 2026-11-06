@@ -14,6 +14,7 @@ XP_FOR = {
     "save_word": 5,       # a new word saved to a deck
     "know_it": 3,         # study mode: "Know it"
     "still_learning": 1,  # study mode: "Don't know" (practice still counts!)
+    "speaking": 2,        # every full minute I spoke in a call or voice room
 }
 DAILY_GOAL = 50
 MESSAGE_XP_EVERY = 20     # seconds: message XP at most this often, so spamming doesn't pay
@@ -58,14 +59,15 @@ def progress_state(profile, tz_offset):
     }
 
 
-def award_xp(db, user_id, reason, tz_offset):
-    """Give XP for doing something, update the streak, and tell the user's open tabs."""
+def award_xp(db, user_id, reason, tz_offset, times=1):
+    """Give XP for doing something (times = how many times, e.g. 3 minutes of speaking),
+    update the streak, and tell the user's open tabs."""
     try:
         profile = db.table("profiles").select("xp, streak, best_streak, last_active, xp_today").execute().data[0]
     except Exception as error:  # e.g. the progress SQL hasn't been run yet: everything else still works
         print("Couldn't award XP:", error)
         return
-    amount = XP_FOR[reason]
+    amount = XP_FOR[reason] * times
     today = local_today(tz_offset)
     last = profile.get("last_active")
     if last == today.isoformat():                                  # already practiced today

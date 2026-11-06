@@ -12,6 +12,7 @@ async function enterApp() {
   markSeen();     // for "Last online 5 min ago"
   loadSocial();   // friends + recent people
   loadProgress(); // level, XP, streak
+  loadSpeaking(); // minutes spoken this week
   openMenu();
 }
 

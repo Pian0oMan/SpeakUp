@@ -508,3 +508,29 @@
 .anki-form { max-width: 560px; margin-top: 16px; }
 .anki-form h3 { margin: 0; }
 .more-cards { color: var(--muted); font-size: 13px; padding-top: 8px; }
+
+/* ---------- Conversation recap (after a chat or voice room) ---------- */
+dialog.recap { max-width: 480px; }
+.recap-top { display: flex; align-items: center; gap: 14px; }
+.recap-top .hint { margin: 4px 0 0; }
+.recap-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 16px 0; }
+.recap-stat {
+  background: var(--surface-2);
+  border-radius: var(--radius);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  text-align: center;
+}
+.recap-stat .icon-svg { width: 20px; height: 20px; color: var(--brand); }
+.recap-stat strong { font-size: 18px; }
+.recap-stat span { color: var(--muted); font-size: 12px; }
+#recapWordsBox h4 { margin: 0 0 8px; font-size: 14px; }
+.recap-words { list-style: none; margin: 0 0 12px; padding: 0; max-height: 240px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
+.recap-words label { flex-direction: row; align-items: center; gap: 10px; font-weight: 400; padding: 6px 8px; border-radius: var(--radius); cursor: pointer; }
+.recap-words label:hover { background: var(--surface-2); }
+.recap-words input { width: 16px; height: 16px; padding: 0; flex: none; accent-color: var(--brand); }
+.recap-words span { color: var(--muted); font-size: 13px; }
+#recapWordsBox .inline-label { margin-bottom: 14px; }

@@ -111,6 +111,7 @@ async function openWordPopup(span, word, sentence, language, index) {
     el("popupGrammar").textContent = meaning ? meaning.grammar : "";
     el("popupGrammar").hidden = !meaning;
     el("popupLang").textContent = wordResult.language || "";
+    noteLookup({ ...showing }); // for the recap: "words you looked up"
   }
   if (phraseResult) {
     el("popupPhraseTranslation").textContent = phraseResult.translation || "(no translation found)";

@@ -10,6 +10,8 @@ async function start() {
     token = session ? session.access_token : null;
     if (session && !loggedIn && !registering) {
       enterApp();
+    } else if (session && event === "TOKEN_REFRESHED") {
+      sayHello(); // the login token changes every hour: give the server the new one
     } else if (!session) {
       loggedIn = false;
       showScreen("landingScreen"); // visitors start on the landing page
@@ -92,6 +94,7 @@ el("registerForm").onsubmit = async event => {
 };
 
 el("logoutBtn").onclick = () => {
+  discardSession(); // no conversation recap when logging out
   if (currentRoom) leaveRoom();
   leaveChat();
   sb.auth.signOut();
