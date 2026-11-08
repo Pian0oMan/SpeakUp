@@ -5,6 +5,11 @@ who speaks the language you're learning (and is learning yours) for a video, voi
 text chat. Hover any word to translate it, save it to a deck, and review it with spaced
 repetition until you know it.
 
+**Languages:** Speak Up starts with **English ⇄ Japanese**, so everyone who signs up can
+find a partner. The code supports more (Spanish, French, German, Chinese, Russian): to open
+one up, add it to `ACTIVE_LANGUAGES` in `backend/translation.py` and `LANGUAGES` in
+`static/js/core.js`.
+
 **Built with:** Python + Flask + Flask-SocketIO (the server), Supabase (accounts and the
 database), DeepL (translations), WebRTC (calls, browser to browser), and plain HTML, CSS
 and JavaScript (the website, in `static/`).

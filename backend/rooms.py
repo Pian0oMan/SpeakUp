@@ -6,16 +6,16 @@ from flask_socketio import join_room, leave_room
 
 from backend import chat  # rooms and chat need each other, so: chat.leave_current_chat(...)
 from backend.progress import award_message_xp
-from backend.setup import socketio, db_for, person_from_token, public_info
-from backend.social import my_blocks
-from backend.translation import detect_language, DEEPL_CODES
+from backend.setup import socketio, db_for, public_info
+from backend.social import my_blocks, current_person
+from backend.translation import detect_language, ACTIVE_LANGUAGES
 
 
 # ---------- VOICE ROOMS ----------
 # Group voice chats (3 to 10 people) with a side chat. Kept in memory, like matchmaking.
 # Everyone in a room connects DIRECTLY to everyone else for audio (WebRTC);
 # the server only passes the small connection messages between them.
-rooms = {}    # room id -> room, e.g. {"id": "r1", "name": "Spanish for Beginners", "language": "Spanish",
+rooms = {}    # room id -> room, e.g. {"id": "r1", "name": "Japanese for Beginners", "language": "Japanese",
               #   "max_size": 6, "host": "Ana", "members": {sid: person}, "history": [...], "permanent": False}
 room_of = {}  # sid -> id of the room they're in
 room_counter = [0]
@@ -32,7 +32,8 @@ def add_room(name, language, max_size, host, permanent=False):
 # Test rooms that are always there (permanent = not deleted when everyone leaves)
 add_room("English Café", "English", 10, "Speak Up", permanent=True)
 add_room("日本語でおしゃべり (Japanese chat)", "Japanese", 8, "Speak Up", permanent=True)
-add_room("Spanish for Beginners", "Spanish", 6, "Speak Up", permanent=True)
+add_room("Japanese for Beginners (はじめての日本語)", "Japanese", 6, "Speak Up", permanent=True)
+add_room("English for Beginners (はじめての英語)", "English", 6, "Speak Up", permanent=True)
 add_room("Anime & Manga Talk", "Japanese", 10, "Speak Up", permanent=True)
 
 
@@ -62,9 +63,9 @@ def create_room(data):
     except (TypeError, ValueError):
         max_size = 10
     max_size = min(10, max(3, max_size))  # always between 3 and 10
-    person = person_from_token(data.get("token"))
-    if not name or language not in DEEPL_CODES or not person:
-        socketio.emit("room_error", "Give the room a name and a language.", to=request.sid)
+    person = current_person(data.get("token"))
+    if not name or language not in ACTIVE_LANGUAGES or not person:
+        socketio.emit("room_error", "Give the room a name, and pick English or Japanese.", to=request.sid)
         return
     enter_room(add_room(name, language, max_size, person["name"]), person)
 
@@ -72,7 +73,7 @@ def create_room(data):
 @socketio.on("join_room")
 def handle_join_room(data):
     room = rooms.get(data.get("room_id"))
-    person = person_from_token(data.get("token"))
+    person = current_person(data.get("token"))
     if not room or not person:
         socketio.emit("room_error", "This room doesn't exist anymore.", to=request.sid)
     elif len(room["members"]) >= room["max_size"] and request.sid not in room["members"]:
@@ -85,7 +86,7 @@ def handle_join_room(data):
 def join_random_room(data):
     """Drop me into a random open room in my language, preferring rooms where people
     are already talking (an empty room isn't much of a conversation)."""
-    person = person_from_token(data.get("token"))
+    person = current_person(data.get("token"))
     if not person:
         return
     language = data.get("language") or person["learning"]

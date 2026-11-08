@@ -37,7 +37,7 @@ def spoken(data):
             continue
         try:
             db.rpc("add_speaking_time", {"p_day": day, "p_language": language, "p_seconds": seconds}).execute()
-        except Exception as error:  # e.g. 11_speaking.sql hasn't been run yet
+        except Exception as error:  # e.g. the database didn't answer
             print("Couldn't save speaking time:", error)
             return
         total += seconds
@@ -53,12 +53,8 @@ def speaking_stats():
     """My speaking time: today, this week (the last 7 days), and per language this week."""
     db = db_for(token_from_request())
     today = local_today(tz_from_request())
-    try:
-        rows = (db.table("speaking_time").select("day, language, seconds")
-                .gte("day", (today - timedelta(days=6)).isoformat()).execute().data)
-    except Exception as error:  # e.g. 11_speaking.sql hasn't been run yet
-        print("Couldn't load speaking time:", error)
-        rows = []
+    rows = (db.table("speaking_time").select("day, language, seconds")
+            .gte("day", (today - timedelta(days=6)).isoformat()).execute().data)
     by_language = {}
     for row in rows:
         by_language[row["language"]] = by_language.get(row["language"], 0) + row["seconds"]

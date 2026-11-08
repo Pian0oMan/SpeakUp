@@ -9,6 +9,8 @@ let micTrack = null;  // my microphone (null = off)
 let camTrack = null;  // my camera (null = off)
 let callState = "connecting";                 // connecting | connected | failed | ended
 let partnerMedia = { mic: false, cam: false }; // is my partner's mic / camera on?
+let callInitiator = false; // did MY browser start this call? (then it also restarts it)
+let restartsLeft = 0;      // how many more times to try reconnecting a broken call
 
 // A free public "STUN" server tells each browser its address on the internet.
 // When the app starts, the server's list replaces this one: it also has a TURN server
@@ -23,6 +25,8 @@ function startCall(initiator) {
   hangUp();
   const connection = new RTCPeerConnection({ iceServers: ICE_SERVERS });
   peer = connection;
+  callInitiator = initiator;
+  restartsLeft = 2;
   callState = "connecting";
   updatePartnerUI();
 
@@ -40,8 +44,14 @@ function startCall(initiator) {
   };
   connection.onconnectionstatechange = () => {
     if (connection !== peer) return; // an old call, ignore it
-    if (connection.connectionState === "connected") callState = "connected";
-    if (connection.connectionState === "failed") callState = "failed";
+    if (connection.connectionState === "connected") {
+      callState = "connected";
+      restartsLeft = 2; // it works again: allow new tries if it breaks later
+    }
+    if (connection.connectionState === "failed") {
+      callState = "failed";
+      repairCall(); // e.g. someone's network changed: try finding a new route
+    }
     updatePartnerUI();
   };
 
@@ -58,6 +68,21 @@ function startCall(initiator) {
         sendMediaState();
       });
   }
+}
+
+// The call broke (or one of us reconnected after losing the connection): find a new
+// route between the browsers, without starting the whole call again. ("ICE restart":
+// only the browser that started the call does it, so they don't both try at once.)
+function repairCall() {
+  if (!peer || !callInitiator || peer.connectionState === "connected" || restartsLeft <= 0) return;
+  restartsLeft--;
+  callState = "connecting";
+  updatePartnerUI();
+  const connection = peer;
+  connection.createOffer({ iceRestart: true })
+    .then(offer => connection.setLocalDescription(offer))
+    .then(() => sendCall({ type: "offer", description: connection.localDescription }))
+    .catch(error => console.error("Couldn't restart the call:", error));
 }
 
 // Messages from my partner's browser, passed along by the server

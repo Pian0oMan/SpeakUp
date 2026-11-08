@@ -3,8 +3,8 @@ from datetime import datetime, timedelta, timezone
 
 from flask import request, jsonify
 
-from backend.setup import app, socketio, db_for, token_from_request, my_profile
-from backend.social import online, tz_of
+from backend.setup import app, socketio, db_for, db_as, token_from_request, my_profile
+from backend import social  # social and progress need each other, so: social.online
 
 
 # ---------- XP, LEVELS, STREAKS ----------
@@ -62,32 +62,18 @@ def progress_state(profile, tz_offset):
 def award_xp(db, user_id, reason, tz_offset, times=1):
     """Give XP for doing something (times = how many times, e.g. 3 minutes of speaking),
     update the streak, and tell the user's open tabs."""
-    try:
-        profile = db.table("profiles").select("xp, streak, best_streak, last_active, xp_today").execute().data[0]
-    except Exception as error:  # e.g. the progress SQL hasn't been run yet: everything else still works
-        print("Couldn't award XP:", error)
-        return
     amount = XP_FOR[reason] * times
     today = local_today(tz_offset)
-    last = profile.get("last_active")
-    if last == today.isoformat():                                  # already practiced today
-        streak, xp_today = profile["streak"], profile["xp_today"] + amount
-    elif last == (today - timedelta(days=1)).isoformat():          # practiced yesterday: streak grows
-        streak, xp_today = profile["streak"] + 1, amount
-    else:                                                          # first time, or missed a day
-        streak, xp_today = 1, amount
-    old_level = level_of(profile["xp"])
-    new = {
-        "xp": profile["xp"] + amount,
-        "streak": streak,
-        "best_streak": max(profile["best_streak"], streak),
-        "last_active": today.isoformat(),
-        "xp_today": xp_today,
-    }
-    db.table("profiles").update(new).eq("id", user_id).execute()
+    try:
+        # In ONE step inside the database (sql/14_xp.sql), so two awards at the same
+        # moment can't overwrite each other
+        new = db.rpc("add_xp", {"p_amount": amount, "p_today": today.isoformat()}).execute().data[0]
+    except Exception as error:  # e.g. the database didn't answer: the chat or study session goes on
+        print("Couldn't award XP:", error)
+        return
     state = progress_state(new, tz_offset)
-    state.update({"gained": amount, "reason": reason, "level_up": state["level"] > old_level})
-    for sid in online.get(user_id, ()):  # every tab they have open
+    state.update({"gained": amount, "reason": reason, "level_up": state["level"] > level_of(new["xp"] - amount)})
+    for sid in social.online.get(user_id, ()):  # every tab they have open
         socketio.emit("xp", state, to=sid)
 
 
@@ -97,7 +83,7 @@ def award_message_xp(person):
     if now - last_message_xp.get(person["user_id"], 0) < MESSAGE_XP_EVERY:
         return
     last_message_xp[person["user_id"]] = now
-    award_xp(db_for(person["token"]), person["user_id"], "message", tz_of.get(person["sid"], 0))
+    award_xp(db_as(person), person["user_id"], "message", social.tz_of.get(person["sid"], 0))
 
 
 def tz_from_request():

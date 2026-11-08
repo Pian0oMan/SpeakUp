@@ -3,14 +3,13 @@
 import random
 import threading
 import time
-from functools import lru_cache
 
 from flask import request
 
-from backend import rooms, speaking  # rooms and chat need each other, so: rooms.exit_room(...)
-from backend.progress import award_xp, award_message_xp
-from backend.setup import socketio, db_for, person_from_token, public_info
-from backend.social import save_recent_contact, go_offline, tz_of, my_blocks
+from backend import rooms, social, speaking  # rooms and chat need each other, so: rooms.exit_room(...)
+from backend.progress import award_xp, award_message_xp, last_message_xp
+from backend.setup import socketio, db_for, db_as, person_from_token, public_info
+from backend.social import save_recent_contact, go_offline, tz_of, my_blocks, current_person
 from backend.translation import translate, detect_language, DEEPL_CODES
 
 
@@ -74,7 +73,7 @@ KIND_RANK = {"perfect": 3, "half": 2, "peers": 1}
 @socketio.on("find_partner")
 def find_partner(data):
     # Look up WHO this is from their login token (we don't just trust the browser)
-    me = person_from_token(data["token"])
+    me = current_person(data.get("token"))
     if not me:
         return
     leave_current_chat(request.sid)  # in case they clicked "Next"
@@ -283,12 +282,19 @@ def icebreakers_for(me, other):
     return random.sample(ICEBREAKERS, len(ICEBREAKERS)) + random.sample(about_us, min(6, len(about_us)))
 
 
-@lru_cache(maxsize=None)  # remembers results, so each question is only translated once per language
+translated_icebreakers = {}  # (question, language) -> translation, so each is only translated once
+
+
 def in_language(text, language):
     """The icebreakers are written in English. This returns one in any language."""
     if language == "English":
         return text
-    return translate(text, language) or text
+    if (text, language) not in translated_icebreakers:
+        translation = translate(text, language)
+        if not translation:
+            return text  # DeepL didn't answer (e.g. a timeout): English for now, try again next time
+        translated_icebreakers[(text, language)] = translation
+    return translated_icebreakers[(text, language)]
 
 
 def send_icebreaker(chat):
@@ -363,7 +369,7 @@ def send_chat_message(sid, text, voice=False, language=None):
 
     # XP: answering an icebreaker is worth more than a normal message
     if is_answer:
-        award_xp(db_for(me["token"]), me["user_id"], "icebreaker", tz_of.get(sid, 0))
+        award_xp(db_as(me), me["user_id"], "icebreaker", tz_of.get(sid, 0))
     else:
         award_message_xp(me)
 
@@ -415,10 +421,72 @@ def relay_call(data):
         socketio.emit("call", data, to=partner["sid"])
 
 
-# Closing the tab counts as leaving
+# ---------- LOST CONNECTION: getting back into the chat ----------
+# Phones lose the connection for a moment all the time (switching from Wi-Fi to mobile
+# data, going through a tunnel...). Then the browser reconnects with a NEW connection id.
+# So a 1-on-1 chat isn't ended right away: the partner sees "reconnecting...", and if
+# the browser comes back within RECONNECT_SECONDS, the chat just continues.
+RECONNECT_SECONDS = 20
+dropped = {}  # old sid -> when that connection dropped (while it was in a 1-on-1 chat)
+
+
+@socketio.on("connect")
+def handle_connect(auth=None):
+    """A browser connected. If it lost its connection during a chat, it sends
+    {"token": ..., "resume": "<its old connection id>"} to get back in."""
+    if isinstance(auth, dict) and auth.get("resume"):
+        resume_chat(str(auth["resume"]), auth.get("token"))
+
+
+def resume_chat(old_sid, token):
+    me_now = person_from_token(token)  # who's asking (a partner also knows my old id, so check!)
+    with match_lock:
+        partner = partners.get(old_sid)
+        if old_sid not in dropped or not me_now or not partner:
+            socketio.emit("partner_left", to=request.sid)  # too late: the chat is over
+            return
+        me = partners[partner["sid"]]  # my old details (the same dict as in chat["people"])
+        if me["user_id"] != me_now["user_id"]:
+            socketio.emit("partner_left", to=request.sid)
+            return
+        del dropped[old_sid]
+        new_sid = request.sid
+        me["sid"], me["token"] = new_sid, me_now["token"]  # (this also updates chat["people"])
+        partners[new_sid] = partners.pop(old_sid)
+        chat = chats[new_sid] = chats.pop(old_sid)
+        if old_sid in chat["answered"]:
+            chat["answered"].discard(old_sid)
+            chat["answered"].add(new_sid)
+    # My browser swaps my old id for the new one (so my messages still show as mine)
+    socketio.emit("chat_resumed", {"old_sid": old_sid}, to=new_sid)
+    socketio.emit("partner_back", {"old_sid": old_sid, "sid": new_sid}, to=partner["sid"])
+
+
+def end_chat_if_not_back(sid):
+    socketio.sleep(RECONNECT_SECONDS)
+    with match_lock:
+        if dropped.pop(sid, None) is None:
+            return  # they came back (or the chat ended some other way)
+        leave_current_chat(sid)
+
+
 @socketio.on("disconnect")
 def handle_disconnect(reason=None):
-    leave_current_chat(request.sid)
-    rooms.exit_room(request.sid)
-    go_offline(request.sid)
-    speaking.last_report.pop(request.sid, None)
+    sid = request.sid
+    user_id = social.user_of.get(sid)
+    # A lost connection during a chat: wait a little for them to come back.
+    # (Closing the tab or logging out says goodbye properly: "client disconnect".)
+    with match_lock:
+        in_chat = sid in partners
+        if in_chat and reason != socketio.reason.CLIENT_DISCONNECT:
+            dropped[sid] = time.time()
+            socketio.emit("partner_reconnecting", to=partners[sid]["sid"])
+            socketio.start_background_task(end_chat_if_not_back, sid)
+        else:
+            leave_current_chat(sid)
+    rooms.exit_room(sid)
+    go_offline(sid)
+    speaking.last_report.pop(sid, None)
+    if user_id and user_id not in social.online:  # no tabs left open: forget their timers too
+        last_message_xp.pop(user_id, None)
+        speaking.unpaid.pop(user_id, None)

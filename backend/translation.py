@@ -12,6 +12,12 @@ DEEPL_CODES = {
     "Japanese": "JA", "Chinese": "ZH-HANS", "Russian": "RU",
 }
 
+# The languages people can pick to SPEAK and LEARN right now (keep in sync with LANGUAGES
+# in static/js/core.js). Speak Up starts with English <-> Japanese, so everyone who signs
+# up can find a partner. The other languages above are still used for translations
+# ("Show translations in"); to open one up for speaking + learning, just add it here.
+ACTIVE_LANGUAGES = ["English", "Japanese"]
+
 
 # The codes DeepL uses for the language it DETECTS, e.g. "JA" -> "Japanese"
 DEEPL_NAMES = {"EN": "English", "ES": "Spanish", "FR": "French", "DE": "German",

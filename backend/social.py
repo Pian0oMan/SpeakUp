@@ -4,7 +4,8 @@ from datetime import datetime, timezone
 from flask import request, jsonify
 
 from backend import progress
-from backend.setup import app, socketio, db_for, token_from_request, my_profile, person_from_token
+from backend.setup import (app, socketio, db_for, db_as, token_from_request, my_profile, person_from_token,
+                           person_details, latest_token)
 
 tz_of = {}                # sid -> the browser's time zone offset (minutes, like JavaScript's getTimezoneOffset)
 
@@ -25,12 +26,36 @@ def hello(data):
     go_offline(request.sid)  # in case this connection said hello before (e.g. new login)
     user_of[request.sid] = person["user_id"]
     person_of[request.sid] = person  # who this connection is (for invites)
+    latest_token[request.sid] = person["token"]  # also sent again every hour, when the token changes
     online.setdefault(person["user_id"], set()).add(request.sid)
-    tz_of[request.sid] = int(data.get("tz", 0))  # for streaks: when is midnight for them?
+    try:
+        tz_of[request.sid] = int(data.get("tz", 0))  # for streaks: when is midnight for them?
+    except (TypeError, ValueError):
+        tz_of[request.sid] = 0
+
+
+def current_person(token):
+    """Who sent this real-time message? Usually already known from "hello" (no need to ask
+    the database again). Asked again only if the browser sent a different login token,
+    e.g. right after logging in as someone else."""
+    person = person_of.get(request.sid)
+    if person and token and person["token"] == token:
+        return {**person, "sid": request.sid}  # a copy: matching adds its own notes to it
+    return person_from_token(token)
+
+
+def profile_changed(profile):
+    """I saved my profile (e.g. switched languages): my open tabs' details change too,
+    so Quick Match uses my NEW languages."""
+    for sid in online.get(profile["id"], ()):
+        if sid in person_of:
+            person_of[sid] = {**person_of[sid], **person_details(profile)}
 
 
 def go_offline(sid):
     person_of.pop(sid, None)
+    latest_token.pop(sid, None)
+    tz_of.pop(sid, None)
     user_id = user_of.pop(sid, None)
     if user_id in online:
         online[user_id].discard(sid)
@@ -57,12 +82,12 @@ def save_recent_contact(me, other):
     if a["user_id"] == b["user_id"]:
         return  # the same account in two tabs
     try:
-        db_for(me["token"]).table("recent_contacts").upsert({
+        db_as(me).table("recent_contacts").upsert({
             "user_a": a["user_id"], "user_b": b["user_id"],
             "name_a": a["name"], "name_b": b["name"],
             "last_at": datetime.now(timezone.utc).isoformat(),
         }, on_conflict="user_a,user_b").execute()
-    except Exception as error:  # e.g. the friends SQL hasn't been run yet: chatting still works
+    except Exception as error:  # e.g. the database didn't answer: chatting still works
         print("Couldn't save recent contact:", error)
         return
     notify_user(me["user_id"])
@@ -116,11 +141,7 @@ def social():
 def add_friend_stats(db, friends):
     """Add each friend's country, languages, level, streak, words learned and "last online"
     (from the friend_cards() database function, which only shows MY friends)."""
-    try:
-        cards = {row["user_id"]: row for row in db.rpc("friend_cards").execute().data}
-    except Exception as error:  # e.g. 08_friends_discover.sql hasn't been run yet
-        print("Couldn't load friend stats:", error)
-        return
+    cards = {row["user_id"]: row for row in db.rpc("friend_cards").execute().data}
     for person in friends:
         card = cards.get(person["user_id"])
         if not card:
@@ -144,10 +165,7 @@ def add_friend_stats(db, friends):
 @app.route("/api/seen", methods=["POST"])
 def seen():
     db = db_for(token_from_request())
-    try:
-        db.table("profiles").update({"last_seen": datetime.now(timezone.utc).isoformat()})             .eq("id", my_profile(db)["id"]).execute()
-    except Exception as error:  # e.g. the SQL for last_seen hasn't been run yet
-        print("Couldn't save last seen:", error)
+    db.table("profiles").update({"last_seen": datetime.now(timezone.utc).isoformat()})         .eq("id", my_profile(db)["id"]).execute()
     return jsonify({"ok": True})
 
 
@@ -204,12 +222,9 @@ def remove_friend(friendship_id):
 # Blocked people are never matched with me, stop being my friend, and are hidden from
 # my Recent list, Discover and "People to meet". They're never told.
 def my_blocks(db):
-    """Everyone I blocked: {user id: name}. Empty if 12_safety.sql hasn't been run yet."""
-    try:
-        return {row["blocked"]: row["blocked_name"]
-                for row in db.table("blocks").select("blocked, blocked_name").execute().data}
-    except Exception:
-        return {}
+    """Everyone I blocked: {user id: name}"""
+    return {row["blocked"]: row["blocked_name"]
+            for row in db.table("blocks").select("blocked, blocked_name").execute().data}
 
 
 def block_user(db, my_id, other_id, name):

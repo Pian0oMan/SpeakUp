@@ -129,6 +129,7 @@ socket.on("room_joined", data => {
   closeRoomPeers();
   clearRoomCaptions();
   hangUp(); // just in case I was in a 1-on-1 call
+  inChat = false; // (joining a room ends it on the server too)
   currentRoom = data.room;
   roomMembers = {};
   data.members.forEach(member => (roomMembers[member.sid] = { ...member, mic: false, caption: "" }));

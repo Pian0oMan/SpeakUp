@@ -7,6 +7,7 @@ el("menuBtn").onclick = leaveChat;
 el("cancelSearchBtn").onclick = leaveChat;
 
 function findPartner() {
+  inChat = false;
   hangUp(); // end the video link with the old partner (my camera/mic stay as they were)
   socket.emit("find_partner", { token });
   el("searchStatus").textContent =
@@ -19,6 +20,7 @@ function findPartner() {
 
 // Leave the chat (or the search) and go back to the menu
 function leaveChat() {
+  inChat = false;
   socket.emit("leave");
   hangUp();
   stopMyMedia(); // switch off camera + mic
@@ -82,6 +84,7 @@ socket.on("matched", partner => {
     currentRoom = null;
     roomMembers = {};
   }
+  inChat = true;
   messages = [];
   nextIcebreakerAt = 0;
   partnerName = partner.name;
@@ -110,11 +113,48 @@ socket.on("matched", partner => {
 
 // Our partner clicked Next or closed their tab
 socket.on("partner_left", () => {
+  if (!inChat) return; // e.g. I already left this chat myself
+  inChat = false;
   addSystemMessage("Your partner left. Click Next to find someone new.");
   nextIcebreakerAt = 0; // no more questions in this chat
   hangUp();
   callState = "ended";
   updatePartnerUI();
+});
+
+// ---------- LOST CONNECTION ----------
+// My partner's connection dropped: the server waits a few seconds for them to come back
+socket.on("partner_reconnecting", () => {
+  addSystemMessage(`${partnerName} lost their connection. Waiting for them to come back...`);
+});
+
+// Messages and answered questions remember WHO sent them by connection id.
+// After a reconnect, that person has a new id: swap it everywhere.
+function swapSid(oldSid, newSid) {
+  messages.forEach(msg => {
+    if (msg.from === oldSid) msg.from = newSid;
+    if (msg.answered) msg.answered = msg.answered.map(id => (id === oldSid ? newSid : id));
+  });
+  render();
+}
+
+socket.on("partner_back", ({ old_sid, sid }) => {
+  swapSid(old_sid, sid);
+  addSystemMessage(`${partnerName} is back!`);
+  repairCall(); // their network may have changed: reconnect the call if it broke
+});
+
+// MY connection dropped and came back, and I'm still in the same chat
+socket.on("chat_resumed", ({ old_sid }) => {
+  swapSid(old_sid, socket.id);
+  addSystemMessage("You lost your connection for a moment, but you're back in the chat.");
+  repairCall();
+});
+
+// My connection dropped while I was waiting for a partner: the server took me out
+// of the line, so get back in it
+socket.on("connect", () => {
+  if (loggedIn && !el("searchScreen").hidden) socket.emit("find_partner", { token });
 });
 
 // A new chat message (from me or my partner), with its translation

@@ -99,11 +99,17 @@ function openProfile(message) {
 // so the server matches me with the new languages (and they're remembered next time)
 ["matchNative", "matchLearning"].forEach(id => {
   el(id).addEventListener("change", async () => {
-    profile = { ...profile, native: el("matchNative").value, learning: el("matchLearning").value };
+    const changed = { ...profile, native: el("matchNative").value, learning: el("matchLearning").value };
+    const result = await api("/api/profile", { method: "PUT", body: JSON.stringify(changed) });
+    if (result.error) {
+      showToast(result.error);
+      openMenu(); // put the dropdowns back to what's saved
+      return;
+    }
+    profile = changed;
     updateRoomsLive(); // the voice room card follows the language I'm practicing
     updateQueueLive(); // and so does "people waiting"
     updateTalkPanel(); // "Talk to someone who speaks ..."
-    await api("/api/profile", { method: "PUT", body: JSON.stringify(profile) });
     showToast(`Now practicing ${profile.learning}`);
   });
 });
@@ -120,7 +126,11 @@ el("profileForm").onsubmit = async event => {
     el("profileStatus").textContent = "Pick two different languages!";
     return;
   }
-  await api("/api/profile", { method: "PUT", body: JSON.stringify(newProfile) }); // save to database
+  const result = await api("/api/profile", { method: "PUT", body: JSON.stringify(newProfile) }); // save to database
+  if (result.error) {
+    el("profileStatus").textContent = result.error;
+    return;
+  }
   profile = newProfile;
   openMenu();
 };

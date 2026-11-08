@@ -21,10 +21,12 @@ const MIN_INTERESTS = 3;
 async function startOnboarding() {
   // Start from what we already know: an existing profile, or the name from the sign-up form
   const user = (await sb.auth.getUser()).data.user;
+  const browserIsJapanese = navigator.language.startsWith("ja");
   answers = {
     username: (profile && profile.username) || (user && user.user_metadata.username) || "",
-    native: (profile && profile.native) || "English",
-    learning: (profile && profile.learning) || "Spanish",
+    // New here? Guess from the browser's language: Japanese browsers are probably learning English
+    native: (profile && profile.native) || (browserIsJapanese ? "Japanese" : "English"),
+    learning: (profile && profile.learning) || (browserIsJapanese ? "English" : "Japanese"),
     country: (profile && profile.country) || "",
     fluency: (profile && profile.fluency) || null,
     studying_for: (profile && profile.studying_for) || null,
@@ -135,7 +137,7 @@ el("obNext").onclick = () => {
 // Save everything, then go into the app
 async function finishOnboarding() {
   el("obNext").disabled = true;
-  await api("/api/profile", {
+  const result = await api("/api/profile", {
     method: "PUT",
     body: JSON.stringify({
       ...answers,
@@ -143,6 +145,11 @@ async function finishOnboarding() {
       translate_to: (profile && profile.translate_to) || answers.native,
     }),
   });
+  if (result.error) {
+    el("obNext").disabled = false;
+    showToast(result.error);
+    return;
+  }
   enterApp();
 }
 

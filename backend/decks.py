@@ -10,16 +10,13 @@ from backend import dictionary, review
 from backend.anki_import import read_apkg, read_collection, read_media_index, unpack, AnkiError, COLLECTIONS
 from backend.progress import award_xp, tz_from_request
 from backend.setup import app, db_for, token_from_request, fetch_all, my_profile
-from backend.translation import translate_for, script_language, DEEPL_CODES
+from backend.translation import translate_for, script_language, ACTIVE_LANGUAGES, DEEPL_CODES
 
 
 # ---------- DECKS ----------
 def get_decks(db):
     """This user's decks, oldest first. Everyone gets a "My Words" deck to start."""
-    try:
-        rows = db.table("decks").select("id, name, color, image").order("id").execute().data
-    except Exception:  # the deck-style SQL hasn't been run yet: still works, just without colors
-        rows = db.table("decks").select("id, name").order("id").execute().data
+    rows = db.table("decks").select("id, name, color, image").order("id").execute().data
     if not rows:
         rows = db.table("decks").insert({"name": "My Words"}).execute().data
     return rows
@@ -107,15 +104,9 @@ CARD_FIELDS = ("id, word, color, translation, deck_id, example, status, reading,
 @app.route("/api/flashcards", methods=["GET"])
 def list_flashcards():
     db = db_for(token_from_request())
-    # With each card's review schedule (when it's due, see review.py) and its picture.
-    # If an update SQL file hasn't been run yet, those columns are left out.
-    for fields in (CARD_FIELDS + ", image, " + review.SCHEDULE_FIELDS,   # 13_card_images.sql
-                   CARD_FIELDS + ", " + review.SCHEDULE_FIELDS):         # 10_review.sql
-        try:
-            return jsonify(fetch_all(lambda: db.table("flashcards").select(fields).order("created_at")))
-        except Exception:
-            pass
-    return jsonify(fetch_all(lambda: db.table("flashcards").select(CARD_FIELDS).order("created_at")))
+    # With each card's picture and review schedule (when it's due, see review.py)
+    fields = CARD_FIELDS + ", image, " + review.SCHEDULE_FIELDS
+    return jsonify(fetch_all(lambda: db.table("flashcards").select(fields).order("created_at")))
 
 
 @app.route("/api/flashcards", methods=["POST"])
@@ -208,8 +199,10 @@ def add_cards(db, deck_id, cards, source, language=None):
 @app.route("/api/library", methods=["GET"])
 def list_library():
     db = db_for(token_from_request())
-    decks = db.table("library_decks").select("*").order("id").execute().data
-    cards = fetch_all(lambda: db.table("library_cards").select("deck_id, word").order("id"))
+    # Only decks in the open languages (e.g. not "Spanish for Beginners" while it's English <-> Japanese)
+    decks = db.table("library_decks").select("*").in_("language", ACTIVE_LANGUAGES).order("id").execute().data
+    ids = [deck["id"] for deck in decks]
+    cards = fetch_all(lambda: db.table("library_cards").select("deck_id, word").in_("deck_id", ids).order("id"))
     for deck in decks:
         words = [card["word"] for card in cards if card["deck_id"] == deck["id"]]
         deck["count"] = len(words)
@@ -278,13 +271,8 @@ def import_anki():
 
 def plan_pictures(db, deck_id, cards, media_index):
     """Give each card with a picture its place in Storage (card["image"]), and return
-    what the browser has to upload: [{"zip": "3943", "path": "<my id>/<deck>/<name>.webp"}].
-    Empty if the pictures can't be stored (13_card_images.sql not run yet)."""
+    what the browser has to upload: [{"zip": "3943", "path": "<my id>/<deck>/<name>.webp"}]."""
     if media_index is None:
-        return []
-    try:
-        db.table("flashcards").select("image").limit(1).execute()
-    except Exception:
         return []
     in_zip = read_media_index(media_index)
     me = my_profile(db)["id"]

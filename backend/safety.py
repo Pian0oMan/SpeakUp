@@ -5,8 +5,8 @@
 from flask import request
 
 from backend import chat, rooms
-from backend.setup import socketio, db_for, person_from_token
-from backend.social import block_user
+from backend.setup import socketio, db_for
+from backend.social import block_user, current_person
 
 REASONS = {"harassment", "inappropriate", "hate", "spam", "underage", "other"}
 
@@ -27,7 +27,7 @@ def conversation_with(sid, user_id):
 def report_user(data):
     """e.g. {"token": ..., "user_id": "...", "name": "Sam", "reason": "harassment",
              "details": "...", "block": true, "where": "chat"}"""
-    me = person_from_token(data.get("token"))
+    me = current_person(data.get("token"))
     other = data.get("user_id")
     if not me or not other or other == me["user_id"]:
         return
@@ -46,7 +46,7 @@ def report_user(data):
             }).execute()
         if block:
             block_user(db, me["user_id"], other, data.get("name"))
-    except Exception as error:  # e.g. 12_safety.sql hasn't been run yet
+    except Exception as error:  # e.g. the database didn't answer
         print("Couldn't save the report or block:", error)
         socketio.emit("report_error", "That didn't work. Please try again in a moment.", to=request.sid)
         return

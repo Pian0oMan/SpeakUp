@@ -5,6 +5,8 @@ from flask import request, jsonify, send_from_directory
 
 from backend.setup import (app, db_for, token_from_request, SUPABASE_URL, SUPABASE_ANON_KEY,
                            TURN_URLS, TURN_USERNAME, TURN_CREDENTIAL)
+from backend import social
+from backend.translation import ACTIVE_LANGUAGES, DEEPL_CODES
 
 
 # Visiting http://localhost:5000/ sends the HTML page
@@ -53,6 +55,13 @@ def get_profile():
 @app.route("/api/profile", methods=["PUT"])
 def save_profile():
     data = request.get_json()
+    # The languages to speak + learn must be open (ACTIVE_LANGUAGES in translation.py)
+    if data.get("native") not in ACTIVE_LANGUAGES or data.get("learning") not in ACTIVE_LANGUAGES:
+        return jsonify({"error": "Pick English or Japanese."}), 400
+    if data["native"] == data["learning"]:
+        return jsonify({"error": "Pick a language you're learning that you don't already speak."}), 400
+    if data.get("translate_to") not in DEEPL_CODES:
+        return jsonify({"error": "That translation language isn't available."}), 400
     changes = {
         "username": data["username"],
         "native": data["native"],
@@ -73,11 +82,7 @@ def save_profile():
     if isinstance(data.get("interests"), list):
         extras["interests"] = [topic for topic in INTERESTS if topic in data["interests"]][:MAX_INTERESTS]
 
-    db = db_for(token_from_request())
-    try:
-        db.table("profiles").upsert({**changes, **extras}).execute()
-    except Exception as error:
-        # 09_onboarding.sql hasn't been run yet: save the basics, so signing up still works
-        print("Saved the profile without level/interests:", error)
-        db.table("profiles").upsert(changes).execute()
+    saved = db_for(token_from_request()).table("profiles").upsert({**changes, **extras}).execute().data
+    if saved:
+        social.profile_changed(saved[0])  # matching uses my new languages right away
     return jsonify({"ok": True})

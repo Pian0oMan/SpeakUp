@@ -65,11 +65,7 @@ def create_post():
 # "People to meet": people who like the same things as me (see people_to_meet() in the SQL)
 @app.route("/api/people")
 def people_to_meet():
-    try:
-        return jsonify(db_for(token_from_request()).rpc("people_to_meet").execute().data)
-    except Exception as error:  # e.g. 09_onboarding.sql hasn't been run yet
-        print("Couldn't load people to meet:", error)
-        return jsonify([])
+    return jsonify(db_for(token_from_request()).rpc("people_to_meet").execute().data)
 
 
 @app.route("/api/posts/<int:post_id>", methods=["DELETE"])

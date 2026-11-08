@@ -11,7 +11,12 @@ let deck = {};           // word -> card, e.g. { "hola": { color: "#ffd54f", tra
 let decks = [];          // my decks, e.g. [{ id: 3, name: "My Words" }, { id: 4, name: "Food" }]
 let partnerName = "";
 
-const LANGUAGES = ["English", "Spanish", "French", "German", "Japanese", "Chinese", "Russian"];
+// The languages people can SPEAK and LEARN right now: Speak Up starts with English <-> Japanese,
+// so everyone who signs up can find a partner. (Keep in sync with ACTIVE_LANGUAGES in
+// backend/translation.py. To open up another language, add it to both lists.)
+const LANGUAGES = ["English", "Japanese"];
+// Every language translations can be shown in ("Show translations in" on the profile)
+const ALL_LANGUAGES = ["English", "Spanish", "French", "German", "Japanese", "Chinese", "Russian"];
 
 // Shortcut so we don't type document.getElementById a hundred times
 const el = id => document.getElementById(id);
@@ -148,11 +153,11 @@ function autoColor(name) {
   return `hsl(${hash}, 65%, 55%)`;
 }
 
-// Fill every language dropdown from the list above (so we only write the list once)
+// Fill every language dropdown from the lists above (so we only write them once)
 document.querySelectorAll(".lang-select").forEach(select => {
-  LANGUAGES.forEach(lang => select.add(new Option(lang, lang)));
+  (select.id === "profTranslate" ? ALL_LANGUAGES : LANGUAGES).forEach(lang => select.add(new Option(lang, lang)));
 });
-el("obLearning").value = "Spanish";
+el("obLearning").value = "Japanese";
 
 // Language PAIRS ("I speak" + "I'm learning"): the language picked on one side
 // is blocked (greyed out) on the other side, so they can never be the same.
@@ -174,7 +179,21 @@ LANGUAGE_PAIRS.forEach(pair => {
 });
 
 // REAL-TIME: open an always-on connection to the server
-const socket = io();
+let lastSid = null;  // my connection's id (a new one is made every time it reconnects)
+let inChat = false;  // in a 1-on-1 chat right now?
+// If the connection drops during a chat, the browser reconnects with a new id. It sends
+// its OLD id along, so the server can put it back in the same chat (see chat.py).
+// (This runs on every connect, before anything else is sent.)
+const socket = io({ auth: send => send(inChat && lastSid ? { token, resume: lastSid } : {}) });
+socket.on("connect", () => (lastSid = socket.id));
+
+// Closing the tab: say goodbye properly, so my partner is told right away
+// (otherwise the server waits a few seconds, in case I'm just reconnecting)
+window.addEventListener("pagehide", () => socket.disconnect());
+// Coming back to a page the browser kept in memory (the back button): start fresh
+window.addEventListener("pageshow", event => {
+  if (event.persisted) location.reload();
+});
 
 // Every screen is a <section class="screen">. Show one, hide the rest.
 function showScreen(id) {

@@ -3,6 +3,8 @@
 These files build Speak Up's database. Run them **in order**, in Supabase:
 **Dashboard → SQL Editor → New query → paste → Run**.
 
+**Run all of them.** The server expects every table and function below to be there.
+
 | File | What it adds |
 |---|---|
 | `01_setup.sql` | Profiles and flashcards, with security rules (each user only sees their own rows) |
@@ -18,6 +20,7 @@ These files build Speak Up's database. Run them **in order**, in Supabase:
 | `11_speaking.sql` | Speaking time: minutes you talked, per language, per day |
 | `12_safety.sql` | Blocking and reporting people (and "People to meet" skips blocked people) |
 | `13_card_images.sql` | Pictures on flashcards from Anki decks (a Storage bucket, shrunk pictures only) |
+| `14_xp.sql` | Adding XP in one safe step (so XP earned at the same moment isn't lost) |
 
-Files 04 to 13 are safe to run again. If Supabase offers to "enable RLS" for you,
+Files 04 to 14 are safe to run again. If Supabase offers to "enable RLS" for you,
 run the file as written: every file already turns on Row Level Security itself.

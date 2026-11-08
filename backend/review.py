@@ -110,12 +110,7 @@ def review_card(card_id):
     if grade not in GRADES:
         return jsonify({"error": "The grade must be know or dont_know."}), 400
     db = db_for(token_from_request())
-    try:
-        rows = db.table("flashcards").select("id, word, " + SCHEDULE_FIELDS).eq("id", card_id).execute().data
-        upgraded = True
-    except Exception:  # 10_review.sql hasn't been run yet: only the ring and the status are saved
-        rows = db.table("flashcards").select("id, word").eq("id", card_id).execute().data
-        upgraded = False
+    rows = db.table("flashcards").select("id, word, " + SCHEDULE_FIELDS).eq("id", card_id).execute().data
     if not rows:
         return jsonify({"error": "That card isn't in your decks anymore."}), 404
 
@@ -123,8 +118,7 @@ def review_card(card_id):
     changes = schedule(card, grade)
     if not card.get("due_at") and not card.get("first_studied_at"):
         changes["first_studied_at"] = datetime.now(timezone.utc).isoformat()  # a new card, studied today
-    saved = changes if upgraded else {key: changes[key] for key in ("status", "proficiency")}
-    db.table("flashcards").update(saved).eq("id", card_id).execute()
+    db.table("flashcards").update(changes).eq("id", card_id).execute()
 
     # XP for studying: more when I remembered it, but practice still counts
     reason = "know_it" if grade == "know" else "still_learning"
