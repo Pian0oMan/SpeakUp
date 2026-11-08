@@ -6,7 +6,7 @@
 -- me XP at the same moment (e.g. a chat message and a minute of speaking), one of them
 -- could overwrite the other, and that XP was lost. This adds the XP and updates the streak
 -- in ONE step inside the database, so that can't happen.
--- (Without this file, the server still works the old way.)
+-- The server needs this file: without it, nobody gets XP.
 
 -- p_amount: how much XP (at most 100 at once)
 -- p_today:  today's date in the user's own time zone (for the streak and daily goal)

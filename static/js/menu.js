@@ -31,9 +31,6 @@ function showView(id) {
 function openMenu() {
   if (!profile) return openProfile("Save your profile first.");
   el("greeting").textContent = `Hi, ${profile.username}`;
-  el("matchNative").value = profile.native;
-  el("matchLearning").value = profile.learning;
-  blockSameLanguage(["matchNative", "matchLearning"]);
   socket.emit("list_rooms"); // for "3 people talking in Japanese" on the voice room card
   socket.emit("list_queue"); // for "2 people are waiting for a partner like you" on Quick Match
   updateRoomsLive();
@@ -94,25 +91,6 @@ function openProfile(message) {
   el("profileStatus").textContent = message;
   showView("profileView");
 }
-
-// Changing languages on the Quick Match banner saves them to my profile,
-// so the server matches me with the new languages (and they're remembered next time)
-["matchNative", "matchLearning"].forEach(id => {
-  el(id).addEventListener("change", async () => {
-    const changed = { ...profile, native: el("matchNative").value, learning: el("matchLearning").value };
-    const result = await api("/api/profile", { method: "PUT", body: JSON.stringify(changed) });
-    if (result.error) {
-      showToast(result.error);
-      openMenu(); // put the dropdowns back to what's saved
-      return;
-    }
-    profile = changed;
-    updateRoomsLive(); // the voice room card follows the language I'm practicing
-    updateQueueLive(); // and so does "people waiting"
-    updateTalkPanel(); // "Talk to someone who speaks ..."
-    showToast(`Now practicing ${profile.learning}`);
-  });
-});
 
 // Sidebar buttons
 el("navHome").onclick = openMenu;

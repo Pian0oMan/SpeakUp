@@ -164,7 +164,6 @@ el("obLearning").value = "Japanese";
 const LANGUAGE_PAIRS = [
   ["obNative", "obLearning"],
   ["profNative", "profLearning"],
-  ["matchNative", "matchLearning"],
 ];
 
 function blockSameLanguage([firstId, secondId]) {

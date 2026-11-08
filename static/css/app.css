@@ -51,19 +51,6 @@
 .content h2 { margin: 0 0 22px; font-size: 34px; font-weight: 800; }
 .content .card { max-width: 560px; }
 
-.chips { display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap; }
-.chip-label { flex: 0; font-size: 12px; font-weight: 700; }
-.chip {
-  background: var(--surface);
-  color: var(--text);
-  border: var(--line);
-  padding: 7px 12px;
-  border-radius: var(--radius-sm);
-  font-weight: 700;
-  cursor: pointer;
-}
-.arrow { font-size: 22px; font-weight: 800; padding-bottom: 6px; }
-
 /* ---------- Home: TALK NOW (the one big thing on the page) ----------
    Yellow for 1-on-1, violet for a group room: the switch changes the color. */
 .talk-panel {
