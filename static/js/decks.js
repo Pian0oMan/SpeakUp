@@ -260,6 +260,9 @@ async function openLibrary() {
   box.textContent = "Loading...";
   const libraryDecks = await api("/api/library");
   box.innerHTML = "";
+  // Decks in the language I'm learning come first (the order stays level 1, 2, 3...)
+  const learning = profile && profile.learning;
+  libraryDecks.sort((a, b) => (b.language === learning) - (a.language === learning));
   libraryDecks.forEach(libraryDeck => {
     const card = document.createElement("div");
     card.className = "room-card"; // same look as the room cards

@@ -21,6 +21,10 @@ These files build Speak Up's database. Run them **in order**, in Supabase:
 | `12_safety.sql` | Blocking and reporting people (and "People to meet" skips blocked people) |
 | `13_card_images.sql` | Pictures on flashcards from Anki decks (a Storage bucket, shrunk pictures only) |
 | `14_xp.sql` | Adding XP in one safe step (so XP earned at the same moment isn't lost) |
+| `15_level_decks.sql` | The level decks: Japanese 1–5 and English 1–5, about 1000 words per language, easy to hard. Replaces the 2 beginner decks from 04 (run 15 again if you ever re-run 04) |
 
-Files 04 to 14 are safe to run again. If Supabase offers to "enable RLS" for you,
+**The level decks are made from word lists.** To add or fix words, edit `library/japanese.txt`
+or `library/english.txt`, run `python sql/library/build.py`, then run `15_level_decks.sql` again.
+
+Files 04 to 15 are safe to run again. If Supabase offers to "enable RLS" for you,
 run the file as written: every file already turns on Row Level Security itself.

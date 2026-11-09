@@ -1,0 +1,1085 @@
+// ENGLISH for Japanese speakers: 5 levels, about 200 words each (level 1 = first words ... level 5 = idioms and nuance).
+// word | meaning (Japanese) | example | note (optional, Japanese)
+
+@deck English 1 · First Words | English | Japanese | レベル1/5。最初の200語：挨拶、人、数字、時間、食べ物、基本の動詞と形容詞。Your first 200 English words.
+# 挨拶
+hello | こんにちは | Hello, nice to meet you.
+hi | やあ / こんにちは | Hi! How are you? | カジュアル。
+good morning | おはよう(ございます) | Good morning, everyone!
+good night | おやすみ(なさい) | Good night, see you tomorrow.
+nice to meet you | はじめまして | Nice to meet you, I'm Yuki. | 初めて会ったとき。
+how are you? | 元気ですか？ | Hi Tom, how are you? | 答え方：I'm good, thanks.
+thank you | ありがとう | Thank you for your help. | カジュアル：thanks.
+you're welcome | どういたしまして | "Thanks!" "You're welcome."
+sorry | ごめんなさい | Sorry, I'm late.
+excuse me | すみません | Excuse me, where is the station? | 人に話しかけるとき。謝るときは sorry.
+please | お願いします / どうぞ | Water, please.
+yes | はい | Yes, I am.
+no | いいえ | No, thank you.
+bye | じゃあね / さようなら | Bye! See you later.
+see you | またね | See you tomorrow!
+# 人
+me | 私を / 私に | Call me later.
+you | あなた | Are you Japanese?
+he | 彼 | He is my brother.
+she | 彼女 | She is my teacher.
+we | 私たち | We are friends.
+they | 彼ら | They live in Tokyo.
+friend | 友達 | She is my best friend.
+family | 家族 | I have a big family.
+mother | 母 | My mother is a nurse. | カジュアル：mom (米), mum (英).
+father | 父 | My father works in a bank. | カジュアル：dad.
+brother | 兄 / 弟 | I have one brother. | 兄は older brother、弟は younger brother.
+sister | 姉 / 妹 | My sister is ten years old.
+child | 子供 | They have one child. | 複数形：children.
+man | 男の人 | That man is tall. | 複数形：men.
+woman | 女の人 | The woman is a doctor. | 複数形：women.
+people | 人々 | Many people live here. | person の複数形。
+teacher | 先生 | My English teacher is from Canada.
+student | 学生 | I'm a university student.
+name | 名前 | What's your name?
+# 数字
+one | 1 | I have one cat.
+two | 2 | Two coffees, please.
+three | 3 | I have three brothers.
+four | 4 | It's four o'clock.
+five | 5 | Wait five minutes.
+six | 6 | I get up at six.
+seven | 7 | There are seven days in a week.
+eight | 8 | School starts at eight.
+nine | 9 | I go to bed at nine.
+ten | 10 | It takes ten minutes.
+hundred | 百 | It's two hundred yen.
+thousand | 千 | Three thousand people came.
+how many | いくつ | How many brothers do you have? | 数えられるもの。
+how much | いくら | How much is this?
+number | 数 / 番号 | What's your phone number?
+# 時間
+today | 今日 | Today is Monday.
+tomorrow | 明日 | See you tomorrow!
+yesterday | 昨日 | I was busy yesterday.
+now | 今 | I'm busy now.
+morning | 朝 / 午前 | I drink coffee in the morning.
+afternoon | 午後 | Let's meet in the afternoon.
+evening | 夕方 / 夜 | What are you doing this evening?
+night | 夜 | I study at night.
+day | 日 / 昼 | Have a nice day!
+week | 週 | See you next week.
+month | 月 | I'm going to Japan next month.
+year | 年 | I'm twenty years old.
+time | 時間 / 時刻 | What time is it?
+o'clock | 〜時 | It's three o'clock. | ちょうどの時刻だけ。
+weekend | 週末 | What did you do on the weekend?
+always | いつも | I always eat breakfast.
+sometimes | 時々 | I sometimes cook.
+never | 一度も〜ない | I never drink coffee.
+# 食べ物
+food | 食べ物 | I love Japanese food.
+water | 水 | Can I have some water?
+coffee | コーヒー | I drink coffee every morning.
+tea | お茶 / 紅茶 | Would you like some tea? | 普通は紅茶。緑茶は green tea.
+rice | ご飯 / お米 | I eat rice every day.
+bread | パン | I bought some bread.
+meat | 肉 | I don't eat meat.
+fish | 魚 | Do you like fish?
+egg | 卵 | I had two eggs for breakfast.
+fruit | 果物 | I eat fruit every day.
+apple | りんご | An apple a day keeps the doctor away.
+breakfast | 朝ご飯 | What did you have for breakfast?
+lunch | 昼ご飯 | Let's have lunch together.
+dinner | 晩ご飯 | Dinner is ready!
+# 場所
+home | 家 | I'm going home. | go home には to がつかない。
+house | 家 (建物) | They live in a big house.
+school | 学校 | I go to school by bus.
+station | 駅 | Where is the station?
+shop | 店 | This shop is open until ten. | アメリカでは store も。
+room | 部屋 | My room is small.
+city | 都市 / 市 | Tokyo is a big city.
+country | 国 / 田舎 | What country are you from?
+here | ここ | Come here!
+there | そこ / あそこ | The station is over there.
+where | どこ | Where do you live?
+bathroom | トイレ / 浴室 | Where is the bathroom? | アメリカでは「トイレ」は bathroom や restroom と言う。
+# もの
+this | これ / この | What is this?
+that | それ / あれ | That is my bag.
+book | 本 | I'm reading a good book.
+phone | 電話 / スマホ | Can I use your phone?
+money | お金 | I don't have any money. | 数えられない。a money とは言わない。
+car | 車 | My father has a red car.
+bag | かばん / 袋 | My bag is heavy.
+clothes | 服 | I need new clothes.
+shoes | 靴 | Take off your shoes, please.
+key | 鍵 | I lost my key.
+# 質問
+what | 何 | What is your name?
+who | 誰 | Who is that?
+when | いつ | When is your birthday?
+why | なぜ | Why are you learning English?
+how | どう / どうやって | How do you say this in English?
+which | どれ / どちら | Which one do you want?
+# 動詞
+be | 〜である / いる | I am happy. She is at home. | am / is / are に変わる。
+have | 持っている / 食べる | I have a dog. I have lunch at noon.
+do | する | What do you do on weekends?
+go | 行く | I go to school every day.
+come | 来る | Come to my party!
+eat | 食べる | Let's eat sushi.
+drink | 飲む | I drink milk every day.
+see | 見る / 会う | I can see the mountain. See you!
+watch | (じっと)見る | I watch TV at night. | テレビ、映画、試合など。
+look | 見る (目を向ける) | Look at this picture!
+listen | 聞く | I listen to music. | listen to 〜.
+hear | 聞こえる | Can you hear me?
+speak | 話す | I speak a little English.
+talk | 話す / しゃべる | Let's talk about our hobbies.
+say | 言う | What did you say?
+tell | 伝える / 教える | Tell me about your family.
+read | 読む | I read books on the train.
+write | 書く | Write your name here.
+buy | 買う | I want to buy a new phone.
+like | 好き | I like cats.
+want | 欲しい / 〜したい | I want to go to Japan.
+know | 知っている | I know that song!
+understand | 理解する / わかる | Sorry, I don't understand.
+think | 思う / 考える | I think it's a good idea.
+live | 住む | I live in Osaka.
+work | 働く / 仕事 | My mother works at a hospital.
+study | 勉強する | I study English every day.
+sleep | 寝る / 睡眠 | I sleep eight hours a night.
+wake up | 目が覚める / 起きる | I wake up at seven.
+make | 作る | I can make pancakes.
+give | あげる / 与える | I gave her a present.
+take | 取る / 持っていく | Take an umbrella.
+help | 手伝う / 助ける | Can you help me?
+wait | 待つ | Wait a minute, please. | wait for 〜 = 〜を待つ.
+meet | 会う | Nice to meet you.
+play | 遊ぶ / (スポーツを)する / 演奏する | I play soccer on Sundays.
+# 形容詞
+good | いい / 上手な | This is a good book.
+bad | 悪い | The weather is bad today.
+big | 大きい | That's a big dog!
+small | 小さい | My room is small.
+new | 新しい | I have a new phone.
+old | 古い / 年をとった | This is an old house. | 人にも使う。How old are you? = 何歳ですか？
+hot | 暑い / 熱い / 辛い | It's hot today.
+cold | 寒い / 冷たい | It's cold outside.
+happy | 幸せな / 嬉しい | I'm happy to see you.
+sad | 悲しい | Why are you sad?
+easy | 簡単な | This test is easy.
+difficult | 難しい | Japanese is difficult. | hard とも言う。
+expensive | 高い (値段) | This bag is expensive.
+cheap | 安い | This shop is cheap.
+delicious | おいしい | This ramen is delicious! | 普段の会話では good や tasty も。
+fun | 楽しい | The party was fun!
+busy | 忙しい | I'm busy this week.
+tired | 疲れた | I'm so tired.
+hungry | お腹がすいた | I'm hungry. Let's eat!
+beautiful | 美しい / きれいな | What a beautiful view!
+# 便利な言葉
+very | とても | It's very cold.
+really | 本当に | I really like it.
+a little | 少し | I speak a little Japanese.
+a lot | たくさん | Thanks a lot!
+too | 〜も / あまりにも | Me too! It's too hot.
+and | そして / 〜と | I like cats and dogs.
+but | でも / しかし | I like it, but it's expensive.
+or | または / それとも | Tea or coffee?
+because | なぜなら / 〜だから | I'm tired because I worked late.
+so | だから / とても | It was late, so I went home.
+# 便利なフレーズ
+What's your name? | お名前は？ | Hi, what's your name?
+Where are you from? | 出身はどこですか？ | Where are you from? I'm from Japan.
+I don't understand | わかりません | Sorry, I don't understand.
+Can you say that again? | もう一度言ってもらえますか？ | Sorry, can you say that again?
+Please speak slowly | ゆっくり話してください | Could you please speak slowly?
+How do you say ~ in English? | 〜は英語で何と言いますか？ | How do you say 「猫」 in English?
+What does ~ mean? | 〜はどういう意味ですか？ | What does "awesome" mean?
+Me too | 私も | "I love anime!" "Me too!"
+That's right | その通り | That's right! Good job.
+No problem | 大丈夫 / どういたしまして | "Sorry!" "No problem."
+# 曜日と色
+Monday | 月曜日 | I have English class on Monday.
+Friday | 金曜日 | Let's go out on Friday night!
+Sunday | 日曜日 | I relax on Sundays.
+red | 赤 | I like red.
+blue | 青 | The sky is blue.
+white | 白 | She has a white cat.
+black | 黒 | I wear black a lot.
+green | 緑 | The leaves are green.
+color | 色 | What's your favorite color? | イギリス：colour.
+# 自然と動物
+dog | 犬 | I have a dog.
+cat | 猫 | My cat sleeps all day.
+tree | 木 | There's a big tree in the park.
+flower | 花 | These flowers are beautiful.
+mountain | 山 | Mt. Fuji is a famous mountain.
+sea | 海 | Let's go to the sea this summer. | the beach もよく使う。
+
+@deck English 2 · Everyday Life | English | Japanese | レベル2/5。日常生活の200語：家、買い物、外食、移動、体、趣味、もっと動詞と形容詞。Words for everyday life.
+# 家
+kitchen | 台所 | My mom is in the kitchen.
+bedroom | 寝室 | My bedroom is upstairs.
+window | 窓 | Can I open the window?
+door | ドア | Please close the door.
+table | テーブル | The keys are on the table.
+chair | 椅子 | Sit on this chair.
+bed | ベッド | I go to bed at eleven.
+fridge | 冷蔵庫 | There's milk in the fridge. | refrigerator の短縮。
+light | 電気 / 光 / 軽い | Turn off the light, please.
+floor | 床 / 階 | My room is on the second floor.
+wall | 壁 | There's a clock on the wall.
+clean | 掃除する / きれいな | I clean my room on Sundays.
+wash | 洗う | Wash your hands before dinner.
+cook | 料理する | I cook dinner every night.
+# 買い物
+shopping | 買い物 | Let's go shopping!
+supermarket | スーパー | I buy food at the supermarket.
+price | 値段 | The price is too high.
+pay | 払う | Can I pay by card?
+cash | 現金 | Do you take cash?
+sell | 売る | They sell fresh bread.
+size | サイズ | Do you have this in a smaller size?
+try on | 試着する | Can I try this on?
+receipt | レシート | Can I have a receipt?
+sale | セール / 販売 | Everything is on sale today!
+# 外食
+restaurant | レストラン | Let's eat at that restaurant.
+menu | メニュー | Can I see the menu, please?
+order | 注文する / 注文 | Are you ready to order?
+bill | お会計 / 請求書 | Can we have the bill, please? | アメリカでは check とも言う。
+waiter | ウェイター / 店員 | The waiter is very friendly.
+sweet | 甘い | This cake is too sweet.
+spicy | 辛い | Is this curry spicy?
+salty | しょっぱい | The soup is a little salty.
+bitter | 苦い | This coffee is bitter.
+thirsty | 喉が渇いた | I'm thirsty. Can I have some water?
+full | お腹いっぱい / 満員の | I'm full. Thank you!
+for here or to go? | 店内で？持ち帰り？ | "For here or to go?" "To go, please."
+# 移動
+street | 通り | I live on this street.
+right | 右 / 正しい | Turn right at the corner.
+left | 左 | The bank is on the left.
+straight | まっすぐ | Go straight for two blocks.
+near | 近い / 近くに | Is there a bank near here?
+far | 遠い | Is it far from here?
+bus | バス | I take the bus to work.
+train | 電車 | The train is late again.
+plane | 飛行機 | The plane leaves at 9 a.m.
+airport | 空港 | How do I get to the airport?
+ticket | 切符 / チケット | One ticket to Kyoto, please.
+map | 地図 | Can you show me on the map?
+walk | 歩く | I walk to school.
+drive | 運転する | Can you drive?
+ride | 乗る | I ride my bike to work. | 自転車、馬、乗り物に。
+get on | 乗る | Get on the train.
+get off | 降りる | Get off at the next stop.
+arrive | 着く | We arrived at the hotel late.
+leave | 出発する / 去る | The bus leaves at six.
+turn | 曲がる | Turn left at the light.
+# 体と健康
+body | 体 | Exercise is good for your body.
+head | 頭 | I have a headache. My head hurts.
+face | 顔 | Wash your face.
+eye | 目 | She has blue eyes.
+ear | 耳 | My ears are cold.
+mouth | 口 | Open your mouth, please.
+hand | 手 | Raise your hand.
+foot | 足 | My foot hurts. | 複数形：feet. 足首から上は leg.
+stomach | お腹 / 胃 | My stomach hurts.
+tooth | 歯 | I brush my teeth twice a day. | 複数形：teeth.
+hurt | 痛む / 傷つける | My back hurts.
+sick | 病気の / 気持ち悪い | I feel sick.
+medicine | 薬 | Take this medicine after meals. | 薬は take で「飲む」。
+a cold | 風邪 | I have a cold. | 風邪は a をつける。catch a cold = 風邪をひく.
+fever | 熱 | I have a fever.
+doctor | 医者 | You should see a doctor.
+headache | 頭痛 | I have a terrible headache.
+# 趣味
+hobby | 趣味 | What are your hobbies?
+music | 音楽 | What kind of music do you like?
+movie | 映画 | Let's watch a movie tonight. | イギリスでは film も。
+photo | 写真 | Can I take a photo?
+song | 歌 | This is my favorite song.
+game | ゲーム / 試合 | Do you play video games?
+sport | スポーツ | What sports do you play?
+travel | 旅行する / 旅行 | I love to travel.
+swim | 泳ぐ | Can you swim?
+sing | 歌う | She sings very well.
+dance | 踊る / ダンス | Let's dance!
+draw | (線で)描く | I like to draw anime characters.
+favorite | お気に入りの / 一番好きな | What's your favorite food? | イギリス：favourite.
+free time | 自由時間 / 暇な時間 | What do you do in your free time?
+# 天気と季節
+weather | 天気 | How's the weather today?
+spring | 春 | Cherry blossoms bloom in spring.
+summer | 夏 | Summer in Japan is hot.
+fall | 秋 | I love the colors of fall. | イギリスでは autumn.
+winter | 冬 | It snows in winter.
+sunny | 晴れた | It's sunny today.
+cloudy | 曇った | It's cloudy this morning.
+rain | 雨 / 雨が降る | It's raining.
+snow | 雪 / 雪が降る | Look, it's snowing!
+wind | 風 | The wind is strong today.
+warm | 暖かい | It's warm today.
+cool | 涼しい / かっこいい | It's cool in the evening. That's so cool!
+# 時間の言葉
+last week | 先週 | I went to Tokyo last week.
+next week | 来週 | I have a test next week.
+last year | 去年 | I graduated last year.
+next year | 来年 | I'm going to Japan next year.
+every day | 毎日 | I study English every day. | everyday (一語) は形容詞「日常の」。
+often | よく / しばしば | I often eat out.
+usually | 普段は / たいてい | I usually get up at seven.
+early | 早い / 早く | I got up early today.
+late | 遅い / 遅く | Sorry I'm late!
+soon | すぐに / もうすぐ | See you soon!
+already | もう / すでに | I already ate.
+yet | まだ / もう (疑問文) | I haven't eaten yet. Are you done yet?
+still | まだ (続いている) | I'm still at work.
+again | また / もう一度 | Can you say that again?
+before | 前に | Wash your hands before you eat.
+after | 後で | Let's go after lunch.
+# 学校と仕事
+university | 大学 | I go to university in Tokyo. | アメリカでは college もよく使う。
+class | 授業 / クラス | My first class starts at nine.
+homework | 宿題 | I have a lot of homework. | 数えられない。
+test | テスト | I passed the test!
+question | 質問 | Can I ask a question?
+answer | 答え / 答える | I don't know the answer.
+word | 単語 / 言葉 | What does this word mean?
+meaning | 意味 | What's the meaning of this word?
+job | 仕事 | I have a part-time job.
+office | 事務所 / オフィス | I work in an office.
+meeting | 会議 | I have a meeting at three.
+boss | 上司 | My boss is very nice.
+# もっと動詞
+open | 開ける / 開いている | Open the door, please.
+close | 閉める | Close the window, please. | 形容詞 (近い) の発音は「クロース」。
+start | 始める / 始まる | The movie starts at seven.
+finish | 終える / 終わる | I finished my homework.
+put | 置く | Put your bag here.
+wear | 着ている / 身につけている | She's wearing a red dress. | 服、靴、帽子、眼鏡など全部 wear.
+lend | 貸す | Can you lend me a pen?
+borrow | 借りる | Can I borrow your pen?
+teach | 教える | She teaches English.
+learn | 学ぶ / 覚える | I'm learning Japanese.
+remember | 覚えている / 思い出す | Do you remember me?
+forget | 忘れる | Don't forget your umbrella!
+find | 見つける | I can't find my keys.
+lose | なくす / 負ける | I lost my wallet.
+send | 送る | I'll send you a message.
+call | 電話する / 呼ぶ | I'll call you later.
+sit | 座る | Please sit down.
+stand | 立つ | Please stand up.
+need | 必要とする | I need help.
+try | やってみる / 試す | Try this cake!
+use | 使う | Can I use your phone?
+feel | 感じる | How do you feel today?
+# もっと形容詞
+long | 長い | She has long hair.
+short | 短い / 背が低い | The movie was short.
+tall | 背が高い / 高い | He's very tall.
+heavy | 重い | This box is heavy.
+fast | 速い / 速く | He runs fast.
+slow | 遅い (速さ) | The internet is slow today.
+quiet | 静かな | The library is quiet.
+noisy | うるさい | The street is noisy.
+famous | 有名な | Mt. Fuji is very famous.
+important | 大切な / 重要な | Family is important to me.
+free | 暇な / 無料の / 自由な | Are you free tomorrow? It's free!
+same | 同じ | We're in the same class.
+different | 違う / 異なる | Japanese is very different from English.
+cute | かわいい | Your cat is so cute!
+interesting | 面白い / 興味深い | This book is interesting. | 笑える面白さは funny.
+funny | 面白い (笑える) | He's really funny.
+# 便利なフレーズ
+Let's go! | 行こう！ | Come on, let's go!
+Good luck! | 頑張って！ / 幸運を | Good luck on your test!
+Take care | 気をつけて / お元気で | Bye, take care!
+Here you are | はい、どうぞ | "Can I have the salt?" "Here you are."
+Of course | もちろん | "Can you help me?" "Of course!"
+I'm home | ただいま | Mom, I'm home! | 英語では毎回言うわけではない。
+Wait a minute | ちょっと待って | Wait a minute, I'm coming!
+Excuse me? | えっ、何て？ | Excuse me? Could you repeat that? | 聞き返すとき。
+Have a nice day | よい一日を | Thanks! Have a nice day!
+What time is it? | 今何時？ | Excuse me, what time is it?
+# 位置
+on | 〜の上に | The book is on the table.
+in | 〜の中に | The keys are in my bag.
+under | 〜の下に | The cat is under the bed.
+next to | 〜の隣に | The bank is next to the station.
+behind | 〜の後ろに | The park is behind the school.
+in front of | 〜の前に | Let's meet in front of the station.
+between | 〜の間に | The cafe is between the bank and the post office.
+inside | 中に / 内側 | Let's go inside. It's cold.
+outside | 外に / 外側 | The kids are playing outside.
+upstairs | 上の階に | My room is upstairs.
+# 数える
+first | 1番目 / 最初 | This is my first time in Japan.
+second | 2番目 / 秒 | Wait a second!
+last | 最後の / この前の | This is the last train.
+half | 半分 | Half past three. (3時半)
+all | 全部 / みんな | I ate it all!
+every | 毎〜 / すべての | I go there every Sunday.
+some | いくつか / 少し | I want some water.
+any | 何か / どれでも | Do you have any questions?
+many | たくさんの (数) | I have many friends. | 数えられるもの。
+much | たくさんの (量) | I don't have much time. | 数えられないもの。
+# 家族 (もっと)
+parents | 両親 | My parents live in Osaka.
+husband | 夫 | Her husband is a chef.
+wife | 妻 | My wife and I love to travel.
+baby | 赤ちゃん | The baby is sleeping.
+grandmother | 祖母 / おばあちゃん | My grandmother is ninety. | カジュアル：grandma.
+
+@deck English 3 · Getting Things Done | English | Japanese | レベル3/5。旅行、仕事、学校、予定、気持ちの200語。過去の話や希望が言えるようになる。Words for travel, work, plans and feelings.
+# 気持ち
+excited | ワクワクした | I'm so excited about the trip!
+nervous | 緊張した | I'm nervous about the interview.
+worried | 心配な | I'm worried about my test.
+angry | 怒った | Why are you angry?
+scared | 怖がった | I'm scared of spiders.
+surprised | 驚いた | I was surprised to see him.
+bored | 退屈した | I'm bored. Let's do something. | boring = 退屈な (もの・人)。
+lonely | 寂しい | I feel lonely sometimes.
+embarrassed | 恥ずかしい | I was so embarrassed!
+proud | 誇りに思う | I'm proud of you.
+relaxed | リラックスした | I feel relaxed after a bath.
+upset | 動揺した / 怒った | She was upset about the news.
+glad | 嬉しい | I'm glad you came.
+miss | 恋しく思う / 乗り遅れる | I miss you. I missed the bus.
+cry | 泣く | The movie made me cry.
+laugh | 笑う | He always makes me laugh.
+smile | 笑顔 / ほほえむ | She has a beautiful smile.
+# 旅行
+trip | 旅行 | How was your trip?
+hotel | ホテル | We stayed at a nice hotel.
+reservation | 予約 | I have a reservation for two.
+book a table | (店の) 席を予約する | I booked a table for two at seven.
+luggage | 荷物 | My luggage is too heavy. | 数えられない。アメリカでは baggage も。
+passport | パスポート | Don't forget your passport.
+sightseeing | 観光 | We went sightseeing in Kyoto.
+souvenir | お土産 | I bought souvenirs for my friends. | 英語圏ではお土産文化は日本ほど強くない。
+abroad | 海外に / 海外で | I want to study abroad. | go abroad (to はつかない)。
+flight | 便 / フライト | My flight was delayed.
+delay | 遅れ / 遅らせる | Sorry for the delay.
+view | 景色 / 意見 | The view from here is amazing.
+stay | 滞在する / 泊まる | How long are you staying?
+get lost | 道に迷う | I got lost in Shinjuku station.
+visit | 訪れる | I want to visit London.
+# 仕事
+company | 会社 | I work for a big company.
+coworker | 同僚 | My coworkers are friendly. | colleague とも言う。
+salary | 給料 | The salary is good.
+part-time job | アルバイト | I have a part-time job at a cafe.
+interview | 面接 / インタビュー | I have a job interview tomorrow.
+experience | 経験 | Do you have any work experience?
+email | メール | I'll send you an email.
+deadline | 締め切り | The deadline is Friday.
+contact | 連絡する / 連絡先 | Please contact me anytime.
+prepare | 準備する | I need to prepare for the meeting.
+customer | 客 / 顧客 | The customer is always right.
+manager | 部長 / 店長 / 管理者 | I'd like to speak to the manager.
+overtime | 残業 | I worked overtime again.
+schedule | 予定 / スケジュール | What's your schedule for tomorrow?
+# 学校
+classroom | 教室 | The classroom is on the third floor.
+library | 図書館 | I study at the library.
+exam | 試験 | I have an exam next week.
+pass | 合格する / 渡す | I passed the exam! Can you pass the salt?
+fail | 失敗する / 落ちる | I failed my driving test.
+practice | 練習する / 練習 | I practice English every day.
+review | 復習する / 見直す | Let's review today's lesson.
+grammar | 文法 | English grammar is not so hard.
+vocabulary | 語彙 | I want to increase my vocabulary.
+pronunciation | 発音 | Your pronunciation is very good!
+dictionary | 辞書 | Look it up in the dictionary.
+study abroad | 留学する | I want to study abroad in Canada.
+graduate | 卒業する | I graduated from university last year.
+mistake | 間違い | Don't worry about mistakes.
+# 予定と誘い
+plan | 予定 / 計画する | Do you have any plans this weekend?
+promise | 約束する / 約束 | I promise I won't be late.
+invite | 招待する / 誘う | Thanks for inviting me!
+join | 参加する / 加わる | Do you want to join us?
+hurry | 急ぐ | Hurry up! We're late.
+decide | 決める | I can't decide what to eat.
+change | 変える / 変わる / お釣り | Let's change the plan.
+cancel | キャンセルする | I had to cancel my trip.
+enjoy | 楽しむ | Enjoy your meal!
+on time | 時間通りに | The train arrived on time.
+available | 都合がつく / 利用できる | Are you available on Friday?
+hang out | ぶらぶらする / 遊ぶ | Let's hang out this weekend. | 友達と遊ぶ = hang out (play は子供)。
+How about ~? | 〜はどう？ | How about Saturday?
+Why don't we ~? | 〜しませんか？ | Why don't we get some lunch?
+# 人間関係
+boyfriend | 彼氏 | Do you have a boyfriend?
+girlfriend | 彼女 | His girlfriend is from Spain. | 女性同士の友達にも使うことがある。
+couple | カップル / 夫婦 | They're a cute couple.
+married | 結婚している | Are you married?
+date | デート / 日付 | We went on a date last night.
+adult | 大人 | Adults pay 1,000 yen.
+neighbor | 隣人 / 近所の人 | My neighbor is very kind. | イギリス：neighbour.
+everyone | みんな | Hi, everyone!
+myself | 自分自身 | I made it myself.
+kind | 親切な / 種類 | That's very kind of you. What kind of music do you like?
+friendly | 人なつっこい / 親しみやすい | People here are very friendly.
+get along | 仲良くやる | I get along well with my sister.
+# 街とサービス
+bank | 銀行 | The bank closes at three.
+post office | 郵便局 | Where is the post office?
+police | 警察 | Call the police!
+park | 公園 / 駐車する | Let's walk in the park. Where can I park?
+building | 建物 | That building is very old.
+entrance | 入口 | The entrance is over there.
+exit | 出口 | Where's the exit?
+stairs | 階段 | Take the stairs to the second floor.
+elevator | エレベーター | Let's take the elevator. | イギリス：lift.
+traffic light | 信号 | Turn right at the traffic light.
+corner | 角 | The shop is on the corner.
+town | 町 | I grew up in a small town.
+countryside | 田舎 | I like the quiet countryside.
+convenience store | コンビニ | There's a convenience store on every corner in Japan.
+# 物事をする
+look up | 調べる | Look it up online.
+compare | 比べる | Let's compare prices.
+explain | 説明する | Can you explain it again?
+carry | 運ぶ / 持ち歩く | Can you carry this box?
+pick up | 拾う / 迎えに行く | I'll pick you up at the station.
+throw away | 捨てる | Don't throw that away!
+drop | 落とす | I dropped my phone.
+break | 壊す / 壊れる / 休憩 | I broke my glasses. Let's take a break.
+fix | 直す | Can you fix my bike?
+keep | 保つ / 取っておく | Keep the change.
+continue | 続ける | Let's continue tomorrow.
+stop | 止める / 止まる | Stop! That's dangerous.
+grow | 育つ / 育てる | I grew up in Osaka.
+check | 確認する | Let me check my schedule.
+# できる・許可
+can | 〜できる | I can swim.
+could | 〜できた / 〜していただけますか | Could you help me? | can より丁寧。
+should | 〜すべき / 〜したほうがいい | You should see a doctor.
+must | 〜しなければならない | You must wear a seatbelt. | 会話では have to をよく使う。
+have to | 〜しなければならない | I have to go now.
+may | 〜かもしれない / 〜してもよい | May I come in? It may rain.
+allowed | 許されている | You're not allowed to smoke here.
+necessary | 必要な | Is it necessary to bring my passport?
+impossible | 不可能な | That's impossible!
+# 描写
+dangerous | 危ない | This road is dangerous at night.
+safe | 安全な | Japan is a very safe country.
+dirty | 汚い | My room is dirty.
+crowded | 混んでいる | The train is very crowded.
+empty | 空の / 空いている | The restaurant was empty.
+rare | 珍しい / (肉が) レア | That's a rare name.
+special | 特別な | Today is a special day.
+simple | 単純な / 簡単な | The rules are simple.
+complicated | 複雑な | It's a bit complicated.
+correct | 正しい | That's correct!
+wrong | 間違った / 調子が悪い | What's wrong?
+similar | 似ている | Your bag is similar to mine.
+comfortable | 快適な / 着心地がいい | These shoes are very comfortable.
+# つなぎの言葉
+for example | 例えば | I like Japanese food, for example sushi and ramen.
+then | それから / その時 | First wash your hands, then eat.
+also | 〜も / また | I also like cats.
+however | しかし | It was expensive. However, it was worth it.
+maybe | たぶん / もしかしたら | Maybe it will rain tomorrow.
+probably | おそらく | He's probably at home.
+sure | もちろん / いいよ | "Can I sit here?" "Sure!"
+actually | 実は | Actually, I'm from Osaka.
+especially | 特に | I love fruit, especially strawberries.
+recently | 最近 | I've been busy recently.
+finally | ついに / 最後に | I finally finished my homework!
+right away | すぐに | I'll do it right away.
+for the first time | 初めて | I ate natto for the first time.
+# 便利なフレーズ
+I have a favor to ask | お願いがあるんだけど | I have a favor to ask. Can you help me move?
+What's wrong? | どうしたの？ | You look sad. What's wrong?
+I see | なるほど / そうなんだ | I see. That makes sense.
+What should I do? | どうしよう | I lost my wallet! What should I do?
+It can't be helped | 仕方ない | It's raining, but it can't be helped.
+Thank goodness | よかった / ほっとした | Thank goodness you're safe!
+Hold on | ちょっと待って (電話など) | Hold on, let me check.
+Never mind | 気にしないで / なんでもない | Never mind, it's not important.
+I'm sorry to hear that | それはお気の毒に | "I'm sick." "I'm sorry to hear that."
+Sounds good | いいね | "Pizza tonight?" "Sounds good!"
+# 日常
+brush my teeth | 歯を磨く | I brush my teeth before bed. | 自分以外なら brush your teeth など。
+take a shower | シャワーを浴びる | I take a shower every morning.
+take a walk | 散歩する | Let's take a walk after dinner.
+exercise | 運動する / 運動 | I exercise three times a week.
+nap | 昼寝 | I took a nap after lunch.
+get used to | 〜に慣れる | I got used to life in Japan.
+commute | 通勤する / 通勤 | My commute takes an hour.
+move | 引っ越す / 動く | We moved to Tokyo last year.
+# お金
+wallet | 財布 | I left my wallet at home.
+save | 貯める / 救う / 保存する | I'm saving money for a trip.
+discount | 割引 | Is there a student discount?
+enough | 十分な | I don't have enough money.
+spend | (お金・時間を) 使う / 過ごす | I spent too much money.
+cost | (費用が) かかる | How much does it cost?
+# テクノロジー
+computer | パソコン / コンピューター | I use my computer for work. | PC とも言う。
+app | アプリ | This app is really useful.
+password | パスワード | I forgot my password.
+charge | 充電する / 請求する | I need to charge my phone.
+screen | 画面 | My phone screen is broken.
+video | 動画 | I watched a funny video.
+post | 投稿する / 投稿 | I posted a photo on Instagram.
+download | ダウンロードする | Download the app for free.
+press | 押す | Press the button.
+turn on | (電源を) つける | Turn on the light, please.
+turn off | (電源を) 消す | Turn off your phone, please.
+# 体の動き
+run | 走る | I run every morning.
+jump | 跳ぶ | The cat jumped on the table.
+climb | 登る | We climbed Mt. Fuji.
+fall down | 転ぶ | I fell down on the ice.
+push | 押す | Push the door to open it.
+pull | 引く | Pull, don't push!
+hold | 持つ / 抱く | Can you hold my bag?
+catch | 捕まえる / (電車に) 間に合う | I caught the last train.
+throw | 投げる | Throw me the ball!
+shake hands | 握手する | In America, people shake hands when they meet.
+bow | お辞儀する | In Japan, people bow.
+wave | 手を振る / 波 | She waved goodbye.
+hug | 抱きしめる / ハグ | Give me a hug!
+point | 指さす | Don't point at people.
+nod | うなずく | He nodded and smiled.
+whisper | ささやく | She whispered in my ear.
+
+@deck English 4 · Real Conversations | English | Japanese | レベル4/5。本当の会話の200語：意見、理由、カジュアルな英語、人間関係、よく使う句動詞 (phrasal verbs)。Words for real conversations.
+# 意見
+opinion | 意見 | In my opinion, it's too expensive.
+agree | 賛成する / 同意する | I agree with you.
+disagree | 反対する | I disagree. I think it's a good idea.
+definitely | 絶対に / 間違いなく | I'll definitely come!
+I guess | たぶん / 〜かな | I guess you're right.
+I feel like | 〜な気がする / 〜したい気分 | I feel like it's going to rain. I feel like pizza.
+impression | 印象 | What was your first impression of Japan?
+reason | 理由 | What's the reason?
+result | 結果 | The results were good.
+case | 場合 / 事件 | In that case, let's stay home.
+point | 要点 / 意味 | What's the point? Good point!
+honestly | 正直に言うと | Honestly, I didn't like it.
+To be honest | 正直に言うと | To be honest, I'm a little tired.
+It depends | 場合によるね | "Is it expensive?" "It depends."
+# カジュアルな英語
+yeah | うん | Yeah, sure!
+nope | ううん | "Are you tired?" "Nope!"
+gonna | 〜するつもり (going to) | I'm gonna eat now. | 書き言葉では使わない。
+wanna | 〜したい (want to) | Do you wanna come?
+kinda | ちょっと / なんか (kind of) | I'm kinda tired.
+awesome | すごい / 最高 | That's awesome!
+no worries | 大丈夫 / 気にしないで | "Sorry I'm late." "No worries!"
+super | すごく | It's super hot today.
+literally | 文字通り / マジで | I literally can't move. | 強調として大げさに使う人も多い。
+basically | 基本的に / 要するに | Basically, it's free.
+you know | ほら / ね | It's, you know, hard to explain.
+anyway | とにかく / ところで | Anyway, how was your day?
+What's up? | 元気？ / どうしたの？ | Hey, what's up? | 答え：Not much.
+No way! | まさか！ / 嘘でしょ！ | "I won the lottery!" "No way!"
+Seriously? | マジで？ | Seriously? That's amazing!
+# 人間関係
+relationship | 関係 | We have a good relationship.
+argue | 言い争う | They argue all the time.
+make up | 仲直りする / 作り上げる | We had a fight, but we made up.
+trust | 信頼する / 信頼 | I trust you.
+break up | 別れる | They broke up last month.
+ask out | デートに誘う | He asked her out.
+have a crush on | 〜に片思いしている | I have a crush on someone in my class.
+go out with | 〜と付き合う | Are you going out with him?
+fall in love | 恋に落ちる | They fell in love in Paris.
+personality | 性格 | She has a great personality.
+honest | 正直な | Please be honest with me.
+shy | 恥ずかしがりの / 内気な | I was shy as a child.
+outgoing | 社交的な | My sister is very outgoing.
+selfish | わがままな / 自分勝手な | Don't be so selfish.
+smart | 頭がいい | He's really smart. | イギリスでは「おしゃれな」の意味も。
+strict | 厳しい | My parents were strict.
+annoying | うっとうしい / イライラさせる | That noise is so annoying!
+weird | 変な | That's weird.
+jealous | うらやましい / 嫉妬して | I'm so jealous! | 「いいなあ」の軽い意味でもよく使う。
+# 会話の動詞
+notice | 気づく | Did you notice anything strange?
+recall | 思い出す | I can't recall his name.
+consider | よく考える / 検討する | I'll consider it.
+reply | 返事をする / 返事 | Sorry for the late reply.
+discuss | 話し合う | Let's discuss it tomorrow. | discuss about とは言わない。
+praise | 褒める | My teacher praised my work.
+apologize | 謝る | I apologize for the mistake. | イギリス：apologise.
+joke | 冗談 / 冗談を言う | Just kidding! It was a joke.
+lie | 嘘 / 嘘をつく | Don't lie to me.
+secret | 秘密 | Can you keep a secret?
+rumor | 噂 | I heard a rumor about him. | イギリス：rumour.
+topic | 話題 | Let's change the topic.
+complain | 文句を言う | He always complains about his job.
+# 句動詞 (phrasal verbs)
+find out | わかる / 知る | I found out the truth.
+figure out | 理解する / 解決する | I can't figure out this problem.
+give up | 諦める / やめる | Don't give up!
+look for | 探す | I'm looking for my keys.
+look forward to | 楽しみにする | I'm looking forward to seeing you. | to の後は名詞か -ing.
+look after | 世話をする | Can you look after my cat?
+come up with | 思いつく | She came up with a great idea.
+run out of | 使い果たす / 切らす | We ran out of milk.
+put off | 延期する | Don't put off your homework.
+show up | 現れる / 来る | He didn't show up to the party.
+set up | 設定する / 準備する | Can you help me set up my new phone?
+work out | 運動する / うまくいく | I work out at the gym. It'll work out.
+calm down | 落ち着く | Calm down, it's OK.
+cheer up | 元気を出す | Cheer up! It's not your fault.
+check out | 調べる / 見てみる / チェックアウトする | Check out this video!
+catch up | 追いつく / 近況を話す | Let's get coffee and catch up.
+go on | 続く / 起こる | What's going on?
+turn down | 断る / (音を) 下げる | She turned down the job offer.
+get over | 乗り越える / 立ち直る | It took a long time to get over it.
+# 理由と条件
+if | もし〜なら | If it rains, we'll stay home.
+unless | 〜でない限り | I'll go unless it rains.
+even though | 〜にもかかわらず | I went even though I was tired.
+so that | 〜するために | I study hard so that I can pass.
+in other words | 言い換えると | In other words, it's impossible.
+by the way | ところで | By the way, are you free tomorrow?
+just in case | 念のため | Take an umbrella, just in case.
+in the end | 結局 | In the end, we didn't go.
+instead | 代わりに | Let's have tea instead.
+otherwise | さもないと / それ以外は | Hurry, otherwise we'll be late.
+as long as | 〜である限り / 〜さえすれば | You can go as long as you're back by ten.
+# 時間の表現
+a moment ago | さっき | He left a moment ago.
+from now on | これからは | From now on, I'll be careful.
+next time | 次回 | Let's go together next time.
+the other day | この間 | I saw him the other day.
+someday | いつか | I want to live in Japan someday.
+long time no see | 久しぶり | Long time no see! How have you been?
+for a while | しばらく | I haven't seen her for a while.
+suddenly | 突然 | Suddenly, it started to rain.
+gradually | だんだん | It's gradually getting colder.
+at last | ついに / やっと | At last, we're here!
+ago | 〜前 | I came to Japan three years ago.
+later | 後で | See you later!
+lately | 最近 | I've been tired lately.
+# メディアと娯楽
+show | 番組 / 見せる | What's your favorite TV show?
+series | シリーズ / 連続ドラマ | I watched the whole series in one weekend.
+episode | (1話分の) エピソード | Did you see the last episode?
+news | ニュース | Did you see the news? | 数えられない。
+novel | 小説 | I'm reading a Japanese novel.
+character | キャラクター / 性格 | Who's your favorite character?
+singer | 歌手 | She's my favorite singer.
+fan | ファン / 扇風機 | I'm a big fan of this band.
+popular | 人気のある | This anime is very popular.
+trend | 流行 | What's the latest trend?
+binge-watch | 一気見する | I binge-watched the whole season.
+spoiler | ネタバレ | No spoilers, please!
+moving | 感動的な | The ending was so moving.
+hilarious | めちゃくちゃ面白い | That video is hilarious!
+# 食文化
+bar | バー / 飲み屋 | Let's go to a bar after work.
+Cheers! | 乾杯！ | Cheers! To our friendship!
+taste | 味 / 味がする | It tastes great!
+smell | 匂い / 匂いがする | Something smells good!
+bake | (オーブンで) 焼く | I baked some cookies.
+grill | (網で) 焼く | Let's grill some fish.
+fry | 揚げる / 炒める | Fry the onions first.
+boil | ゆでる / 沸騰させる | Boil the water.
+cut | 切る | Cut the vegetables into small pieces.
+ingredient | 材料 | What are the ingredients?
+leftovers | 残り物 | We had leftovers for lunch.
+all-you-can-eat | 食べ放題 | Let's go to an all-you-can-eat place!
+treat | おごる / ごちそう | It's my treat!
+# 便利なフレーズ
+Don't worry about it | 気にしないで | "Sorry!" "Don't worry about it."
+I'm sorry to bother you | お邪魔してすみません | I'm sorry to bother you, but can I ask something?
+Get well soon | お大事に | I heard you're sick. Get well soon!
+Congratulations! | おめでとう！ | Congratulations on your new job!
+Lucky you! | いいなあ！ | You're going to Hawaii? Lucky you!
+Is that so? | そうなの？ | "He's moving to Paris." "Is that so?"
+I'm not so sure | どうかな | I'm not so sure about that.
+I'll give it a try | やってみる | It looks hard, but I'll give it a try.
+Leave it to me | 任せて | Leave it to me! I'll cook.
+Same here | 私も同じ | "I'm so tired." "Same here."
+That makes sense | なるほど / 納得 | Oh, that makes sense now.
+It's up to you | あなた次第 | "Where should we eat?" "It's up to you."
+# 健康 (もっと)
+health | 健康 | Walking is good for your health.
+healthy | 健康的な | I try to eat healthy food.
+injury | けが | He has a knee injury.
+sleepy | 眠い | I'm so sleepy.
+gain weight | 太る | I gained weight during the holidays.
+lose weight | 痩せる | I want to lose weight.
+throw up | 吐く | I feel like I'm going to throw up.
+cough | 咳 / 咳をする | I have a bad cough.
+allergic | アレルギーがある | I'm allergic to cats.
+sore | 痛い (筋肉・喉) | I have a sore throat.
+# 家の生活 (もっと)
+rent | 家賃 / 借りる | The rent is too high.
+neighborhood | 近所 / 地域 | It's a quiet neighborhood. | イギリス：neighbourhood.
+trash | ゴミ | Take out the trash, please. | イギリス：rubbish.
+pet | ペット | Do you have any pets?
+plant | 植物 / 植える | I have a lot of plants in my room.
+laundry | 洗濯 / 洗濯物 | I do laundry on Saturdays.
+chores | 家事 | I hate doing chores.
+roommate | ルームメイト | My roommate is from Korea.
+# 社会と世界
+world | 世界 | I want to travel around the world.
+society | 社会 | Technology changes society.
+culture | 文化 | I'm interested in Japanese culture.
+history | 歴史 | Kyoto has a long history.
+foreign | 外国の | Do you speak any foreign languages?
+language | 言語 | How many languages do you speak?
+interested in | 〜に興味がある | I'm interested in anime.
+custom | 習慣 / 風習 | It's a Japanese custom to bow.
+habit | (個人の) 癖 / 習慣 | Biting your nails is a bad habit.
+rule | ルール / 規則 | Please follow the rules.
+# 言葉について
+translate | 翻訳する | Can you translate this into English?
+translation | 翻訳 | This translation is wrong.
+polite | 丁寧な / 礼儀正しい | Japanese people are very polite.
+casual | カジュアルな / くだけた | You can use casual English with friends.
+accent | なまり / アクセント | She has a British accent.
+slang | スラング / 俗語 | Teach me some English slang!
+fluent | ペラペラな / 流暢な | She's fluent in three languages.
+improve | 上達する / 改善する | Your English has really improved!
+native speaker | ネイティブスピーカー | I want to practice with native speakers.
+make a mistake | 間違える | Everyone makes mistakes.
+# よく使う表現
+seem | 〜のようだ | You seem tired.
+look like | 〜のように見える / 〜に似ている | You look like your mother.
+sound like | 〜のように聞こえる | That sounds like a good idea.
+too ~ to ~ | 〜すぎて〜できない | I'm too tired to cook.
+used to | 以前は〜していた | I used to live in Osaka.
+be supposed to | 〜することになっている | We're supposed to meet at six.
+might | 〜かもしれない | It might rain later.
+had better | 〜したほうがいい | You'd better hurry. | 強い忠告。should より強い。
+going to | 〜するつもり / 〜しそう | I'm going to study tonight.
+have been to | 〜に行ったことがある | Have you ever been to Japan?
+# 気持ち (もっと)
+frustrated | イライラした / もどかしい | I'm frustrated with my English.
+nostalgic | 懐かしい | This song makes me nostalgic.
+relieved | ほっとした | I was relieved when I passed.
+confused | 混乱した | I'm confused. Can you explain again?
+disappointed | がっかりした | I was disappointed with the movie.
+grateful | 感謝している | I'm grateful for your help.
+thrilled | すごく嬉しい | I'm thrilled to be here!
+
+@deck English 5 · Going Deeper | English | Japanese | レベル5/5。難しめの200語：ビジネス英語、ニュース、微妙なニュアンス、イディオム、自然な表現。Advanced words, idioms and natural expressions.
+# 丁寧な英語
+Would you mind ~ing? | 〜していただけませんか？ | Would you mind closing the window? | 答え：Not at all (いいですよ)。
+I was wondering if ~ | 〜していただけないかと思いまして | I was wondering if you could help me.
+Could I possibly ~? | 〜してもよろしいでしょうか？ | Could I possibly borrow your notes?
+I'd appreciate it if ~ | 〜していただけるとありがたいです | I'd appreciate it if you could reply soon.
+I'm afraid ~ | 申し訳ないのですが〜 | I'm afraid I can't come tomorrow.
+Certainly | かしこまりました / もちろん | "Can I have the bill?" "Certainly."
+Pardon? | すみません、もう一度？ | Pardon? I didn't catch that.
+I apologize for the inconvenience | ご迷惑をおかけして申し訳ありません | We apologize for the inconvenience.
+Thank you for your patience | お待たせしました / ご辛抱ありがとう | Thank you for your patience.
+Please let me know | お知らせください | Please let me know if you have any questions.
+I look forward to hearing from you | ご連絡お待ちしております | I look forward to hearing from you. | メールの締めの言葉。
+regards | よろしくお願いします (メールの結び) | Best regards, Yuki | メールの最後に。
+# ビジネス
+colleague | 同僚 | I had lunch with a colleague.
+supervisor | 上司 / 監督者 | Ask your supervisor.
+senior | 先輩 / 上級の / 高齢者 | He's a senior engineer. | 「先輩」にぴったりの英語はない。
+in charge of | 〜の担当 | I'm in charge of this project.
+business trip | 出張 | I'm going on a business trip to Osaka.
+quit | 辞める | She quit her job.
+resign | 辞職する | He resigned last month.
+promotion | 昇進 / 販売促進 | Congratulations on your promotion!
+responsibility | 責任 | It's my responsibility.
+goal | 目標 / ゴール | What's your goal this year?
+succeed | 成功する | I hope you succeed.
+effort | 努力 | Thank you for your effort.
+negotiate | 交渉する | We need to negotiate the price.
+proposal | 提案 / プロポーズ | I read your proposal.
+budget | 予算 | We're over budget.
+# ニュースと社会
+politics | 政治 | I'm not interested in politics.
+economy | 経済 | The economy is growing.
+election | 選挙 | Who won the election?
+environment | 環境 | We need to protect the environment.
+issue | 問題 / 課題 | Climate change is a big issue.
+incident | 出来事 / 事件 | There was an incident at the station.
+accident | 事故 | He was in a car accident.
+earthquake | 地震 | Did you feel the earthquake?
+typhoon | 台風 | A typhoon is coming.
+disaster | 災害 | Be prepared for natural disasters.
+population | 人口 | Japan's population is getting older.
+aging society | 高齢化社会 | Japan is an aging society.
+technology | 技術 / テクノロジー | Technology is changing fast.
+information | 情報 | Thanks for the information. | 数えられない。
+government | 政府 | The government made a new law.
+# 抽象的な言葉
+awareness | 意識 / 認識 | We need more awareness of this problem.
+value | 価値 / 大切にする | I value our friendship.
+possibility | 可能性 | There's a possibility of rain.
+influence | 影響 / 影響を与える | Anime influenced me to study Japanese.
+situation | 状況 | The situation is getting better.
+freedom | 自由 | Freedom is important.
+peace | 平和 | I hope for world peace.
+future | 未来 / 将来 | What do you want to do in the future?
+past | 過去 | Let's forget the past.
+reality | 現実 | Back to reality!
+dream | 夢 / 夢を見る | My dream is to live abroad.
+confidence | 自信 | I don't have confidence in my English.
+opportunity | 機会 / チャンス | This is a great opportunity.
+challenge | 挑戦 / 課題 | Learning Japanese is a challenge. | 「チャレンジする」は try が自然なことが多い。
+advantage | 利点 / 有利 | What are the advantages?
+# 副詞のニュアンス
+take your time | ゆっくりでいいよ | Take your time, there's no rush.
+properly | ちゃんと / 適切に | Do it properly.
+clearly | はっきりと | Please speak clearly.
+completely | 完全に | I completely forgot!
+barely | かろうじて / ほとんど〜ない | I barely made it.
+almost | ほとんど / もう少しで | I almost missed the train.
+quite | かなり | It's quite cold today. | イギリスでは「まあまあ」の意味にもなる。
+pretty | かなり / かわいい | It's pretty good.
+rather | むしろ / かなり | I'd rather stay home.
+fairly | まあまあ / かなり | The test was fairly easy.
+hardly | ほとんど〜ない | I can hardly hear you.
+eventually | 最終的に / やがて | Eventually, he agreed.
+apparently | どうやら〜らしい | Apparently, she's moving to London.
+obviously | 明らかに / もちろん | Obviously, I said yes.
+exactly | まさに / その通り | Exactly! That's what I meant.
+# 微妙な動詞
+put up with | 我慢する | I can't put up with the noise anymore.
+struggle | 苦労する / もがく | I'm struggling with English grammar.
+worry about | 〜を心配する | Don't worry about it.
+bother | 迷惑をかける / 悩ませる | Sorry to bother you.
+hesitate | ためらう | Don't hesitate to ask.
+expect | 期待する / 予期する | I didn't expect that!
+appreciate | 感謝する / 価値を認める | I really appreciate it.
+respect | 尊敬する / 尊敬 | I respect my parents.
+support | 支える / 応援する | I'll always support you.
+admit | 認める | He admitted his mistake.
+avoid | 避ける | Avoid the rush hour.
+aim | 目指す / 目標 | I'm aiming to pass the test.
+realize | 気づく / 実現する | I realized I was wrong. | イギリス：realise.
+manage to | なんとか〜する | I managed to finish on time.
+deal with | 対処する | How do you deal with stress?
+include | 含む | Is tax included?
+# 微妙な形容詞
+wasteful | もったいない / 無駄な | It's wasteful to throw away food. | 「もったいない」にぴったりの英語はない。What a waste! もよく使う。
+pushy | しつこい / 押しが強い | The salesman was really pushy.
+unfair | 不公平な / ずるい | That's so unfair!
+messy | 散らかった / だらしない | My room is so messy.
+impressive | 素晴らしい / 感心する | Your English is impressive!
+terrible | ひどい | The weather was terrible.
+silly | ばかげた / くだらない | Don't be silly!
+suspicious | 怪しい | That email looks suspicious.
+clever | 賢い / 巧妙な | What a clever idea!
+valuable | 貴重な / 価値のある | It was a valuable experience.
+awkward | 気まずい / ぎこちない | That was so awkward.
+mediocre | 平凡な / イマイチな | The food was mediocre.
+subtle | 微妙な / かすかな | There's a subtle difference.
+reliable | 頼りになる | She's very reliable.
+generous | 気前がいい / 寛大な | Thank you, that's very generous.
+picky | 好き嫌いが多い / こだわりが強い | My brother is a picky eater.
+# 自然な表現
+regardless | それでも / 関係なく | I'll go regardless of the weather.
+as expected | さすが / 予想通り | As expected, it was delicious.
+no wonder | 道理で | No wonder you're tired!
+by any chance | もしかして | Are you Yuki, by any chance?
+I couldn't help ~ing | 思わず〜してしまった | I couldn't help laughing.
+at least | 少なくとも / せめて | At least call me!
+what on earth | いったい何 | What on earth happened?
+out of nowhere | 突然 / どこからともなく | He appeared out of nowhere.
+after all | 結局 / なんといっても | He was right after all.
+on purpose | わざと | You did that on purpose!
+by accident | 偶然に / うっかり | I deleted it by accident.
+for sure | 確かに / 絶対 | I'll be there for sure.
+kind of | ちょっと / なんとなく | I'm kind of hungry.
+sort of | ちょっと / まあ | "Do you understand?" "Sort of."
+I mean | つまり / というか | I mean, it's not bad.
+# イディオム
+piece of cake | 朝飯前 / 簡単 | The test was a piece of cake.
+break the ice | 場を和ませる | Let's play a game to break the ice.
+hit the books | 猛勉強する | I need to hit the books tonight.
+under the weather | 体調が悪い | I'm feeling a bit under the weather.
+cost an arm and a leg | ものすごく高い | That bag cost an arm and a leg.
+once in a blue moon | めったにない | I eat fast food once in a blue moon.
+spill the beans | 秘密をばらす | Who spilled the beans?
+on the same page | 同じ認識で | Let's make sure we're on the same page.
+call it a day | 今日はここまでにする | Let's call it a day.
+it's not my cup of tea | 好みじゃない | Horror movies are not my cup of tea.
+kill two birds with one stone | 一石二鳥 | Walking to work kills two birds with one stone.
+the ball is in your court | 次はあなたの番 (決める番) | I made my offer. The ball is in your court.
+better late than never | 遅れてもしないよりまし | You finally came! Better late than never.
+easier said than done | 言うのは簡単 | Speaking fluently is easier said than done.
+when pigs fly | ありえない | He'll clean his room when pigs fly.
+get the hang of | コツをつかむ | You'll get the hang of it.
+keep in touch | 連絡を取り合う | Let's keep in touch!
+no big deal | 大したことない | Don't worry, it's no big deal.
+sleep on it | 一晩考える | Let me sleep on it.
+a blessing in disguise | 不幸中の幸い | Missing the train was a blessing in disguise.
+# 句動詞 (もっと)
+bring up | (話題を) 持ち出す / 育てる | Don't bring up that topic.
+come across | 偶然見つける | I came across an old photo.
+get along with | 〜と仲良くする | I get along with my boss.
+look into | 調査する | I'll look into it.
+point out | 指摘する | Thanks for pointing out my mistake.
+take after | (親に) 似ている | She takes after her mother.
+make sense | 意味が通る / 納得がいく | That makes sense.
+end up | 結局〜になる | We ended up staying home.
+carry on | 続ける | Carry on, don't stop.
+turn out | 結果〜になる / 判明する | It turned out to be true.
+fall behind | 遅れをとる | I fell behind in class.
+stand out | 目立つ | Her red dress stood out.
+# 感情と人生
+regret | 後悔する / 後悔 | I regret not studying harder.
+memory | 思い出 / 記憶 | I have good memories of Japan.
+celebrate | 祝う | Let's celebrate your birthday!
+anniversary | 記念日 | Today is our tenth anniversary.
+funeral | 葬式 | I went to my grandfather's funeral.
+relatives | 親戚 | All my relatives came for New Year.
+spend time | 時間を過ごす | I love spending time with my family.
+grow up | 大人になる / 育つ | I grew up in the countryside.
+adulthood | 大人 (の時期) | Life changes in adulthood.
+independent | 自立した | She's very independent.
+# インターネットの英語
+LOL | 笑 / (笑) | That's so funny LOL | laughing out loud の略。
+BRB | ちょっと離席します | BRB, getting coffee. | be right back の略。
+DM | ダイレクトメッセージ | Send me a DM.
+go viral | バズる | Her video went viral.
+ghost | (急に) 連絡を絶つ | He ghosted me after the date.
+leave on read | 既読スルーする | She left me on read.
+cringe | 痛い / 恥ずかしい | That video is so cringe.
+vibe | 雰囲気 / ノリ | This cafe has a nice vibe.
+low-key | ひそかに / 控えめに | I'm low-key excited.
+no cap | マジで / 嘘なし | That was the best pizza, no cap. | 若者のスラング。
+# 議論と説明
+argument | 議論 / 口論 | That's a good argument.
+evidence | 証拠 | There's no evidence.
+claim | 主張する | He claims he's innocent.
+suggest | 提案する | I suggest we take a break.
+recommend | 勧める | Can you recommend a good restaurant?
+assume | 思い込む / 仮定する | Don't assume anything.
+conclusion | 結論 | What's your conclusion?
+compared to | 〜と比べて | Compared to Tokyo, Osaka is cheaper.
+on the other hand | 一方で | It's cheap. On the other hand, it's far.
+as a result | その結果 | As a result, we were late.
+in fact | 実際は | In fact, it was easy.
+overall | 全体的に | Overall, it was a great trip.
+# 性格と態度
+patient | 我慢強い / 患者 | Be patient, it takes time.
+stubborn | 頑固な | My father is so stubborn.
+humble | 謙虚な | She's very humble.
+confident | 自信がある | You should be more confident.
+mature | 大人びた / 成熟した | He's very mature for his age.
+easygoing | のんびりした / おおらかな | My roommate is easygoing.
+thoughtful | 思いやりのある | What a thoughtful gift!
+rude | 失礼な | It's rude to be late.
+lazy | 怠けた | I feel lazy today.
+hardworking | 勤勉な / 真面目な | Japanese workers are hardworking.
+curious | 好奇心が強い / 興味がある | I'm curious about your country.
+sensitive | 敏感な / 繊細な | She's very sensitive.
+determined | 決意が固い | I'm determined to pass.
+optimistic | 楽観的な | Stay optimistic!
+pessimistic | 悲観的な | Don't be so pessimistic.
+cheerful | 明るい / 陽気な | She's always cheerful.
+introverted | 内向的な | I'm a bit introverted.

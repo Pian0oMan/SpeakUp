@@ -1,0 +1,1078 @@
+// JAPANESE for English speakers: 5 levels, about 200 words each (level 1 ≈ JLPT N5 ... level 5 ≈ N3).
+// word | reading (blank if the word is only kana) | meaning | example | note (optional)
+
+@deck Japanese 1 · First Words | Japanese | English | Level 1 of 5. Your first 200 words: greetings, people, numbers, time, food, and the verbs and adjectives you need for a first conversation.
+# Greetings
+こんにちは | | hello / good afternoon | こんにちは、はじめまして。 | From late morning to early evening.
+おはよう | | good morning | おはよう！よく寝た？ | Polite: おはようございます.
+こんばんは | | good evening | こんばんは、元気ですか？
+はじめまして | | nice to meet you | はじめまして、アレックスです。 | Only the first time you meet someone.
+よろしくお願いします | よろしくおねがいします | nice to meet you / please treat me well | どうぞよろしくお願いします。 | Said after introducing yourself or asking a favor.
+ありがとう | | thank you | 手伝ってくれてありがとう。 | Polite: ありがとうございます.
+すみません | | excuse me / sorry | すみません、駅はどこですか？ | Also used to call a waiter.
+ごめんなさい | | I'm sorry | 遅れてごめんなさい。 | A real apology. Casual: ごめん.
+おやすみ | | good night | おやすみ、また明日。 | Polite: おやすみなさい.
+さようなら | | goodbye | 先生、さようなら。 | Sounds final. Friends say またね or じゃあね.
+またね | | see you | じゃあ、またね！
+いただきます | | (said before eating) | いただきます！ | Literally "I humbly receive".
+ごちそうさま | | (said after eating) | ごちそうさまでした。おいしかった！
+はい | | yes | はい、そうです。
+いいえ | | no | いいえ、違います。 | Often softer in conversation: いや or ううん.
+# People
+私 | わたし | I / me | 私はアメリカ人です。
+あなた | | you | あなたの名前は？ | Often sounds too direct: use the person's name instead.
+人 | ひと | person | あの人は誰ですか？
+友達 | ともだち | friend | 友達と映画を見ました。
+家族 | かぞく | family | 家族は四人です。
+父 | ちち | (my) father | 父は会社員です。 | Someone else's father: お父さん.
+母 | はは | (my) mother | 母は料理が上手です。 | Someone else's mother: お母さん.
+兄 | あに | (my) older brother | 兄は東京に住んでいます。 | Someone else's: お兄さん.
+姉 | あね | (my) older sister | 姉は先生です。 | Someone else's: お姉さん.
+弟 | おとうと | younger brother | 弟はまだ学生です。
+妹 | いもうと | younger sister | 妹は十歳です。
+子供 | こども | child | 子供が二人います。
+先生 | せんせい | teacher | 先生、質問があります。 | Also for doctors. Not used for yourself.
+学生 | がくせい | student | 私は大学の学生です。
+名前 | なまえ | name | 名前は何ですか？
+〜さん | | Mr. / Ms. ~ | 田中さん、こんにちは。 | Never used with your own name.
+# Numbers
+一 | いち | one | りんごを一個ください。
+二 | に | two | 二時に会いましょう。
+三 | さん | three | 三人で行きます。
+四 | よん | four | 四月に日本へ行きます。 | Also read し.
+五 | ご | five | 五分待ってください。
+六 | ろく | six | 六時に起きます。
+七 | なな | seven | 七月は暑いです。 | Also read しち.
+八 | はち | eight | 八時に学校へ行きます。
+九 | きゅう | nine | 九時に寝ます。 | Also read く.
+十 | じゅう | ten | 十分ぐらいかかります。
+百 | ひゃく | hundred | これは百円です。
+千 | せん | thousand | 千円札を持っていますか？
+万 | まん | ten thousand | 一万円は高いです。 | Big numbers go by 万: 10万 = 100,000.
+円 | えん | yen | このパンは二百円です。
+いくつ | | how many / how old | りんごはいくつありますか？
+# Time
+今 | いま | now | 今、何時ですか？
+今日 | きょう | today | 今日は暑いですね。
+明日 | あした | tomorrow | 明日、また会いましょう。
+昨日 | きのう | yesterday | 昨日は雨でした。
+毎日 | まいにち | every day | 毎日日本語を勉強します。
+朝 | あさ | morning | 朝ごはんを食べましたか？
+昼 | ひる | noon / daytime | 昼に会いましょう。
+夜 | よる | night | 夜はゲームをします。
+時間 | じかん | time / hours | 時間がありません。
+〜時 | 〜じ | ~ o'clock | 三時に会いましょう。
+〜分 | 〜ふん | ~ minutes | 五分待ってください。 | Sometimes ぷん: 一分 (いっぷん), 十分 (じゅっぷん).
+週末 | しゅうまつ | weekend | 週末は何をしますか？
+今年 | ことし | this year | 今年は日本に行きたいです。
+何時 | なんじ | what time | 今、何時ですか？
+いつ | | when | 誕生日はいつですか？
+# Food and drink
+ご飯 | ごはん | rice / meal | ご飯を食べましょう。
+水 | みず | water | 水をください。
+お茶 | おちゃ | tea (green tea) | お茶はいかがですか？
+コーヒー | | coffee | 朝はコーヒーを飲みます。
+パン | | bread | パンを買いました。
+肉 | にく | meat | 肉が好きです。
+魚 | さかな | fish | 魚は食べられますか？
+野菜 | やさい | vegetables | 野菜を食べてください。
+果物 | くだもの | fruit | 果物が好きです。
+卵 | たまご | egg | 卵を二つ使います。
+ラーメン | | ramen | このラーメン、おいしい！
+朝ご飯 | あさごはん | breakfast | 朝ご飯は何を食べましたか？
+昼ご飯 | ひるごはん | lunch | 一緒に昼ご飯を食べませんか？
+晩ご飯 | ばんごはん | dinner | 晩ご飯はカレーです。
+# Places
+家 | いえ | house / home | 家に帰ります。 | Also read うち ("my home").
+学校 | がっこう | school | 学校は八時からです。
+駅 | えき | station | 駅はどこですか？
+店 | みせ | shop / store | あの店は安いです。
+日本 | にほん | Japan | 日本に行ったことがありますか？
+国 | くに | country | どこの国から来ましたか？
+部屋 | へや | room | 部屋がきれいですね。
+トイレ | | toilet / restroom | トイレはどこですか？
+会社 | かいしゃ | company / office | 会社は東京にあります。
+病院 | びょういん | hospital | 病院へ行きました。
+ここ | | here | ここに座ってください。
+そこ | | there (near you) | そこにあります。
+あそこ | | over there | あそこが駅です。
+どこ | | where | どこに住んでいますか？
+# Things
+これ | | this (near me) | これは何ですか？
+それ | | that (near you) | それは私のです。
+あれ | | that (over there) | あれは何ですか？
+本 | ほん | book | この本は面白いです。
+電話 | でんわ | phone | あとで電話します。
+スマホ | | smartphone | スマホをなくしました。
+お金 | おかね | money | お金がありません。
+車 | くるま | car | 車で行きます。
+電車 | でんしゃ | train | 電車で学校へ行きます。
+傘 | かさ | umbrella | 傘を持っていますか？
+服 | ふく | clothes | 新しい服を買いました。
+靴 | くつ | shoes | 靴を脱いでください。
+かばん | | bag | かばんの中に何がありますか？
+# Questions
+何 | なに / なん | what | 何を食べますか？
+誰 | だれ | who | あの人は誰ですか？
+どう | | how | 日本はどうですか？
+なぜ | | why | なぜ日本語を勉強していますか？ | Casual: どうして or なんで.
+どれ | | which (one) | どれがいいですか？
+いくら | | how much (price) | これはいくらですか？
+# Verbs
+する | | to do | 宿題をします。
+行く | いく | to go | 明日、学校に行きます。
+来る | くる | to come | 友達が家に来ます。
+帰る | かえる | to go home / return | 六時に帰ります。
+食べる | たべる | to eat | 寿司を食べたいです。
+飲む | のむ | to drink | 水を飲みます。
+見る | みる | to see / watch | 映画を見ます。
+聞く | きく | to listen / ask | 音楽を聞きます。
+話す | はなす | to speak / talk | 日本語を話します。
+読む | よむ | to read | 本を読むのが好きです。
+書く | かく | to write | 名前を書いてください。
+買う | かう | to buy | パンを買いました。
+起きる | おきる | to wake up / get up | 七時に起きます。
+寝る | ねる | to sleep / go to bed | 十一時に寝ます。
+わかる | | to understand | すみません、わかりません。 | Kanji: 分かる.
+ある | | to be / exist (things) | 机の上に本があります。
+いる | | to be / exist (people, animals) | 部屋に猫がいます。
+会う | あう | to meet | 駅で友達に会います。
+待つ | まつ | to wait | ちょっと待ってください。
+勉強する | べんきょうする | to study | 毎日日本語を勉強します。
+住む | すむ | to live (somewhere) | 大阪に住んでいます。 | Usually 住んでいます.
+使う | つかう | to use | このペンを使ってもいいですか？
+休む | やすむ | to rest / take a day off | 今日は学校を休みます。
+遊ぶ | あそぶ | to play / hang out | 週末、友達と遊びます。
+働く | はたらく | to work | 銀行で働いています。
+# Adjectives
+大きい | おおきい | big | 大きい犬ですね。
+小さい | ちいさい | small | 小さい部屋です。
+高い | たかい | expensive / tall | このかばんは高いです。
+安い | やすい | cheap | この店は安いです。
+新しい | あたらしい | new | 新しいスマホを買いました。
+古い | ふるい | old (things) | 古い車です。 | Not for people: 年を取った.
+いい | | good | いい天気ですね。 | Past tense: よかった.
+悪い | わるい | bad | 天気が悪いです。
+おいしい | | delicious | このケーキはおいしい！ | Kanji: 美味しい.
+楽しい | たのしい | fun | パーティーは楽しかった！
+難しい | むずかしい | difficult | 漢字は難しいです。
+簡単 | かんたん | easy / simple | この問題は簡単です。 | Na-adjective: 簡単な問題.
+暑い | あつい | hot (weather) | 今日はとても暑いです。
+寒い | さむい | cold (weather) | 冬は寒いです。
+好き | すき | to like (liked) | 猫が好きです。 | Na-adjective: 〜が好きです.
+嫌い | きらい | to dislike (disliked) | 虫が嫌いです。
+上手 | じょうず | good at | 日本語が上手ですね！ | Don't use it for yourself.
+下手 | へた | bad at | 歌が下手です。
+元気 | げんき | healthy / energetic / fine | お元気ですか？
+きれい | | pretty / clean | 部屋がきれいです。 | A na-adjective, even though it ends in い.
+忙しい | いそがしい | busy | 今週は忙しいです。
+面白い | おもしろい | interesting / funny | この漫画は面白い！
+# Useful words
+とても | | very | とてもおいしいです。
+ちょっと | | a little / a bit | ちょっと待って。 | Also a polite way to say no: ちょっと…
+たくさん | | a lot | 写真をたくさん撮りました。
+一緒に | いっしょに | together | 一緒に行きませんか？
+また | | again | また来てください。
+もう | | already / anymore | もう食べました。
+まだ | | still / not yet | まだ食べていません。
+でも | | but | 行きたいです。でも、時間がありません。
+そして | | and then | 起きました。そして、朝ご飯を食べました。
+だから | | so / therefore | 雨です。だから、家にいます。
+# Phrases
+〜はどこですか | 〜はどこですか | where is ~? | トイレはどこですか？
+〜をください | | ~, please (give me) | コーヒーをください。
+これは何ですか | これはなんですか | what is this? | これは何ですか？おいしそう！
+英語を話せますか | えいごをはなせますか | can you speak English? | すみません、英語を話せますか？
+もう一度お願いします | もういちどおねがいします | once more, please | すみません、もう一度お願いします。
+ゆっくり話してください | ゆっくりはなしてください | please speak slowly | もう少しゆっくり話してください。
+大丈夫 | だいじょうぶ | it's OK / I'm fine | 大丈夫ですか？ | Also a polite "no thanks": 大丈夫です.
+そうですね | | that's right / let me see | そうですね、いいと思います。
+本当 | ほんとう | really / true | 本当？すごい！
+すごい | | amazing / wow | すごい！上手ですね。
+# Days and colors
+月曜日 | げつようび | Monday | 月曜日は忙しいです。
+火曜日 | かようび | Tuesday | 火曜日にテストがあります。
+水曜日 | すいようび | Wednesday | 水曜日に会いましょう。
+木曜日 | もくようび | Thursday | 木曜日は休みです。
+金曜日 | きんようび | Friday | 金曜日の夜は楽しい！
+土曜日 | どようび | Saturday | 土曜日は何をしますか？
+日曜日 | にちようび | Sunday | 日曜日は家で休みます。
+何曜日 | なんようび | what day of the week | 今日は何曜日ですか？
+赤 | あか | red | 赤が好きです。 | Adjective: 赤い.
+青 | あお | blue | 空が青いですね。 | Adjective: 青い. Also used for green traffic lights.
+白 | しろ | white | 白いシャツを買いました。 | Adjective: 白い.
+黒 | くろ | black | 黒い猫がいます。 | Adjective: 黒い.
+黄色 | きいろ | yellow | 黄色い花がきれいです。
+緑 | みどり | green | 緑が多い公園です。
+# Nature and animals
+天気 | てんき | weather | 今日はいい天気ですね。
+雨 | あめ | rain | 雨が降っています。
+雪 | ゆき | snow | 雪が降りました！
+空 | そら | sky | 空がきれいです。
+山 | やま | mountain | 富士山は高い山です。
+海 | うみ | sea / ocean | 夏は海に行きます。
+犬 | いぬ | dog | 犬を飼っています。
+猫 | ねこ | cat | 猫が好きです。
+花 | はな | flower | きれいな花ですね。
+木 | き | tree | 大きい木があります。
+
+@deck Japanese 2 · Everyday Life | Japanese | English | Level 2 of 5. 200 words for daily life: home, shopping, eating out, getting around, your body, hobbies, and more verbs and adjectives.
+# At home
+台所 | だいどころ | kitchen | 台所で料理をします。
+お風呂 | おふろ | bath | 毎晩お風呂に入ります。
+窓 | まど | window | 窓を開けてもいいですか？
+ドア | | door | ドアを閉めてください。
+机 | つくえ | desk | 机の上にパソコンがあります。
+椅子 | いす | chair | この椅子に座ってください。
+冷蔵庫 | れいぞうこ | refrigerator | 冷蔵庫に牛乳があります。
+ベッド | | bed | ベッドで本を読みます。
+テレビ | | TV | 夜はテレビを見ます。
+鍵 | かぎ | key / lock | 鍵をなくしました。
+電気 | でんき | electricity / the light | 電気を消してください。
+掃除 | そうじ | cleaning | 週末に部屋の掃除をします。 | 掃除する = to clean.
+洗濯 | せんたく | laundry | 毎日洗濯をします。 | 洗濯する = to do laundry.
+料理 | りょうり | cooking / a dish | 料理が好きです。 | 料理する = to cook.
+# Shopping
+買い物 | かいもの | shopping | 駅前で買い物をしました。
+スーパー | | supermarket | スーパーで野菜を買います。
+コンビニ | | convenience store | コンビニでおにぎりを買いました。
+値段 | ねだん | price | 値段が高すぎます。
+袋 | ふくろ | bag (plastic, paper) | 袋はいりますか？
+カード | | (credit) card | カードで払えますか？
+現金 | げんきん | cash | 現金しか使えません。
+レシート | | receipt | レシートをください。
+売る | うる | to sell | この店は古い本を売っています。
+払う | はらう | to pay | 私が払います。
+選ぶ | えらぶ | to choose | 好きなのを選んでください。
+探す | さがす | to look for | 鍵を探しています。
+# Eating out
+レストラン | | restaurant | 駅の近くのレストランに行きました。
+メニュー | | menu | メニューを見せてください。
+注文 | ちゅうもん | order (food) | 注文をお願いします。 | 注文する = to order.
+お会計 | おかいけい | the bill / check | すみません、お会計お願いします。
+お箸 | おはし | chopsticks | お箸を使えますか？
+寿司 | すし | sushi | 寿司が大好きです。
+お弁当 | おべんとう | boxed lunch | 毎日お弁当を作ります。
+甘い | あまい | sweet | このケーキは甘いです。
+辛い | からい | spicy / hot | このカレーは辛い！
+しょっぱい | | salty | このスープはちょっとしょっぱいです。
+苦い | にがい | bitter | このコーヒーは苦いです。
+お腹がすいた | おなかがすいた | I'm hungry | お腹がすいた！何か食べよう。
+喉が渇いた | のどがかわいた | I'm thirsty | 喉が渇いたので、水を飲みます。
+お酒 | おさけ | alcohol / sake | お酒は飲みますか？
+ビール | | beer | 冷たいビールが飲みたい。
+# Getting around
+道 | みち | road / way | 道に迷いました。
+右 | みぎ | right | 右に曲がってください。
+左 | ひだり | left | 左にコンビニがあります。
+まっすぐ | | straight ahead | まっすぐ行ってください。
+近い | ちかい | near / close | 駅は近いです。
+遠い | とおい | far | 空港は遠いです。
+バス | | bus | バスで行きましょう。
+自転車 | じてんしゃ | bicycle | 自転車で学校に行きます。
+飛行機 | ひこうき | airplane | 飛行機で日本に来ました。
+空港 | くうこう | airport | 空港まで一時間かかります。
+地図 | ちず | map | 地図を見てもいいですか？
+切符 | きっぷ | ticket | 切符はどこで買えますか？
+乗る | のる | to ride / get on | 電車に乗ります。 | 〜に乗る.
+降りる | おりる | to get off | 次の駅で降ります。 | 〜を降りる.
+歩く | あるく | to walk | 駅まで歩きます。
+曲がる | まがる | to turn | あの角を左に曲がってください。
+着く | つく | to arrive | 何時に着きますか？
+# Body and health
+体 | からだ | body | 体に気をつけてください。
+頭 | あたま | head | 頭がいいですね。
+顔 | かお | face | 顔を洗います。
+目 | め | eye | 目が痛いです。
+耳 | みみ | ear | 耳が聞こえにくいです。
+口 | くち | mouth | 口を開けてください。
+手 | て | hand | 手を洗ってください。
+足 | あし | foot / leg | 足が痛いです。
+お腹 | おなか | stomach / belly | お腹が痛いです。
+歯 | は | tooth | 毎日歯を磨きます。
+痛い | いたい | painful / it hurts | 頭が痛いです。
+病気 | びょうき | illness / sick | 病気で学校を休みました。
+薬 | くすり | medicine | 薬を飲んでください。 | You "drink" medicine: 薬を飲む.
+風邪 | かぜ | a cold | 風邪をひきました。 | 風邪をひく = to catch a cold.
+熱 | ねつ | fever / heat | 熱があります。
+医者 | いしゃ | doctor | 医者に行ったほうがいいですよ。
+# Hobbies and free time
+趣味 | しゅみ | hobby | 趣味は何ですか？
+音楽 | おんがく | music | どんな音楽が好きですか？
+映画 | えいが | movie | 映画を見に行きませんか？
+写真 | しゃしん | photo | 写真を撮ってもいいですか？ | 写真を撮る = to take a photo.
+歌 | うた | song | 歌が上手ですね。
+ゲーム | | (video) game | 毎晩ゲームをします。
+漫画 | まんが | manga / comics | 漫画を読むのが好きです。
+アニメ | | anime | 好きなアニメは何ですか？
+スポーツ | | sports | スポーツは好きですか？
+旅行 | りょこう | travel / a trip | 来月、京都に旅行します。 | 旅行する = to travel.
+泳ぐ | およぐ | to swim | 海で泳ぎました。
+歌う | うたう | to sing | カラオケで歌いましょう！
+踊る | おどる | to dance | 踊るのが好きです。
+撮る | とる | to take (a photo) | 一緒に写真を撮りましょう。
+# Weather and seasons
+春 | はる | spring | 春は桜がきれいです。
+夏 | なつ | summer | 夏休みは何をしますか？
+秋 | あき | autumn / fall | 秋は涼しいです。
+冬 | ふゆ | winter | 冬はスキーをします。
+晴れ | はれ | sunny / clear | 明日は晴れです。
+曇り | くもり | cloudy | 今日は曇りです。
+風 | かぜ | wind | 今日は風が強いです。
+涼しい | すずしい | cool (pleasant) | 夜は涼しいですね。
+暖かい | あたたかい | warm | 今日は暖かいです。
+降る | ふる | to fall (rain, snow) | 雨が降っています。
+# Time words
+先週 | せんしゅう | last week | 先週、東京に行きました。
+来週 | らいしゅう | next week | 来週はテストです。
+先月 | せんげつ | last month | 先月引っ越しました。
+来月 | らいげつ | next month | 来月日本に行きます。
+去年 | きょねん | last year | 去年、大学を卒業しました。
+来年 | らいねん | next year | 来年は二十歳になります。
+午前 | ごぜん | a.m. / morning | 午前十時に会いましょう。
+午後 | ごご | p.m. / afternoon | 午後は暇です。
+半 | はん | half (past) | 三時半に会いましょう。
+毎朝 | まいあさ | every morning | 毎朝コーヒーを飲みます。
+毎晩 | まいばん | every night | 毎晩日記を書きます。
+いつも | | always | いつもありがとう。
+よく | | often / well | よく映画を見ます。
+時々 | ときどき | sometimes | 時々料理をします。
+あまり | | not much (with a negative) | あまり好きじゃないです。 | Used with a negative verb.
+全然 | ぜんぜん | not at all (with a negative) | 全然わかりません。
+# School and work
+大学 | だいがく | university / college | 大学で経済を勉強しています。
+授業 | じゅぎょう | class / lesson | 授業は九時からです。
+宿題 | しゅくだい | homework | 宿題が多いです。
+テスト | | test | 明日テストがあります。
+質問 | しつもん | question | 質問してもいいですか？
+答え | こたえ | answer | 答えがわかりません。
+言葉 | ことば | word / language | この言葉の意味は何ですか？
+意味 | いみ | meaning | どういう意味ですか？
+仕事 | しごと | work / job | 仕事は何ですか？
+会議 | かいぎ | meeting | 三時から会議があります。
+休み | やすみ | break / day off / holiday | 明日は休みです。
+# More verbs
+開ける | あける | to open | 窓を開けてください。
+閉める | しめる | to close | ドアを閉めてください。
+入る | はいる | to enter | 部屋に入ってもいいですか？
+出る | でる | to leave / go out | 八時に家を出ます。
+始まる | はじまる | to begin | 映画は七時に始まります。
+終わる | おわる | to end | 授業は四時に終わります。
+作る | つくる | to make | 晩ご飯を作ります。
+洗う | あらう | to wash | 手を洗います。
+着る | きる | to wear (on the body) | コートを着てください。
+脱ぐ | ぬぐ | to take off (clothes, shoes) | ここで靴を脱いでください。
+貸す | かす | to lend | ペンを貸してくれませんか？
+借りる | かりる | to borrow | 図書館で本を借りました。
+教える | おしえる | to teach / tell | 日本語を教えてください。
+習う | ならう | to learn (from someone) | ピアノを習っています。
+覚える | おぼえる | to remember / memorize | 新しい単語を覚えます。
+忘れる | わすれる | to forget | 宿題を忘れました。
+知る | しる | to know | その人を知っていますか？ | Usually 知っています. "I don't know": 知りません.
+思う | おもう | to think | いいと思います。
+言う | いう | to say | 何と言いましたか？
+持つ | もつ | to hold / have | 傘を持っていますか？
+送る | おくる | to send | メッセージを送ります。
+呼ぶ | よぶ | to call (someone) | タクシーを呼びましょう。
+立つ | たつ | to stand | 立ってください。
+座る | すわる | to sit | ここに座ってもいいですか？
+死ぬ | しぬ | to die | お腹がすいて死にそう！ | Also used to exaggerate.
+# More adjectives
+長い | ながい | long | 髪が長いですね。
+短い | みじかい | short (length) | 夏休みは短いです。
+重い | おもい | heavy | このかばんは重いです。
+軽い | かるい | light (weight) | 軽いパソコンが欲しいです。
+早い | はやい | early | 朝早く起きます。
+速い | はやい | fast | 新幹線は速いです。
+遅い | おそい | late / slow | もう遅いから、帰ります。
+多い | おおい | many / a lot | 東京は人が多いです。
+少ない | すくない | few / little | 休みが少ないです。
+明るい | あかるい | bright / cheerful | 明るい部屋ですね。
+暗い | くらい | dark / gloomy | 外はもう暗いです。
+静か | しずか | quiet | 静かな町が好きです。
+有名 | ゆうめい | famous | この店は有名です。
+便利 | べんり | convenient | コンビニは便利です。
+大切 | たいせつ | important / precious | 家族は大切です。
+暇 | ひま | free (not busy) | 明日は暇ですか？
+同じ | おなじ | the same | 同じクラスですね！
+欲しい | ほしい | to want (a thing) | 新しいスマホが欲しい。 | 〜が欲しい.
+かわいい | | cute | この犬、かわいい！
+かっこいい | | cool / good-looking | その服、かっこいいね！
+# Useful phrases
+いってきます | | I'm off (leaving home) | いってきます！ | The answer: いってらっしゃい.
+ただいま | | I'm home | ただいま！ | The answer: おかえり.
+おかえり | | welcome home | おかえり！今日はどうだった？
+どうぞ | | please / go ahead / here you are | どうぞ、座ってください。
+どういたしまして | | you're welcome | 「ありがとう」「どういたしまして」
+お疲れ様 | おつかれさま | thanks for your hard work | 今日もお疲れ様でした。 | Said to coworkers and teammates.
+気をつけて | きをつけて | take care / be careful | 気をつけて帰ってね。
+頑張って | がんばって | good luck / do your best | テスト、頑張って！
+いいですよ | | sure / OK | 「手伝って」「いいですよ」
+ちょっと待って | ちょっとまって | wait a moment | ちょっと待って、すぐ行く！
+# Positions and counting
+上 | うえ | on / above | 机の上に本があります。
+下 | した | under / below | ベッドの下に猫がいます。
+中 | なか | inside | かばんの中に財布があります。
+外 | そと | outside | 外は寒いです。
+前 | まえ | in front / before | 駅の前で待っています。
+後ろ | うしろ | behind | 後ろに座ってください。
+隣 | となり | next to | 隣の人は誰ですか？
+近く | ちかく | nearby | 近くにコンビニはありますか？
+間 | あいだ | between | 銀行と郵便局の間にあります。
+一つ | ひとつ | one (thing) | りんごを一つください。
+二つ | ふたつ | two (things) | ケーキを二つ買いました。
+三つ | みっつ | three (things) | 質問が三つあります。
+一人 | ひとり | one person / alone | 一人で旅行するのが好きです。
+二人 | ふたり | two people | 二人で映画を見ました。
+〜枚 | 〜まい | (counter for flat things) | 紙を三枚ください。
+〜本 | 〜ほん | (counter for long things) | ペンを二本持っています。 | Sometimes ぽん or ぼん: 一本 (いっぽん), 三本 (さんぼん).
+〜回 | 〜かい | ~ times | 日本に三回行きました。
+〜歳 | 〜さい | ~ years old | 二十歳です。 | 20 years old is はたち.
+全部 | ぜんぶ | all / everything | 全部食べました！
+少し | すこし | a little | 日本語を少し話せます。
+
+@deck Japanese 3 · Getting Things Done | Japanese | English | Level 3 of 5 (about JLPT N4). 200 words for travel, work, school, plans and feelings, plus the verbs that let you say what happened and what you want.
+# Feelings
+嬉しい | うれしい | happy / glad | 会えて嬉しいです。
+悲しい | かなしい | sad | その映画は悲しかったです。
+寂しい | さびしい | lonely | 一人で寂しいです。
+怖い | こわい | scary / afraid | ホラー映画は怖い！
+恥ずかしい | はずかしい | embarrassed / shy | 人前で歌うのは恥ずかしい。
+心配 | しんぱい | worry | 心配しないでください。 | 心配する = to worry.
+安心 | あんしん | relief / peace of mind | それを聞いて安心しました。
+びっくり | | surprised | びっくりした！ | びっくりする = to be surprised.
+怒る | おこる | to get angry | 母に怒られました。
+泣く | なく | to cry | 映画を見て泣きました。
+笑う | わらう | to laugh / smile | みんなが笑いました。
+疲れる | つかれる | to get tired | 今日はとても疲れました。
+困る | こまる | to be in trouble / at a loss | 財布をなくして困っています。
+楽しみ | たのしみ | looking forward to | 旅行が楽しみです！
+残念 | ざんねん | too bad / disappointing | 行けなくて残念です。
+気持ち | きもち | feeling | 気持ちがわかります。
+気分 | きぶん | mood | 今日は気分がいいです。
+# Travel
+ホテル | | hotel | ホテルを予約しました。
+予約 | よやく | reservation / booking | 七時に予約しています。 | 予約する = to book.
+荷物 | にもつ | luggage / baggage | 荷物が重いです。
+パスポート | | passport | パスポートを忘れないでね。
+観光 | かんこう | sightseeing | 京都で観光しました。
+お土産 | おみやげ | souvenir (gift) | 友達にお土産を買いました。 | Gifts from a trip for friends and coworkers.
+新幹線 | しんかんせん | bullet train | 新幹線で大阪に行きます。
+乗り換え | のりかえ | transfer (trains) | 新宿で乗り換えです。 | 乗り換える = to change trains.
+出発 | しゅっぱつ | departure | 出発は八時です。
+到着 | とうちゃく | arrival | 到着が遅れています。
+景色 | けしき | scenery / view | ここからの景色はきれいです。
+温泉 | おんせん | hot spring | 温泉に入りたいです。
+神社 | じんじゃ | (Shinto) shrine | 神社でお参りしました。
+お寺 | おてら | (Buddhist) temple | 京都にはお寺がたくさんあります。
+泊まる | とまる | to stay (overnight) | 友達の家に泊まりました。
+迷う | まよう | to get lost / hesitate | 道に迷いました。
+# Work
+会社員 | かいしゃいん | office worker | 父は会社員です。
+社長 | しゃちょう | company president / boss | 社長と話しました。
+同僚 | どうりょう | coworker | 同僚と昼ご飯を食べます。
+給料 | きゅうりょう | salary / pay | 給料が上がりました！
+残業 | ざんぎょう | overtime | 今日も残業です。
+アルバイト | | part-time job | コンビニでアルバイトをしています。 | Often バイト.
+面接 | めんせつ | (job) interview | 明日、面接があります。
+経験 | けいけん | experience | 仕事の経験はありますか？ | 経験する = to experience.
+メール | | email | あとでメールを送ります。
+書類 | しょるい | documents / paperwork | この書類にサインしてください。
+締め切り | しめきり | deadline | 締め切りは金曜日です。
+連絡 | れんらく | contact / getting in touch | あとで連絡します。 | 連絡する = to contact.
+相談 | そうだん | consultation / asking advice | ちょっと相談があります。 | 相談する = to talk over.
+準備 | じゅんび | preparation | 旅行の準備をしています。 | 準備する = to prepare.
+# School
+教室 | きょうしつ | classroom | 教室に誰もいません。
+図書館 | としょかん | library | 図書館で勉強します。
+試験 | しけん | exam | 来週、試験があります。
+合格 | ごうかく | passing (an exam) | 試験に合格しました！ | 合格する = to pass.
+練習 | れんしゅう | practice | 毎日ピアノを練習します。 | 練習する = to practice.
+復習 | ふくしゅう | review (of lessons) | 今日の授業を復習します。
+文法 | ぶんぽう | grammar | 日本語の文法は難しいです。
+単語 | たんご | word / vocabulary | 新しい単語を十個覚えました。
+発音 | はつおん | pronunciation | 発音がきれいですね。
+漢字 | かんじ | kanji (Chinese characters) | 漢字を書くのは難しい。
+ひらがな | | hiragana | ひらがなはもう読めます。
+カタカナ | | katakana | 外来語はカタカナで書きます。
+辞書 | じしょ | dictionary | 辞書で調べてください。
+留学 | りゅうがく | studying abroad | 日本に留学したいです。 | 留学生 = international student.
+卒業 | そつぎょう | graduation | 来年大学を卒業します。 | 卒業する = to graduate.
+# Plans and invitations
+予定 | よてい | plans / schedule | 週末の予定はありますか？
+約束 | やくそく | promise / appointment | 友達と約束があります。
+誘う | さそう | to invite | 友達を映画に誘いました。
+集まる | あつまる | to gather | 駅に七時に集まりましょう。
+遅れる | おくれる | to be late | 電車が遅れています。
+間に合う | まにあう | to be in time | 急げば間に合います。
+急ぐ | いそぐ | to hurry | 急いでください！
+決める | きめる | to decide | 何を食べるか決めましたか？
+変える | かえる | to change (something) | 予定を変えましょう。
+変わる | かわる | to change (by itself) | 町がずいぶん変わりました。
+手伝う | てつだう | to help | 引っ越しを手伝ってくれませんか？
+頼む | たのむ | to ask (a favor) / order | 友達に頼みました。
+断る | ことわる | to refuse / turn down | 誘いを断りました。
+楽しむ | たのしむ | to enjoy | 旅行を楽しんでください！
+都合 | つごう | convenience / circumstances | 明日の都合はどうですか？
+# People and relationships
+彼 | かれ | he / boyfriend | 彼は優しい人です。
+彼女 | かのじょ | she / girlfriend | 彼女ができました！
+恋人 | こいびと | boyfriend / girlfriend (partner) | 恋人はいますか？
+夫 | おっと | (my) husband | 夫は料理が上手です。
+妻 | つま | (my) wife | 妻と旅行に行きました。
+両親 | りょうしん | parents | 両親は大阪に住んでいます。
+赤ちゃん | あかちゃん | baby | 赤ちゃんがかわいいです。
+大人 | おとな | adult | 大人一枚お願いします。
+男の人 | おとこのひと | man | あの男の人は誰ですか？
+女の人 | おんなのひと | woman | 女の人が手を振っています。
+みんな | | everyone | みんなで食べましょう。
+自分 | じぶん | oneself | 自分でやります。
+結婚 | けっこん | marriage | 来年結婚します。 | 結婚する = to get married.
+付き合う | つきあう | to date / go out with | 二人は付き合っています。
+優しい | やさしい | kind / gentle | 彼女はとても優しいです。
+親切 | しんせつ | kind / helpful | 親切にしてくれてありがとう。
+# City and services
+銀行 | ぎんこう | bank | 銀行でお金をおろします。
+郵便局 | ゆうびんきょく | post office | 郵便局はどこですか？
+交番 | こうばん | police box | 交番で道を聞きました。
+警察 | けいさつ | police | 警察を呼んでください！
+公園 | こうえん | park | 公園を散歩します。
+建物 | たてもの | building | 古い建物が多いです。
+入口 | いりぐち | entrance | 入口はあちらです。
+出口 | でぐち | exit | 東口の出口で会いましょう。
+階段 | かいだん | stairs | 階段を上がってください。
+エレベーター | | elevator | エレベーターで五階に行きます。
+信号 | しんごう | traffic light | 次の信号を右です。
+角 | かど | corner | その角を曲がってください。
+町 | まち | town | 静かな町に住んでいます。
+田舎 | いなか | the countryside / hometown | 田舎の生活が好きです。
+# Doing things
+調べる | しらべる | to look up / check | ネットで調べます。
+比べる | くらべる | to compare | 値段を比べましょう。
+説明 | せつめい | explanation | もう一度説明してください。 | 説明する = to explain.
+運ぶ | はこぶ | to carry | この箱を運んでください。
+届く | とどく | to arrive (a package) / reach | 荷物が届きました。
+拾う | ひろう | to pick up | ゴミを拾いました。
+捨てる | すてる | to throw away | ゴミを捨ててください。
+落とす | おとす | to drop | 財布を落としました。
+なくす | | to lose (something) | 鍵をなくしました。 | Kanji: 無くす.
+壊れる | こわれる | to break (by itself) | パソコンが壊れました。
+直す | なおす | to fix / correct | 間違いを直してください。
+片付ける | かたづける | to tidy up | 部屋を片付けます。
+続ける | つづける | to continue | 日本語の勉強を続けます。
+止める | とめる | to stop (something) | 車を止めてください。
+始める | はじめる | to start (something) | 新しい仕事を始めました。
+増える | ふえる | to increase | 観光客が増えました。
+減る | へる | to decrease | 体重が減りました。
+# Abilities and permission
+できる | | can / to be able to | 日本語ができます。 | Kanji: 出来る.
+必要 | ひつよう | necessary / needed | パスポートが必要です。
+大事 | だいじ | important | 健康が一番大事です。
+無理 | むり | impossible / too much | 無理しないでね。
+だめ | | no good / not allowed | ここで写真を撮ってはだめです。 | Kanji: 駄目.
+いけない | | must not / bad | 遅れてはいけません。
+かまわない | | don't mind | 窓を開けてもかまいませんか？
+許す | ゆるす | to forgive / allow | 許してください。
+# Describing things
+危ない | あぶない | dangerous / watch out | 危ない！
+安全 | あんぜん | safe | 日本は安全な国です。
+汚い | きたない | dirty | 部屋が汚いです。
+狭い | せまい | narrow / cramped | 部屋が狭いです。
+広い | ひろい | wide / spacious | 広い公園ですね。
+珍しい | めずらしい | rare / unusual | 珍しい名前ですね。
+素敵 | すてき | lovely / wonderful | 素敵な家ですね。
+丁寧 | ていねい | polite / careful | 丁寧に書いてください。
+特別 | とくべつ | special | 今日は特別な日です。
+簡単に | かんたんに | easily | 簡単に作れます。
+複雑 | ふくざつ | complicated | 説明が複雑です。
+正しい | ただしい | correct | 正しい答えはどれですか？
+違う | ちがう | different / wrong | それは違います。
+似ている | にている | to look alike | お母さんに似ていますね。
+# Connecting ideas
+例えば | たとえば | for example | 例えば、寿司やラーメンが好きです。
+それから | | and then / after that | 宿題をして、それから寝ました。
+それに | | besides / moreover | 安いし、それにおいしい。
+けど | | but / though | 高いけど、買います。 | Casual. Polite: ですが.
+ので | | because / so | 雨なので、家にいます。 | Softer than から.
+たぶん | | probably / maybe | たぶん明日は雨です。
+きっと | | surely / I bet | きっと大丈夫ですよ。
+もちろん | | of course | もちろん、いいですよ！
+やっぱり | | as expected / after all | やっぱり寿司がいい。 | Formal: やはり.
+実は | じつは | actually / to tell the truth | 実は、明日誕生日なんです。
+特に | とくに | especially | 特に夏が好きです。
+最近 | さいきん | recently / lately | 最近忙しいです。
+最初 | さいしょ | first / the beginning | 最初は難しかったです。
+最後 | さいご | last / the end | 最後まで頑張りましょう。
+初めて | はじめて | for the first time | 日本に来るのは初めてです。
+すぐ | | right away / soon | すぐ行きます！
+もうすぐ | | soon / almost | もうすぐ夏休みです。
+ずっと | | the whole time / by far | ずっと待っていました。
+# Useful phrases
+お願いがあります | おねがいがあります | I have a favor to ask | ちょっとお願いがあるんですが…
+どうしたの | | what's wrong? / what happened? | どうしたの？元気ないね。
+なるほど | | I see / that makes sense | なるほど、わかりました。
+どうしよう | | what should I do? | 財布がない！どうしよう！
+しょうがない | | it can't be helped | 雨だからしょうがないね。
+よかった | | that's good / I'm glad / phew | 間に合ってよかった！
+もしもし | | hello (on the phone) | もしもし、田中です。
+# Daily routine
+歯を磨く | はをみがく | to brush your teeth | 寝る前に歯を磨きます。
+シャワーを浴びる | シャワーをあびる | to take a shower | 朝シャワーを浴びます。
+化粧 | けしょう | makeup | 化粧に十分かかります。 | 化粧する = to put on makeup.
+散歩 | さんぽ | a walk | 犬と散歩します。 | 散歩する = to take a walk.
+運動 | うんどう | exercise | 毎日運動しています。 | 運動する = to exercise.
+昼寝 | ひるね | nap | 昼寝をしました。
+生活 | せいかつ | life / lifestyle | 日本の生活に慣れました。
+慣れる | なれる | to get used to | 日本の生活に慣れました。
+通う | かよう | to commute / go regularly | ジムに通っています。
+引っ越す | ひっこす | to move (house) | 来月東京に引っ越します。
+# Money
+財布 | さいふ | wallet | 財布を忘れました。
+貯金 | ちょきん | savings | 旅行のために貯金しています。 | 貯金する = to save money.
+お釣り | おつり | change (money back) | お釣りをどうぞ。
+無料 | むりょう | free (no cost) | 入場は無料です。
+割引 | わりびき | discount | 学生割引はありますか？
+足りる | たりる | to be enough | お金が足りません。
+かかる | | to take (time) / cost (money) | 駅まで十分かかります。
+# Technology
+パソコン | | computer (PC) | パソコンで仕事をします。
+インターネット | | internet | インターネットで調べます。 | Often ネット.
+アプリ | | app | このアプリは便利です。
+パスワード | | password | パスワードを忘れました。
+充電 | じゅうでん | charging (a battery) | スマホを充電しないと。 | 充電する = to charge.
+画面 | がめん | screen | 画面が割れました。
+動画 | どうが | video | 面白い動画を見ました。
+投稿 | とうこう | a post (online) | インスタに写真を投稿しました。 | 投稿する = to post.
+ダウンロード | | download | アプリをダウンロードしてください。
+押す | おす | to push / press | このボタンを押してください。
+消す | けす | to erase / turn off | テレビを消してください。
+付ける | つける | to turn on / attach | 電気をつけてください。
+
+@deck Japanese 4 · Real Conversations | Japanese | English | Level 4 of 5 (JLPT N4 to N3). 200 words for real conversations: opinions, reasons, casual speech, relationships, and the little words Japanese people use all the time.
+# Opinions
+意見 | いけん | opinion | あなたの意見を聞かせてください。
+賛成 | さんせい | agreement / in favor | その意見に賛成です。
+反対 | はんたい | opposition / opposite | 私は反対です。
+本当に | ほんとうに | really / truly | 本当にありがとう。
+絶対 | ぜったい | absolutely / definitely | 絶対に行きます！
+多分 | たぶん | probably | 多分大丈夫だと思う。
+確か | たしか | if I remember right / certain | 確か、彼は大阪出身です。
+気がする | きがする | to have a feeling that | 雨が降る気がする。
+感じ | かんじ | feeling / impression / vibe | いい感じですね！
+印象 | いんしょう | impression | 日本の第一印象はどうでしたか？
+好み | このみ | taste / preference | それは好みの問題です。
+理由 | りゆう | reason | 理由を教えてください。
+原因 | げんいん | cause | 事故の原因は何ですか？
+結果 | けっか | result | 試験の結果はどうでしたか？
+場合 | ばあい | case / situation | 雨の場合は中止です。
+# Casual speech
+うん | | yeah (casual yes) | うん、いいよ。
+ううん | | nope (casual no) | ううん、大丈夫。
+マジで | | seriously? / for real | マジで？すごい！ | Slang.
+やばい | | crazy / awful / amazing | このラーメン、やばい！ | Slang. Good or bad, depending on the situation.
+めっちゃ | | super / really | めっちゃおいしい！ | Slang, from western Japan. Standard: とても.
+すごく | | very / really | すごく楽しかった！
+ちゃんと | | properly / for sure | ちゃんと寝てね。
+なんか | | somehow / kind of / like | なんか眠い。 | A filler word, like "like" in English.
+とりあえず | | for now / first of all | とりあえずビール！
+まあ | | well / I guess | まあ、いいか。
+えっと | | um / let me see | えっと、何だっけ？
+あの | | um / excuse me | あの、すみません…
+ね | | right? / isn't it? | いい天気だね。 | Sentence ending: checks that the listener agrees.
+よ | | (I'm telling you) | これ、おいしいよ。 | Sentence ending: gives the listener new information.
+じゃん | | isn't it? / you know | いいじゃん！ | Casual, from Tokyo.
+# Relationships
+関係 | かんけい | relationship / connection | 二人はどういう関係ですか？
+仲がいい | なかがいい | to get along well | 姉とは仲がいいです。
+喧嘩 | けんか | fight / argument | 弟と喧嘩しました。 | 喧嘩する = to fight.
+仲直り | なかなおり | making up (after a fight) | 友達と仲直りしました。
+信じる | しんじる | to believe / trust | あなたを信じています。
+裏切る | うらぎる | to betray | 友達に裏切られました。
+別れる | わかれる | to break up / part | 彼女と別れました。
+告白 | こくはく | confession (of love) | 好きな人に告白しました。 | 告白する = to confess.
+片思い | かたおもい | one-sided love / crush | ずっと片思いしています。
+デート | | a date | 週末にデートします。
+気になる | きになる | to be curious about / have a crush | 彼のことが気になる。
+会いたい | あいたい | I want to see you / I miss you | 早く会いたいな。
+大好き | だいすき | to love (like a lot) | 日本の食べ物が大好きです。
+性格 | せいかく | personality | 彼は性格がいいです。
+真面目 | まじめ | serious / hardworking | 彼女は真面目な学生です。
+# Personality
+明るい性格 | あかるいせいかく | cheerful personality | 明るい性格ですね。
+おとなしい | | quiet / well-behaved | 彼はおとなしい人です。
+わがまま | | selfish | わがままを言わないで。
+頭がいい | あたまがいい | smart | 彼女は頭がいいです。
+面倒くさい | めんどうくさい | what a pain / too much trouble | 料理は面倒くさい。 | Casual: めんどい.
+厳しい | きびしい | strict / harsh | 先生は厳しいです。
+うるさい | | noisy / annoying | 隣の部屋がうるさい。 | Also "shut up!" said to someone.
+変 | へん | strange / weird | 変な音がします。
+不思議 | ふしぎ | mysterious / strange | 不思議な話ですね。
+羨ましい | うらやましい | jealous / envious | 日本に住んでいるの？羨ましい！
+# Daily conversation verbs
+気をつける | きをつける | to be careful | 車に気をつけて。
+気がつく | きがつく | to notice | 間違いに気がつきました。
+思い出す | おもいだす | to remember / recall | 名前を思い出せません。
+考える | かんがえる | to think (about) / consider | ちょっと考えさせてください。
+答える | こたえる | to answer | 質問に答えてください。
+伝える | つたえる | to tell / pass on (a message) | よろしく伝えてください。
+話し合う | はなしあう | to discuss | みんなで話し合いましょう。
+褒める | ほめる | to praise | 先生に褒められました。
+謝る | あやまる | to apologize | ちゃんと謝りました。
+冗談 | じょうだん | joke | 冗談だよ！
+嘘 | うそ | lie / no way! | 嘘でしょう？ | 嘘をつく = to tell a lie.
+秘密 | ひみつ | secret | これは秘密です。
+噂 | うわさ | rumor | 変な噂を聞きました。
+話題 | わだい | topic (of conversation) | 最近の話題は何ですか？
+# Reasons and conditions
+もし | | if | もし雨なら、家にいます。
+〜たら | | if / when ~ | 時間があったら、行きます。 | e.g. 着いたら連絡して = text me when you arrive.
+〜ば | | if ~ | 急げば間に合う。
+〜なら | | if (it's the case that) ~ | 寿司なら、あの店がいいよ。
+なのに | | even though | 約束したのに、来なかった。
+それで | | and so / and then | それで、どうなったの？
+だって | | because / but… | だって、眠いんだもん。 | Casual, a bit childish.
+つまり | | in other words / basically | つまり、無理ってこと？
+ところで | | by the way | ところで、明日暇？
+とにかく | | anyway | とにかく、行ってみよう。
+せっかく | | since we went to the trouble | せっかく来たから、写真を撮ろう。
+わざわざ | | going out of your way | わざわざありがとう。
+一応 | いちおう | just in case / technically | 一応傘を持って行きます。
+結局 | けっきょく | in the end | 結局、行かなかった。
+# Time expressions
+さっき | | a moment ago | さっき電話したよ。
+これから | | from now on / now | これからよろしくお願いします。
+今度 | こんど | next time / this time | 今度一緒に行こう。
+この間 | このあいだ | the other day | この間はありがとう。
+そのうち | | sooner or later / one of these days | そのうち会いましょう。
+久しぶり | ひさしぶり | long time no see | 久しぶり！元気だった？
+いつか | | someday | いつか日本に住みたい。
+しばらく | | for a while | しばらく休みます。
+急に | きゅうに | suddenly | 急に雨が降ってきた。
+だんだん | | gradually | だんだん寒くなってきました。
+やっと | | finally / at last | やっと終わった！
+まず | | first (of all) | まず手を洗ってください。
+次 | つぎ | next | 次の駅で降ります。
+前に | まえに | before / ago | 三年前に日本に来ました。
+後で | あとで | later | 後で電話するね。
+# Media and entertainment
+番組 | ばんぐみ | (TV) program / show | 好きな番組は何ですか？
+ドラマ | | TV drama | 日本のドラマを見ています。
+ニュース | | news | 毎朝ニュースを見ます。
+小説 | しょうせつ | novel | 村上春樹の小説が好きです。
+作品 | さくひん | work (of art) | 宮崎駿の作品は全部見ました。
+主人公 | しゅじんこう | main character | 主人公がかっこいい！
+声優 | せいゆう | voice actor | 好きな声優は誰ですか？
+歌手 | かしゅ | singer | 有名な歌手のコンサートに行きました。
+推し | おし | your favorite (idol, character) | 私の推しはこのキャラです！ | Fan slang.
+ファン | | fan | 昔からのファンです。
+人気 | にんき | popularity / popular | このアニメは人気があります。
+流行る | はやる | to be popular / trendy | 今これが流行っています。
+話が合う | はなしがあう | to have a lot in common (to talk about) | 彼とは話が合います。
+感動 | かんどう | being moved (emotionally) | その映画に感動しました。 | 感動する = to be moved.
+笑える | わらえる | funny / laughable | この動画、笑える！
+# Food culture
+居酒屋 | いざかや | izakaya (Japanese pub) | 居酒屋で飲みましょう。
+乾杯 | かんぱい | cheers! | 乾杯！
+おかわり | | a refill / second helping | ご飯のおかわりはいかがですか？
+味 | あじ | taste / flavor | この料理はいい味ですね。
+匂い | におい | smell | いい匂いがする！
+焼く | やく | to grill / bake | 魚を焼きます。
+煮る | にる | to simmer / boil | 野菜を煮ます。
+揚げる | あげる | to deep-fry | 天ぷらを揚げます。
+切る | きる | to cut | 野菜を切ってください。
+材料 | ざいりょう | ingredients / materials | 材料を買ってきます。
+自炊 | じすい | cooking for yourself | 毎日自炊しています。
+食べ放題 | たべほうだい | all-you-can-eat | 食べ放題の店に行こう！
+飲み会 | のみかい | drinking party | 今夜は会社の飲み会です。
+# Useful phrases
+気にしないで | きにしないで | don't worry about it | 気にしないで、大丈夫だよ。
+お先に失礼します | おさきにしつれいします | I'll be leaving first (excuse me) | お先に失礼します。 | Said when leaving work before others.
+失礼します | しつれいします | excuse me (entering, leaving) | 失礼します。入ってもいいですか？
+お邪魔します | おじゃまします | sorry to intrude (entering a home) | お邪魔します！
+お大事に | おだいじに | get well soon | 風邪？お大事に。
+おめでとう | | congratulations | 誕生日おめでとう！
+いいなあ | | lucky you / I'm jealous | 旅行に行くの？いいなあ！
+そうなんだ | | oh, I see / is that so | そうなんだ、知らなかった。
+そうかな | | I wonder / I'm not so sure | そうかな？私はそう思わない。
+やってみる | | to give it a try | 難しいけど、やってみる！
+任せて | まかせて | leave it to me | 料理は私に任せて！
+お互い様 | おたがいさま | we're in the same boat | 困った時はお互い様です。
+仕方ない | しかたない | it can't be helped | 雨なら仕方ないね。 | Same as しょうがない, a bit more formal.
+# Health and body (more)
+健康 | けんこう | health | 健康のために歩いています。
+具合 | ぐあい | condition (health) | 具合はどうですか？
+怪我 | けが | injury | 足を怪我しました。 | 怪我をする = to get hurt.
+眠い | ねむい | sleepy | 授業中、眠かった。
+だるい | | sluggish / tired | 体がだるいです。
+太る | ふとる | to gain weight | 最近太りました。
+痩せる | やせる | to lose weight | 痩せたいです。
+吐く | はく | to throw up / exhale | 気持ち悪くて吐きそう。
+咳 | せき | cough | 咳が止まりません。
+アレルギー | | allergy | 卵アレルギーがあります。
+# Home life (more)
+家賃 | やちん | rent | 東京は家賃が高いです。
+近所 | きんじょ | neighborhood | 近所にいいパン屋があります。
+ゴミ | | trash / garbage | 今日は燃えるゴミの日です。 | Japan sorts trash: 燃えるゴミ, 燃えないゴミ...
+飼う | かう | to keep (a pet) | 猫を二匹飼っています。
+ペット | | pet | ペットを飼っていますか？
+植物 | しょくぶつ | plant | 部屋に植物を置いています。
+干す | ほす | to hang out to dry | 洗濯物を干します。
+沸かす | わかす | to boil (water) | お湯を沸かします。
+お湯 | おゆ | hot water | お湯を入れて三分待ちます。
+# Society and the world
+世界 | せかい | world | 世界中を旅行したい。
+社会 | しゃかい | society | 日本の社会について勉強しています。
+文化 | ぶんか | culture | 日本の文化に興味があります。
+歴史 | れきし | history | 京都は歴史がある町です。
+外国 | がいこく | foreign country | 外国に住んだことがありますか？
+外国人 | がいこくじん | foreigner | この町は外国人が多いです。
+言語 | げんご | language | 何か国語話せますか？
+興味 | きょうみ | interest | 日本のアニメに興味があります。 | 〜に興味がある.
+習慣 | しゅうかん | custom / habit | 日本の習慣に慣れましたか？
+ルール | | rule | ルールを守ってください。
+守る | まもる | to protect / keep (a promise, rule) | 約束を守ります。
+# Talking about language
+意味がわかる | いみがわかる | to understand the meaning | この文の意味がわかりません。
+通じる | つうじる | to get through / be understood | 英語が通じなくて困った。
+訳す | やくす | to translate | 日本語に訳してください。
+翻訳 | ほんやく | translation | この翻訳は正しいですか？
+敬語 | けいご | polite (honorific) language | 敬語は難しいです。
+ため口 | ためぐち | casual speech (to equals) | ため口で話してもいいよ。 | Also written タメ口.
+方言 | ほうげん | dialect | 大阪の方言は面白い。
+間違える | まちがえる | to make a mistake | 漢字を間違えました。
+間違い | まちがい | mistake | 間違いを直してくれてありがとう。
+上達 | じょうたつ | improvement (in a skill) | 日本語が上達しましたね！ | 上達する = to improve.
+ペラペラ | | fluent | 日本語がペラペラですね！
+# Common expressions
+〜みたい | | seems like ~ / like ~ | 夢みたい！ | Casual. Formal: 〜のようだ.
+〜そう | | looks ~ | おいしそう！
+〜っぽい | | -ish / kind of like ~ | 子供っぽい。 | Casual.
+〜すぎる | | too ~ | 食べすぎた。
+〜やすい | | easy to ~ | この本は読みやすい。
+〜にくい | | hard to ~ | この靴は歩きにくい。
+〜ながら | | while ~ing | 音楽を聞きながら勉強します。
+〜かもしれない | | might / maybe | 明日雨が降るかもしれない。
+〜はず | | should (be) / supposed to | 彼はもう着いたはずです。
+〜わけ | | reason / it means that | そういうわけで、遅れました。
+〜ことがある | | have done ~ (before) | 富士山に登ったことがあります。 | With the past: 〜たことがある.
+〜つもり | | intend to ~ | 来年日本に行くつもりです。
+〜ようにする | | try to (make a habit of) | 毎日歩くようにしています。
+〜ことにする | | decide to ~ | 日本に留学することにしました。
+# Feelings (more)
+緊張 | きんちょう | nervousness | 面接で緊張しました。 | 緊張する = to be nervous.
+退屈 | たいくつ | boring / bored | 退屈な授業でした。
+悔しい | くやしい | frustrating / bitter (after losing) | 負けて悔しい！
+懐かしい | なつかしい | nostalgic | この歌、懐かしい！
+ワクワク | | excited (looking forward) | 明日の旅行にワクワクしています。
+ドキドキ | | heart pounding (nervous or in love) | 告白する前、ドキドキした。
+イライラ | | irritated | 待たされてイライラした。
+ほっとする | | to feel relieved | 試験が終わってほっとした。
+
+@deck Japanese 5 · Going Deeper | Japanese | English | Level 5 of 5 (about JLPT N3). 200 harder words: news and society, work and polite language, nuanced feelings, sound words (onomatopoeia) and natural expressions.
+# Polite language (keigo)
+いらっしゃいませ | | welcome (in a shop) | いらっしゃいませ、何名様ですか？ | What staff say. You don't answer it.
+かしこまりました | | certainly (I understand) | かしこまりました、少々お待ちください。 | Very polite. Used by staff.
+少々 | しょうしょう | a little (polite) | 少々お待ちください。
+申し訳ありません | もうしわけありません | I'm very sorry | 遅れて申し訳ありません。 | Very polite apology.
+恐れ入ります | おそれいります | excuse me / thank you (very polite) | 恐れ入りますが、お名前を教えていただけますか？
+いただく | | to receive (humble) / eat (humble) | 先生にプレゼントをいただきました。 | Humble form of もらう and 食べる.
+くださる | | to give (to me, honorific) | 先生が本をくださいました。 | Honorific form of くれる.
+召し上がる | めしあがる | to eat / drink (honorific) | どうぞ召し上がってください。
+いらっしゃる | | to be / come / go (honorific) | 社長はいらっしゃいますか？
+おっしゃる | | to say (honorific) | 先生がおっしゃいました。
+伺う | うかがう | to visit / ask (humble) | 明日伺います。
+申す | もうす | to say / be called (humble) | 田中と申します。
+参る | まいる | to go / come (humble) | すぐに参ります。
+拝見する | はいけんする | to see / look at (humble) | 資料を拝見しました。
+ご存知 | ごぞんじ | knowing (honorific) | この店をご存知ですか？
+# Work (more)
+上司 | じょうし | boss / superior | 上司に相談しました。
+部下 | ぶか | subordinate | 部下が三人います。
+先輩 | せんぱい | senior (at school or work) | 先輩にいろいろ教えてもらいました。
+後輩 | こうはい | junior (at school or work) | 後輩とご飯に行きました。
+営業 | えいぎょう | sales / business (hours) | 営業の仕事をしています。
+担当 | たんとう | in charge (of) | 私がこのプロジェクトの担当です。
+出張 | しゅっちょう | business trip | 来週、大阪に出張します。
+転職 | てんしょく | changing jobs | 転職を考えています。
+就職 | しゅうしょく | getting a job | 東京の会社に就職しました。
+退職 | たいしょく | leaving a job / retiring | 父は去年退職しました。
+責任 | せきにん | responsibility | 責任を取ります。
+目標 | もくひょう | goal / target | 今年の目標は何ですか？
+成功 | せいこう | success | プロジェクトは成功しました。
+失敗 | しっぱい | failure / mistake | 失敗から学びましょう。 | 失敗する = to fail.
+努力 | どりょく | effort | 努力は大切です。
+# News and society
+政治 | せいじ | politics | 政治に興味がありますか？
+経済 | けいざい | economy | 日本の経済について話しましょう。
+選挙 | せんきょ | election | 来月選挙があります。
+環境 | かんきょう | environment | 環境を守ることは大事です。
+問題 | もんだい | problem / question | 大きな問題ではありません。
+事件 | じけん | incident / case | 昨日、事件がありました。
+事故 | じこ | accident | 交通事故がありました。
+地震 | じしん | earthquake | 昨日の夜、地震がありました。
+台風 | たいふう | typhoon | 台風が来ています。
+災害 | さいがい | disaster | 災害に備えましょう。
+人口 | じんこう | population | 東京の人口は多いです。
+少子化 | しょうしか | declining birth rate | 日本は少子化が問題です。
+高齢化 | こうれいか | aging (of society) | 高齢化が進んでいます。
+技術 | ぎじゅつ | technology / skill | 日本の技術はすごいです。
+情報 | じょうほう | information | 新しい情報があります。
+# Abstract ideas
+意識 | いしき | awareness / consciousness | 健康を意識しています。
+価値 | かち | value / worth | 行く価値があります。
+可能性 | かのうせい | possibility | 雨の可能性があります。
+影響 | えいきょう | influence / effect | アニメの影響で日本語を始めました。
+状況 | じょうきょう | situation | 今の状況を説明してください。
+自由 | じゆう | freedom / free | 自由な時間が欲しい。
+平和 | へいわ | peace | 世界が平和になってほしい。
+未来 | みらい | the future | 未来のことはわからない。
+過去 | かこ | the past | 過去のことは忘れましょう。
+現実 | げんじつ | reality | 現実は厳しいです。
+夢 | ゆめ | dream | 将来の夢は何ですか？
+将来 | しょうらい | (one's) future | 将来、日本で働きたい。
+自信 | じしん | confidence | 日本語に自信がありません。
+努める | つとめる | to try hard / strive | 笑顔で話すように努めています。
+# Sound and feeling words (onomatopoeia)
+ゆっくり | | slowly / take your time | ゆっくり休んでください。
+しっかり | | firmly / properly / reliable | しっかり勉強してください。
+はっきり | | clearly | はっきり言ってください。
+すっかり | | completely | すっかり忘れていました。
+そろそろ | | it's about time | そろそろ帰ります。
+のんびり | | relaxed / leisurely | 週末はのんびりします。
+ぎりぎり | | just barely / at the last minute | ぎりぎり間に合った。
+にこにこ | | smiling | いつもにこにこしています。
+ぺこぺこ | | starving (stomach) | お腹がぺこぺこです。
+ぐっすり | | (sleep) soundly | ぐっすり眠れました。
+ばらばら | | scattered / in pieces | みんなの意見がばらばらです。
+ぴったり | | perfectly fitting | このサイズはぴったりです。
+びしょびしょ | | soaking wet | 雨でびしょびしょになった。
+ふわふわ | | fluffy / soft | ふわふわのパンケーキ！
+ごろごろ | | lazing around (at home) | 日曜日は家でごろごろしています。
+キラキラ | | sparkling / glittering | 星がキラキラしています。
+こっそり | | secretly / sneakily | こっそりお菓子を食べた。
+うとうと | | dozing off | 電車でうとうとしていました。
+わいわい | | lively / noisy (fun) | みんなでわいわい話しました。
+# Nuanced verbs
+諦める | あきらめる | to give up | 夢を諦めないで。
+我慢 | がまん | endurance / putting up with | もう我慢できない！ | 我慢する = to put up with.
+頑張る | がんばる | to do your best / hang in there | 明日のテスト、頑張ります。
+悩む | なやむ | to worry / be troubled | 進路について悩んでいます。
+迷惑 | めいわく | trouble / nuisance | ご迷惑をおかけしました。 | 迷惑をかける = to cause trouble.
+遠慮 | えんりょ | holding back / hesitation | 遠慮しないで食べてください。 | 遠慮する = to hold back.
+甘える | あまえる | to depend on / act spoiled | お言葉に甘えて…
+期待 | きたい | expectation | 期待しています！ | 期待する = to expect, hope for.
+感謝 | かんしゃ | gratitude | 心から感謝しています。 | 感謝する = to be grateful.
+尊敬 | そんけい | respect | 両親を尊敬しています。 | 尊敬する = to respect.
+応援 | おうえん | support / cheering | いつも応援しています！ | 応援する = to cheer for.
+認める | みとめる | to admit / recognize | 自分の間違いを認めました。
+避ける | さける | to avoid | 混んでいる時間を避けましょう。
+目指す | めざす | to aim for | 日本語能力試験N3を目指しています。
+向かう | むかう | to head toward | 今、駅に向かっています。
+支える | ささえる | to support | 家族が支えてくれました。
+受ける | うける | to take (a test) / receive | 来月試験を受けます。
+与える | あたえる | to give / cause | 子供に影響を与えます。
+含む | ふくむ | to include | 税金を含みます。
+# Nuanced adjectives
+懐かしい思い出 | なつかしいおもいで | fond memories | 学生時代の懐かしい思い出です。
+もったいない | | wasteful / what a waste | 食べ物を捨てるのはもったいない。
+しつこい | | persistent / pushy / heavy (food) | しつこい人は嫌いです。
+ずるい | | unfair / sly | 一人だけずるい！
+だらしない | | sloppy | だらしない格好ですね。
+偉い | えらい | great / admirable / important | 毎日勉強して偉いね！
+ひどい | | terrible / cruel | それはひどい！
+くだらない | | stupid / worthless | くだらない冗談を言わないで。
+まぶしい | | dazzling / too bright | 太陽がまぶしい。
+詳しい | くわしい | detailed / knowledgeable | 彼はアニメに詳しいです。
+怪しい | あやしい | suspicious | 怪しいメールが来た。
+賢い | かしこい | wise / clever | 賢い犬ですね。
+貴重 | きちょう | precious / valuable | 貴重な経験でした。
+適当 | てきとう | suitable / half-hearted | 適当に答えないで。 | Often means "careless" in conversation.
+微妙 | びみょう | subtle / so-so / iffy | 味はちょっと微妙。 | Casual: not great, but hard to say.
+地味 | じみ | plain / low-key | 地味な服が好きです。
+派手 | はで | flashy / showy | 派手な色ですね。
+# Natural expressions
+どうせ | | anyway (it's no use) | どうせ無理だよ。
+さすが | | as expected (of you) | さすが先生！
+いよいよ | | at last / finally (about to happen) | いよいよ明日出発です。
+なかなか | | quite / (not) easily | このラーメン、なかなかおいしい。 | With a negative: なかなか来ない = it won't come.
+わりと | | relatively / fairly | わりと簡単でした。
+けっこう | | quite / fairly / no thanks | けっこうおいしいね。 | けっこうです can also mean "no, thank you".
+むしろ | | rather / if anything | むしろ一人の方がいい。
+せめて | | at least | せめて連絡してほしかった。
+いったい | | what on earth | いったい何があったの？
+もしかして | | could it be...? / by any chance | もしかして、田中さんですか？
+思わず | おもわず | without thinking | 思わず笑ってしまった。
+ついに | | finally / at last | ついに完成しました！
+ようやく | | finally (after a long time) | ようやく春が来ました。
+まさか | | no way! / never | まさか、本当に？
+案外 | あんがい | unexpectedly | 案外簡単でした。
+# Proverbs and set phrases
+猿も木から落ちる | さるもきからおちる | even monkeys fall from trees | 猿も木から落ちるから、気にしないで。 | Even experts make mistakes.
+七転び八起き | ななころびやおき | fall seven times, get up eight | 七転び八起きの精神で頑張ろう。
+一石二鳥 | いっせきにちょう | killing two birds with one stone | 運動しながら勉強できて一石二鳥です。
+十人十色 | じゅうにんといろ | everyone has different tastes | 好みは十人十色です。
+口が軽い | くちがかるい | can't keep a secret | 彼は口が軽いから言わないで。
+顔が広い | かおがひろい | knows a lot of people | 彼女は顔が広いです。
+気が合う | きがあう | to get along / click | 初めて会ったけど、気が合う。
+腹が立つ | はらがたつ | to get angry | 本当に腹が立つ！
+手が離せない | てがはなせない | to be tied up (busy) | 今、手が離せないので後で電話します。
+耳が痛い | みみがいたい | it hurts to hear (true criticism) | その話は耳が痛いです。
+猫舌 | ねこじた | can't handle hot food | 私は猫舌なので、冷ましてから食べます。
+一期一会 | いちごいちえ | once-in-a-lifetime encounter | 旅は一期一会です。
+いい加減にして | いいかげんにして | that's enough! / cut it out | もう、いい加減にして！
+お世話になります | おせわになります | thank you for your help (in advance) | これからお世話になります。
+よろしく伝えて | よろしくつたえて | say hi for me | お母さんによろしく伝えて。
+# Everyday kanji words
+最高 | さいこう | the best / awesome | 今日は最高の一日でした！
+最低 | さいてい | the worst / at least | あの人は最低だ。
+全然大丈夫 | ぜんぜんだいじょうぶ | totally fine | 全然大丈夫だよ！ | Casual: 全然 with a positive word.
+普通 | ふつう | normal / usual | 普通はそうしません。
+十分 | じゅうぶん | enough / plenty | もう十分です。
+一番 | いちばん | number one / the most | 一番好きな食べ物は何ですか？
+以上 | いじょう | more than / that's all | 二十歳以上の人。 | 以上です = "That's all."
+以下 | いか | less than / below | 十歳以下は無料です。
+以外 | いがい | except / other than | 日曜日以外は働いています。
+途中 | とちゅう | on the way / halfway | 帰る途中でコンビニに寄りました。
+半分 | はんぶん | half | ケーキを半分ください。
+倍 | ばい | double / times | 値段が倍になりました。
+全員 | ぜんいん | everyone (all members) | 全員そろいました。
+直接 | ちょくせつ | directly | 直接話したほうがいい。
+自然 | しぜん | nature / natural | 自然が好きです。
+# Life events
+誕生日 | たんじょうび | birthday | 誕生日はいつですか？
+入学 | にゅうがく | entering school | 四月に入学します。
+成人式 | せいじんしき | coming-of-age ceremony | 成人式で着物を着ました。 | Held in January for people turning 20.
+お祭り | おまつり | festival | 夏はお祭りがたくさんあります。
+花見 | はなみ | cherry blossom viewing | 公園で花見をしました。
+お正月 | おしょうがつ | New Year (holidays) | お正月は家族と過ごします。
+年賀状 | ねんがじょう | New Year's card | 年賀状を書きました。
+お盆 | おぼん | Obon (summer festival of the dead) | お盆に田舎に帰ります。
+葬式 | そうしき | funeral | 祖父の葬式に行きました。
+祖父 | そふ | (my) grandfather | 祖父は九十歳です。 | Someone else's: おじいさん.
+祖母 | そぼ | (my) grandmother | 祖母は料理が上手です。 | Someone else's: おばあさん.
+親戚 | しんせき | relatives | お正月に親戚が集まります。
+過ごす | すごす | to spend (time) | 週末はどう過ごしましたか？
+迎える | むかえる | to welcome / pick up | 空港まで迎えに行きます。
+祝う | いわう | to celebrate | 誕生日を祝いましょう。
+# Thinking and knowing
+理解 | りかい | understanding | 理解できません。 | 理解する = to understand.
+想像 | そうぞう | imagination | 想像してみてください。 | 想像する = to imagine.
+判断 | はんだん | judgment / decision | 自分で判断してください。
+記憶 | きおく | memory | 記憶がありません。
+知識 | ちしき | knowledge | 日本の歴史の知識があります。
+経験者 | けいけんしゃ | experienced person | 経験者を募集しています。
+疑問 | ぎもん | doubt / question | 疑問があれば聞いてください。
+解決 | かいけつ | solution / solving | 問題は解決しました。 | 解決する = to solve.
+選択 | せんたく | choice / selection | 難しい選択です。
+方法 | ほうほう | method / way | いい方法がありますか？
+# Internet slang and modern Japanese
+草 | くさ | lol | それは草。 | Internet slang, from ｗｗｗ (looks like grass).
+ググる | | to google | わからなかったらググって。
+ドタキャン | | last-minute cancellation | 友達にドタキャンされた。
+既読スルー | きどくスルー | leaving someone on read | 既読スルーされた…
+リア充 | リアじゅう | someone with a happy social life | あの二人はリア充だね。
+エモい | | emotional / nostalgic (in a good way) | この写真、エモい！
+ガチ | | serious / for real | ガチで勉強している。
+ウケる | | hilarious | それ、ウケる！
+バズる | | to go viral | 動画がバズった！
+オタク | | otaku / geek / big fan | 私はアニメオタクです。
