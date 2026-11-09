@@ -32,12 +32,13 @@
 .landing-hero {
   position: relative;
   display: grid;
-  grid-template-columns: 1.1fr 1fr;
+  grid-template-columns: 1.15fr 1fr;
   align-items: center;
-  gap: 48px;
-  max-width: 1150px;
+  gap: 64px;
+  max-width: 1280px;
+  min-height: calc(100vh - 72px);  /* the first screen is all hero (72px = the top bar) */
   margin: 0 auto;
-  padding: 80px 32px 64px;
+  padding: 96px 40px 120px;
 }
 .eyebrow {
   display: inline-block;
@@ -49,17 +50,55 @@
   border-radius: var(--radius-sm);
   margin-bottom: 20px;
 }
-.landing-hero h1 { font-size: 60px; line-height: 1.05; font-weight: 800; margin: 0 0 20px; }
+.landing-hero h1 { font-size: clamp(52px, 5.4vw, 80px); line-height: 1.08; font-weight: 800; margin: 0 0 28px; }
 .gradient-text {  /* "Start speaking.": like a yellow highlighter over the words */
   background: var(--yellow);
   padding: 0 0.12em;
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
 }
-.landing-hero .lead { font-size: 19px; color: var(--muted); line-height: 1.6; margin: 0 0 32px; max-width: 520px; }
-.hero-buttons { display: flex; gap: 12px; flex-wrap: wrap; }
-.hero-buttons .primary { font-size: 18px; padding: 16px 32px; }
-.hero-buttons .ghost { font-size: 18px; padding: 15px 28px; }
+.landing-hero .lead { font-size: 21px; color: var(--muted); line-height: 1.6; margin: 0 0 36px; max-width: 560px; }
+/* the same invitation in Japanese, right under it */
+.landing-hero .lead-ja { font-size: 17px; color: var(--muted); line-height: 1.6; margin: -24px 0 36px; max-width: 560px; }
+.hero-buttons { display: flex; gap: 14px; flex-wrap: wrap; }
+.hero-buttons .primary { font-size: 19px; padding: 18px 36px; box-shadow: var(--shadow); }
+.hero-buttons .ghost { font-size: 19px; padding: 17px 30px; box-shadow: var(--shadow); }
+
+/* The right side of the hero: the chat card, a tilted color block behind it, and stickers */
+.hero-visual { position: relative; padding: 24px 12px; }
+.hero-visual::before {  /* a big teal block peeking out behind the chat, slightly turned */
+  content: "";
+  position: absolute;
+  inset: 0 -8px 8px 24px;
+  background: var(--brand);
+  border: var(--line);
+  border-radius: var(--radius);
+  transform: rotate(4deg);
+}
+.hero-visual .demo-chat { transform: rotate(-1.5deg); padding-bottom: 96px; }  /* room for the word popup at the bottom */
+
+/* STICKERS: small labels stuck on at an angle (also used in the final call to action) */
+.sticker {
+  position: absolute;
+  z-index: 3;
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--on-color);
+  padding: 8px 14px;
+  border: var(--line);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+  white-space: nowrap;
+  animation: bob 4s ease-in-out infinite;
+}
+.sticker-lang { top: -14px; left: -18px; background: var(--yellow); --tilt: -8deg; }
+.sticker-xp { top: 59%; left: -34px; background: var(--pink); --tilt: 6deg; animation-delay: -1.3s; }
+.sticker-streak { bottom: -4px; left: 36px; background: var(--sky); --tilt: -4deg; animation-delay: -2.6s; }
+@keyframes bob {  /* floats gently up and down, keeping its tilt */
+  0%, 100% { transform: rotate(var(--tilt, 0deg)) translateY(0); }
+  50% { transform: rotate(var(--tilt, 0deg)) translateY(-8px); }
+}
 
 /* The fake chat on the right of the hero: shows what Speak Up feels like */
 .demo-chat {
@@ -97,57 +136,76 @@
 .demo-popup strong { font-size: 18px; }
 .demo-popup .muted { color: var(--muted); font-size: 12px; }
 
-/* The scrolling strip of "hello" in many languages */
+/* The scrolling strip of everyday phrases (English + Japanese), tilted across the page */
 .marquee {
   border-top: var(--line);
   border-bottom: var(--line);
   overflow: hidden;
-  padding: 18px 0;
+  padding: 22px 0;
   background: var(--surface);
+  margin: 0 -40px;               /* wider than the page, so the tilted ends stay hidden */
+  transform: rotate(-1.5deg);
 }
 .marquee-track {
   display: flex;
   width: max-content;
   animation: scroll-left 80s linear infinite;  /* longer list, so more time for one loop */
-  font-size: 22px;
+  font-size: 30px;
   font-weight: 600;
   color: var(--muted);
   white-space: nowrap;
 }
 /* Space around EVERY word (not "gap", which skips the ends), so both copies are exactly
    the same width and the loop has no jump */
-.marquee-track span { padding: 0 24px; }
+.marquee-track span { padding: 0 28px; }
 .marquee-track span:nth-child(3n) { color: var(--brand); }
 @keyframes scroll-left { to { transform: translateX(-50%); } }
 
-.landing-section { max-width: 1150px; margin: 0 auto; padding: 96px 32px; }
-.section-title { text-align: center; margin-bottom: 56px; }
-.section-title h2 { font-size: 42px; font-weight: 800; margin: 0 0 12px; }
-.section-title p { color: var(--muted); font-size: 18px; margin: 0; }
+.landing-section { max-width: 1280px; margin: 0 auto; padding: 128px 40px; }
+.section-title { text-align: center; margin-bottom: 64px; }
+.section-title h2 { font-size: clamp(36px, 4.6vw, 60px); line-height: 1.05; letter-spacing: -0.03em; font-weight: 800; margin: 0 0 16px; }
+.section-title p { color: var(--muted); font-size: 20px; margin: 0; }
+.section-kicker {  /* "HOW IT WORKS", "FLASHCARDS"...: a small label sticker above a title */
+  display: inline-block;
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--on-color);
+  background: var(--yellow);
+  border: var(--line);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+  padding: 5px 12px;
+  margin-bottom: 18px;
+  transform: rotate(-2deg);
+}
 
-.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-.step { background: var(--surface); border: var(--line); border-radius: var(--radius); padding: 32px; }
+.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+.step { background: var(--surface); border: var(--line); border-radius: var(--radius); padding: 40px 36px; }
+.step:nth-child(2) { transform: translateY(24px); }  /* a little out of line, like stickers on a page */
 .step-number {
-  width: 44px;
-  height: 44px;
+  width: 56px;
+  height: 56px;
   border-radius: var(--radius);
   background: var(--brand);
   color: var(--on-brand);
   display: grid;
   place-items: center;
   font-weight: 800;
-  font-size: 20px;
-  margin-bottom: 20px;
+  font-size: 26px;
+  margin-bottom: 24px;
 }
-.step h3 { margin: 0 0 8px; font-size: 20px; }
-.step p { margin: 0; color: var(--muted); line-height: 1.6; }
+.step h3 { margin: 0 0 10px; font-size: 24px; }
+.step p { margin: 0; color: var(--muted); line-height: 1.6; font-size: 17px; }
 
-.features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
 .feature {
   background: var(--surface);
   border: var(--line);
   border-radius: var(--radius);
-  padding: 28px;
+  padding: 32px;
   transition: transform 0.2s, border-color 0.2s;
 }
 .feature:hover { transform: translateY(-4px); border-color: var(--brand); }
@@ -161,36 +219,159 @@
   place-items: center;
   margin-bottom: 16px;
 }
-.feature-icon svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.feature h3 { margin: 0 0 8px; font-size: 18px; }
-.feature p { margin: 0; color: var(--muted); line-height: 1.6; font-size: 15px; }
+.feature-icon svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.feature h3 { margin: 0 0 10px; font-size: 21px; }
+.feature p { margin: 0; color: var(--muted); line-height: 1.6; font-size: 16px; }
 
-/* Spots for demo screenshots (pictures come later) */
-.screens { display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; }
-.screen-frame {
-  aspect-ratio: 16 / 10;
+/* ---------- FLASHCARDS: text on the left, a clickable demo on the right ---------- */
+.flash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+.flash-copy h2 { font-size: clamp(36px, 4.6vw, 60px); line-height: 1.05; letter-spacing: -0.03em; font-weight: 800; margin: 0 0 20px; }
+.flash-lead { font-size: 20px; color: var(--muted); line-height: 1.6; margin: 0 0 32px; }
+.flash-points { list-style: none; padding: 0; margin: 0; display: grid; gap: 20px; }
+.flash-points li { display: flex; gap: 16px; align-items: flex-start; }
+.flash-points div { color: var(--muted); line-height: 1.55; font-size: 16px; }
+.flash-points strong { display: block; font-size: 18px; margin-bottom: 2px; color: var(--text); }
+.point-dot { flex-shrink: 0; width: 22px; height: 22px; margin-top: 2px; border: var(--line); border-radius: var(--radius-sm); background: var(--dot); box-shadow: var(--shadow-sm); }
+
+.flash-demo { position: relative; display: flex; flex-direction: column; align-items: center; gap: 22px; }
+.demo-hint { margin: 0; font-family: var(--mono); font-size: 13px; color: var(--muted); }
+
+/* The card flips over (front: the word, back: reading, meaning, example) */
+.demo-card {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  height: 300px;
+  padding: 0;
+  perspective: 1200px;
+}
+.demo-card-inner {
+  position: absolute;
+  inset: 0;
+  display: block;
+  transform-style: preserve-3d;
+  transition: transform 0.5s cubic-bezier(0.3, 1.4, 0.5, 1);  /* a little bounce at the end */
+}
+.demo-card.flipped .demo-card-inner { transform: rotateY(180deg); }
+.demo-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 32px;
+  background: var(--surface);
+  border: var(--line);
   border-radius: var(--radius);
-  border: 1px dashed var(--border);
-  background: var(--surface-2);
+  box-shadow: var(--shadow-lg);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.demo-back { transform: rotateY(180deg); background: var(--brand-soft); }
+.demo-word { font-size: 68px; font-weight: 800; line-height: 1.1; }
+.demo-tap { font-family: var(--mono); font-size: 13px; color: var(--muted); }
+.demo-reading { font-size: 22px; color: var(--muted); }
+.demo-meaning { font-size: 38px; font-weight: 800; }
+.demo-example { font-size: 18px; color: var(--muted); font-style: italic; }
+.demo-card .demo-card-ring { position: absolute; top: 16px; right: 16px; z-index: 2; }  /* (two classes: decks.css loads later and would win) */
+
+.demo-grades { display: flex; gap: 14px; }
+.demo-grades .grade {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 150px;
+  padding: 12px 22px;
+  font-weight: 800;
+  font-size: 17px;
+  background: var(--surface);
+  color: var(--text);
+  border: var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+.demo-grades .grade small { font-family: var(--mono); font-weight: 400; font-size: 12px; color: var(--muted); }
+.demo-grades .grade.know { background: var(--brand); color: var(--on-color); }
+.demo-grades .grade.know small { color: rgba(28, 25, 23, 0.7); }
+.demo-grades .grade:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--ink); }
+.demo-grades .grade:active { transform: translate(2px, 2px); box-shadow: none; }
+
+/* "+3 XP" pops up over the card and floats away */
+.demo-xp {
+  position: absolute;
+  top: 40px;
+  left: 50%;
+  z-index: 4;
+  opacity: 0;
+  pointer-events: none;
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--on-color);
+  background: var(--yellow);
+  border: var(--line);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+  padding: 6px 12px;
+}
+.demo-xp.pop { animation: xp-pop 0.9s ease-out; }
+@keyframes xp-pop {
+  0% { opacity: 0; transform: translate(-50%, 10px) scale(0.8) rotate(-4deg); }
+  25% { opacity: 1; transform: translate(-50%, -10px) scale(1.1) rotate(-4deg); }
+  100% { opacity: 0; transform: translate(-50%, -50px) scale(1) rotate(-4deg); }
+}
+
+/* The little deck, stuck on below the buttons: its rings change as you answer */
+.demo-deck {
+  width: 100%;
+  max-width: 440px;
+  margin-top: 8px;
+  background: var(--surface);
+  border: var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 14px 16px;
+  transform: rotate(-1.5deg);
+}
+.demo-deck-title { display: flex; align-items: center; gap: 8px; font-weight: 800; margin-bottom: 8px; }
+.demo-deck-icon {
   display: grid;
   place-items: center;
-  color: var(--muted);
-  text-align: center;
-  padding: 24px;
+  width: 26px;
+  height: 26px;
+  border: var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--violet);
+  color: var(--on-color);
+  font-size: 14px;
 }
-.screen-frame.tall { aspect-ratio: auto; }
+.demo-deck ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; }
+.demo-deck li { display: grid; grid-template-columns: auto auto 1fr; align-items: center; gap: 10px; padding: 4px 6px; border-radius: var(--radius-sm); font-size: 14px; }
+.demo-deck li span { color: var(--muted); }
+.demo-deck li.current { background: var(--surface-2); }
+.demo-deck .ring { width: 30px; height: 30px; }
+.demo-deck .ring::before { inset: 3px; }
+.demo-deck .ring span { font-size: 8px; color: var(--text); }
 
 .final-cta {
+  position: relative;
   text-align: center;
-  margin: 0 32px 96px;
-  padding: 72px 32px;
+  max-width: 1200px;
+  margin: 32px auto 112px;
+  padding: 96px 40px;
   border-radius: var(--radius);
   background: var(--brand);
   color: var(--on-brand);
 }
-.final-cta h2 { font-size: 40px; margin: 0 0 12px; font-weight: 800; }
-.final-cta p { margin: 0 0 28px; font-size: 18px; opacity: 0.9; }
-.final-cta button { background: var(--ink); color: var(--on-ink); font-size: 18px; font-weight: 800; padding: 15px 34px; border: var(--line); border-radius: var(--radius); box-shadow: 4px 4px 0 var(--surface); }
+.final-cta h2 { font-size: clamp(36px, 5vw, 64px); line-height: 1.05; letter-spacing: -0.03em; margin: 0 0 16px; font-weight: 800; }
+.final-cta p { margin: 0 0 36px; font-size: 20px; opacity: 0.9; }
+.final-cta button { background: var(--ink); color: var(--on-ink); font-size: 20px; font-weight: 800; padding: 18px 40px; border: var(--line); border-radius: var(--radius); box-shadow: 5px 5px 0 var(--surface); }
+.final-cta button:hover { transform: translate(-2px, -2px); box-shadow: 7px 7px 0 var(--surface); }
+.final-cta button:active { transform: translate(3px, 3px); box-shadow: none; }
+.cta-sticker-left { top: 32px; left: 40px; background: var(--yellow); --tilt: -7deg; font-size: 18px; }
+.cta-sticker-right { bottom: 36px; right: 48px; background: var(--pink); --tilt: 6deg; font-size: 18px; animation-delay: -2s; }
 .landing-footer { text-align: center; color: var(--muted); font-size: 14px; padding: 0 0 40px; }
 
 /* ---------- Login + Register (a simpler, focused layout) ---------- */
@@ -315,6 +496,10 @@
 @media (prefers-reduced-motion: reduce) {
   .ob-step, .ob-option.on .level-flame { animation: none; }
   #obProgress { transition: none; }
+  /* the landing page: stickers stay still, the demo card flips without turning */
+  .sticker, .demo-xp.pop { animation: none; }
+  .sticker { transform: rotate(var(--tilt, 0deg)); }
+  .demo-card-inner { transition: none; }
 }
 @media (max-width: 600px) {
   .ob-ask { flex-direction: column; text-align: center; }

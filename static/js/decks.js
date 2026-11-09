@@ -66,6 +66,7 @@ document.querySelectorAll(".close-dialog").forEach(button => {
 el("newDeckForm").onsubmit = async event => {
   event.preventDefault();
   const name = el("newDeckName").value.trim();
+  if (!name) return showToast("Give the deck a name."); // only spaces typed
   await api("/api/decks", { method: "POST", body: JSON.stringify({ name }) });
   el("newDeckDialog").close();
   showToast(`Created "${name}"`);

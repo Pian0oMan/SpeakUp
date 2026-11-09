@@ -5,6 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Speak Up</title>
+  <meta name="description" content="Practice Japanese or English by talking to real people who speak it. Free video, voice and text chat, with translation one hover away.">
   <!-- INSTALLABLE APP (PWA): the name + icon for the home screen, and the color of the title bar -->
   <link rel="manifest" href="/static/manifest.json">
   <meta name="theme-color" content="#fff6e6">
@@ -52,20 +53,25 @@
     <!-- HERO: the big first impression -->
     <header class="landing-hero">
       <div>
-        <span class="eyebrow">Language learning, but you actually talk</span>
+        <span class="eyebrow">English ⇄ Japanese language exchange</span>
         <h1>Stop studying.<br><span class="gradient-text">Start speaking.</span></h1>
         <p class="lead">
-          Speak Up matches you with real people who speak the language you're learning,
-          and who want to learn yours. Video, voice, and chat, with translation one hover away.
+          Learning Japanese? Talk with Japanese speakers who are learning English.
+          You help them, they help you. Video, voice, and chat, with translation one hover away.
         </p>
+        <p class="lead-ja">英語を勉強中？日本語を学ぶ英語ネイティブと話して、教え合おう。</p>
         <div class="hero-buttons">
           <button class="primary to-register">Start speaking, it's free</button>
           <button class="ghost" id="howItWorksBtn">How it works</button>
         </div>
       </div>
 
-      <!-- A pretend conversation, to show what it feels like -->
-      <div class="demo-chat" aria-hidden="true">
+      <!-- A pretend conversation, to show what it feels like, with stickers stuck around it -->
+      <div class="hero-visual" aria-hidden="true">
+      <span class="sticker sticker-lang">EN ⇄ JA</span>
+      <span class="sticker sticker-xp">+10 XP</span>
+      <span class="sticker sticker-streak">7 day streak</span>
+      <div class="demo-chat">
         <!-- the mascot, waving hello from the corner -->
         <div class="hero-mascot" data-mascot="wave" data-size="110"></div>
         <div class="demo-top"><span class="demo-dot"></span> Yuki · speaks Japanese · learning English</div>
@@ -79,9 +85,10 @@
           <div class="muted">"公園のベンチで読むの" → Do you read on a park bench?</div>
         </div>
       </div>
+      </div>
     </header>
 
-    <!-- "Hello" in many languages, scrolling forever (JavaScript fills it in) -->
+    <!-- Everyday phrases in English and Japanese, scrolling forever (JavaScript fills it in) -->
     <div class="marquee" aria-hidden="true">
       <div id="marqueeTrack" class="marquee-track"></div>
     </div>
@@ -89,19 +96,20 @@
     <!-- HOW IT WORKS -->
     <section id="howItWorks" class="landing-section">
       <div class="section-title">
-        <h2>How it works</h2>
-        <p>Three steps from "I can't speak" to your first real conversation.</p>
+        <span class="section-kicker">How it works</span>
+        <h2>From "I can't speak" to talking</h2>
+        <p>Three steps to your first real conversation.</p>
       </div>
       <div class="steps">
         <div class="step">
           <div class="step-number">1</div>
-          <h3>Pick your languages</h3>
+          <h3>Pick your side</h3>
           <p>Speak English and learning Japanese, or the other way around? That's the whole setup.</p>
         </div>
         <div class="step">
           <div class="step-number">2</div>
           <h3>Get matched, or join a room</h3>
-          <p>Quick Match pairs you with someone who's learning your language. Or drop into a voice room with up to 10 people.</p>
+          <p>Quick Match pairs you with someone from the other side, so you both get to practice. Or drop into a voice room with up to 10 people.</p>
         </div>
         <div class="step">
           <div class="step-number">3</div>
@@ -111,9 +119,62 @@
       </div>
     </section>
 
+    <!-- FLASHCARDS: the words you meet in conversations, with a demo you can click.
+         (landing.js fills in the cards and makes the buttons work) -->
+    <section class="landing-section flash-section">
+      <div class="flash-grid">
+        <div class="flash-copy">
+          <span class="section-kicker">Flashcards</span>
+          <h2>Words from your chats become words you know</h2>
+          <p class="flash-lead">Tap a word you don't know and save it, together with the sentence you heard it in.
+            Speak Up brings each card back right before you'd forget it.</p>
+          <ul class="flash-points">
+            <li><span class="point-dot" style="--dot: var(--yellow)"></span>
+              <div><strong>From real conversations</strong>Every card remembers where you met the word, so it sticks.</div></li>
+            <li><span class="point-dot" style="--dot: var(--pink)"></span>
+              <div><strong>Comes back at the right time</strong>Know it? See it again in a day, then 3 days, then a week... Forgot it? It's back in a minute.</div></li>
+            <li><span class="point-dot" style="--dot: var(--sky)"></span>
+              <div><strong>Rings that fill up</strong>Each word's ring goes from red to green as you learn it.</div></li>
+            <li><span class="point-dot" style="--dot: var(--violet)"></span>
+              <div><strong>Decks ready to go</strong>Start with a beginner deck for Japanese or English, or bring your own from Anki.</div></li>
+          </ul>
+        </div>
+
+        <div class="flash-demo">
+          <p class="demo-hint">Try it: click the card</p>
+          <button id="demoCard" class="demo-card" type="button" aria-label="Flashcard: click to flip">
+            <span class="demo-card-inner">
+              <span class="demo-face demo-front">
+                <span id="demoWord" class="demo-word"></span>
+                <span class="demo-tap">Click to see the answer</span>
+              </span>
+              <span class="demo-face demo-back">
+                <span id="demoReading" class="demo-reading"></span>
+                <span id="demoMeaning" class="demo-meaning"></span>
+                <span id="demoExample" class="demo-example"></span>
+              </span>
+            </span>
+            <span id="demoRing" class="ring big demo-card-ring"><span></span></span>
+          </button>
+          <div class="demo-grades">
+            <button id="demoDontKnow" class="grade" type="button">Don't know <small>1 min</small></button>
+            <button id="demoKnow" class="grade know" type="button">Know it <small>3 days</small></button>
+          </div>
+          <span id="demoXp" class="demo-xp" aria-hidden="true"></span>
+
+          <!-- the deck these cards come from: the rings change as you answer -->
+          <div class="demo-deck" aria-hidden="true">
+            <div class="demo-deck-title"><span class="demo-deck-icon">M</span> My Words</div>
+            <ul id="demoDeckList"></ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- FEATURES -->
     <section class="landing-section">
       <div class="section-title">
+        <span class="section-kicker">Features</span>
         <h2>Everything you need to really talk</h2>
         <p>Built for conversation first, and studying second.</p>
       </div>
@@ -139,32 +200,22 @@
           <p>See what people say as they say it, and translate any spoken word.</p>
         </div>
         <div class="feature">
-          <div class="feature-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 8 8"/></svg></div>
-          <h3>Decks that track you</h3>
-          <p>Every saved word gets a proficiency ring that fills up as you practice. Import your Anki decks, too.</p>
+          <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M12 3c1 3 4 5 4 9a4 4 0 0 1-8 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 0-8z"/></svg></div>
+          <h3>Friends and streaks</h3>
+          <p>Add the people you click with, keep a daily streak going, and earn XP for every conversation.</p>
         </div>
         <div class="feature">
           <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg></div>
           <h3>Icebreakers</h3>
-          <p>Never run out of things to say. A new question pops up every 90 seconds.</p>
+          <p>Never run out of things to say. Every few minutes a new question pops up, often about something you both like.</p>
         </div>
       </div>
     </section>
 
-    <!-- DEMO SCREENSHOTS (pictures come later) -->
-    <section class="landing-section">
-      <div class="section-title">
-        <h2>See it in action</h2>
-        <p>Screenshots coming soon.</p>
-      </div>
-      <div class="screens">
-        <div class="screen-frame">Video call + live captions</div>
-        <div class="screen-frame">Your decks + proficiency rings</div>
-      </div>
-    </section>
-
     <div class="final-cta">
-      <div class="final-cta-mascot" data-mascot="excited" data-size="90"></div>
+      <span class="sticker cta-sticker-left" aria-hidden="true">こんにちは！</span>
+      <span class="sticker cta-sticker-right" aria-hidden="true">Hello!</span>
+      <div class="final-cta-mascot" data-mascot="excited" data-size="110"></div>
       <h2>Your first conversation is one click away</h2>
       <p>Free, no download, works in your browser.</p>
       <button class="to-register">Create your account</button>
@@ -178,7 +229,7 @@
       <a href="#" class="back-link to-landing">← Back</a>
       <div class="auth-mascot" data-mascot="wave" data-size="64"></div>
       <h1 class="logo">Speak Up!!</h1>
-      <p class="tagline">Learn a language by talking to people who speak it.</p>
+      <p class="tagline">Learn Japanese or English by talking to people who speak it.</p>
       <form id="loginForm">
         <label>Email <input id="loginEmail" type="email" required></label>
         <label>Password <input id="loginPassword" type="password" required></label>
@@ -966,6 +1017,7 @@
   <script src="/static/js/decks.js"></script>    <!-- decks, library, Anki import -->
   <script src="/static/js/popup.js"></script>    <!-- the word popup, reports -->
   <script src="/static/js/study.js"></script>    <!-- study mode, spaced repetition -->
+  <script src="/static/js/landing.js"></script>  <!-- the flashcard demo on the landing page -->
   <script src="/static/js/recap.js"></script>    <!-- the recap after a conversation -->
   <script src="/static/js/safety.js"></script>   <!-- reporting and blocking people -->
   <script src="/static/js/drawing.js"></script>  <!-- drawing messages and decks -->

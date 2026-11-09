@@ -58,7 +58,7 @@ let practicing = false; // nothing was due, so it's extra practice with every ca
 let reviewedCount = 0;
 let forgottenCount = 0;
 let answeredCount = 0;  // cards answered this time (each one is saved right away)
-let session = null;     // what I did this session, for the summary at the end (see newSession)
+let studySession = null; // what I did this session, for the summary at the end (see newSession)
 
 // XP per answer: the same numbers as XP_FOR in backend/progress.py
 const XP_KNOW = 3;
@@ -83,7 +83,7 @@ function startStudy(deckToStudy) {
   // Reviews first (shuffled), then the new cards in the order they were saved
   studyQueue = practicing ? shuffle([...cards]) : [...shuffle(reviews), ...fresh];
   reviewedCount = forgottenCount = answeredCount = 0;
-  session = newSession();
+  studySession = newSession();
   el("studyTitle").textContent = `${practicing ? "Practicing" : "Reviewing"}: ${deckToStudy.name}`;
   showView("studyView");
   nextStudyCard();
@@ -200,11 +200,11 @@ async function gradeCard(grade) {
   if (!card || el("gradeButtons").hidden) return;
   reviewedCount++;
   answeredCount++;
-  session.cards.add(card.id);
-  if (!card.reps && !card.due_at) session.newWords.add(card.id);
-  if (grade === "know") session.known++;
-  else session.forgot++;
-  session.xp += grade === "know" ? XP_KNOW : XP_DONT_KNOW;
+  studySession.cards.add(card.id);
+  if (!card.reps && !card.due_at) studySession.newWords.add(card.id);
+  if (grade === "know") studySession.known++;
+  else studySession.forgot++;
+  studySession.xp += grade === "know" ? XP_KNOW : XP_DONT_KNOW;
   // Didn't know it: it comes back in a minute (see review.py), so I see it
   // again in THIS session, a few cards from now
   if (grade === "dont_know") {
@@ -242,9 +242,9 @@ document.addEventListener("keydown", event => {
 // Shown when the cards run out, and when I stop halfway (if I answered at least one).
 function showStudySummary(stoppedEarly = false) {
   el("studyProgress").textContent = "";
-  const answers = session.known + session.forgot;
-  const accuracy = answers ? Math.round((session.known / answers) * 100) : 0;
-  const seconds = Math.round((Date.now() - session.startedAt) / 1000);
+  const answers = studySession.known + studySession.forgot;
+  const accuracy = answers ? Math.round((studySession.known / answers) * 100) : 0;
+  const seconds = Math.round((Date.now() - studySession.startedAt) / 1000);
 
   // The headline and the mascot depend on how it went
   const [title, mood] = !answers ? ["All done for now!", "happy"]
@@ -254,18 +254,18 @@ function showStudySummary(stoppedEarly = false) {
     : ["Good practice!", "determined"];
   el("doneTitle").textContent = title;
   el("doneMascot").innerHTML = mascot(mood, 100);
-  const newWords = session.newWords.size;
+  const newWords = studySession.newWords.size;
   el("doneSubtitle").textContent = !answers ? "Nothing to review right now."
     : newWords ? `You met ${newWords} new ${newWords === 1 ? "word" : "words"}.`
     : stoppedEarly ? "Your progress is saved. Come back for the rest any time."
     : "Every card you review sticks a little longer.";
 
   // The numbers count up from 0, the bar fills up
-  countUp(el("doneCards"), session.cards.size, n => n);
-  countUp(el("doneXp"), session.xp, n => `+${n}`);
+  countUp(el("doneCards"), studySession.cards.size, n => n);
+  countUp(el("doneXp"), studySession.xp, n => `+${n}`);
   countUp(el("doneTime"), seconds, formatDuration);
-  el("doneKnown").textContent = session.known;
-  el("doneForgot").textContent = session.forgot;
+  el("doneKnown").textContent = studySession.known;
+  el("doneForgot").textContent = studySession.forgot;
   countUp(el("doneAccuracy"), accuracy, n => `${n}%`);
   el("doneBarFill").style.width = "0%";
   requestAnimationFrame(() => requestAnimationFrame(() => (el("doneBarFill").style.width = `${accuracy}%`)));

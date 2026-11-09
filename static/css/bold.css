@@ -94,14 +94,21 @@ kbd { font-family: var(--mono); background: rgba(28, 25, 23, 0.12); }
 .popup-phrase-translation::before { color: var(--brand-dark); }
 
 /* ---------- Landing page, log in, welcome questions ---------- */
-.landing-hero h1 { font-size: 66px; letter-spacing: -0.035em; }
+.landing-hero h1 { letter-spacing: -0.035em; }
 .eyebrow { color: var(--on-color); background: var(--yellow); border: var(--line); box-shadow: var(--shadow-sm); }
-.step-number { background: var(--yellow); color: var(--on-color); border: var(--line); }
-.feature-icon { background: var(--brand-soft); color: var(--text); border: var(--line); }
+.step-number { background: var(--yellow); color: var(--on-color); border: var(--line); box-shadow: var(--shadow-sm); }
+.step:nth-child(2) .step-number { background: var(--pink); }
+.step:nth-child(3) .step-number { background: var(--sky); }
+/* Each feature gets its own sticker color */
+.feature-icon { background: var(--brand); color: var(--on-color); border: var(--line); box-shadow: var(--shadow-sm); }
+.feature:nth-child(2) .feature-icon { background: var(--yellow); }
+.feature:nth-child(3) .feature-icon { background: var(--pink); }
+.feature:nth-child(4) .feature-icon { background: var(--sky); }
+.feature:nth-child(5) .feature-icon { background: var(--orange); }
+.feature:nth-child(6) .feature-icon { background: var(--violet); }
 .marquee { background: var(--rail); border-color: var(--ink); }  /* always a dark band */
 .marquee-track { color: var(--on-rail); font-weight: 800; }
 .marquee-track span:nth-child(3n) { color: var(--yellow); }
-.screen-frame { border: 2px dashed var(--ink); }
 .final-cta { background: var(--brand); color: var(--on-color); border: var(--line); box-shadow: var(--shadow-lg); }
 .demo-popup { background: var(--yellow); }
 .demo-highlight { background: var(--yellow); border: 1.5px solid var(--ink); }

@@ -45,6 +45,7 @@ INTERESTS = [
     "photography", "tech", "science", "history", "fashion", "nature", "kpop", "business", "languages", "memes",
 ]
 MAX_INTERESTS = 10
+MAX_NAME = 20  # same as maxlength on the name boxes in index.html
 
 @app.route("/api/profile", methods=["GET"])
 def get_profile():
@@ -62,8 +63,12 @@ def save_profile():
         return jsonify({"error": "Pick a language you're learning that you don't already speak."}), 400
     if data.get("translate_to") not in DEEPL_CODES:
         return jsonify({"error": "That translation language isn't available."}), 400
+    # A name is needed: avatars show its first letter, so a blank one breaks them
+    username = str(data.get("username") or "").strip()[:MAX_NAME]
+    if not username:
+        return jsonify({"error": "Pick a name."}), 400
     changes = {
-        "username": data["username"],
+        "username": username,
         "native": data["native"],
         "learning": data["learning"],
         "translate_to": data["translate_to"],

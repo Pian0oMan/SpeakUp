@@ -31,14 +31,16 @@ document.querySelectorAll(".to-landing").forEach(link => {
 });
 el("howItWorksBtn").onclick = () => el("howItWorks").scrollIntoView({ behavior: "smooth" });
 
-// The scrolling belt of "hello" in many languages.
+// The scrolling belt of everyday phrases, in English and Japanese.
 // It holds the list TWICE in a row and slides left by exactly one list, then starts
 // over: because the second copy is identical, the jump back is invisible. One copy
 // must be wider than the screen, or there's an empty gap: that's why the list is long.
 const GREETINGS = [
-  "Hello", "こんにちは", "Hola", "Bonjour", "Hallo", "你好", "Привет", "Ciao", "Olá", "안녕하세요",
-  "Merhaba", "Hej", "नमस्ते", "مرحبا", "שלום", "Γειά σου", "Xin chào", "สวัสดี", "Halo", "Jambo",
-  "Cześć", "Ahoj", "Szia", "Kia ora", "Aloha", "Sawubona", "Hei", "Dia dhuit", "Salut", "Mabuhay",
+  "Hello", "こんにちは", "Nice to meet you", "はじめまして", "How are you?", "元気？",
+  "Thank you", "ありがとう", "Good morning", "おはよう", "Let's talk", "話そう",
+  "Really?", "本当？", "Me too!", "私も！", "Sounds good", "いいね",
+  "Delicious!", "おいしい！", "Let's be friends", "友達になろう", "Good night", "おやすみ",
+  "See you!", "またね",
 ];
 [...GREETINGS, ...GREETINGS].forEach(word => {
   const span = document.createElement("span");

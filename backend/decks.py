@@ -29,7 +29,9 @@ def list_decks():
 
 @app.route("/api/decks", methods=["POST"])
 def create_deck():
-    name = request.get_json()["name"].strip()[:40]
+    name = str(request.get_json().get("name") or "").strip()[:40]
+    if not name:  # a blank name would break the deck's letter icon
+        return jsonify({"error": "Give the deck a name."}), 400
     rows = db_for(token_from_request()).table("decks").insert({"name": name}).execute().data
     return jsonify(rows[0])
 

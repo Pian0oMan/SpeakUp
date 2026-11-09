@@ -1,7 +1,7 @@
 {
   "name": "Speak Up",
   "short_name": "Speak Up",
-  "description": "Learn a language by talking to people who speak it.",
+  "description": "Learn Japanese or English by talking to people who speak it.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
