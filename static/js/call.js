@@ -290,6 +290,13 @@ function startCaptions() {
     if (event.error === "not-allowed" || event.error === "service-not-allowed") {
       captionsWanted = false;
       notice("Live captions need microphone permission.");
+    } else if (event.error === "audio-capture" || event.error === "network") {
+      // Mic busy (e.g. another app or tab uses it), or the speech service can't be reached:
+      // say so once, instead of failing silently and retrying forever
+      captionsWanted = false;
+      notice(event.error === "network"
+        ? "Live captions couldn't connect to the speech service. Your voice still works."
+        : "Live captions couldn't use your microphone (another app may be using it). Your voice still works.");
     }
   };
   recognizer.start();
